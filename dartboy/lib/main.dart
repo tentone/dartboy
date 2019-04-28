@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main()
@@ -36,6 +39,25 @@ class _MyHomePageState extends State<MyHomePage>
 {
   int _counter = 0;
 
+  /// If the current platform is desktop, override the default platform to a supported platform (iOS for macOS, Android for Linux and Windows).
+  /// Otherwise, do nothing.
+  void setTargetPlatformForDesktop() {
+    TargetPlatform targetPlatform;
+
+    if(Platform.isMacOS)
+    {
+      targetPlatform = TargetPlatform.iOS;
+    }
+    else if (Platform.isLinux || Platform.isWindows)
+    {
+      targetPlatform = TargetPlatform.android;
+    }
+
+    if(targetPlatform != null)
+    {
+      debugDefaultTargetPlatformOverride = targetPlatform;
+    }
+  }
   void _incrementCounter()
   {
     setState(()
