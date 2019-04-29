@@ -1,59 +1,54 @@
 import 'package:flutter/material.dart';
 
-class MyHomePage extends StatefulWidget
+class MainScreen extends StatefulWidget
 {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MainScreen({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MainScreenState createState()
+  {
+    return new MainScreenState();
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class MainScreenState extends State<MainScreen>
 {
-  int _counter = 0;
+  int counter = 0;
 
-
-  void _incrementCounter()
+  void incrementCounter()
   {
     setState(()
     {
-      _counter++;
+      counter++;
     });
   }
 
   @override
   Widget build(BuildContext context)
   {
-
-
-
-    return Scaffold
+    return new Scaffold
     (
-      appBar: AppBar
-        (
-        title: Text(widget.title),
+      appBar: new AppBar
+      (
+        title: new Text('Game Boy Emulator'),
       ),
-      body: Center(
-        child: Column
-          (
+      body: new Center
+      (
+        child: new Column
+        (
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
+          children: <Widget>
+          [
+            new Text('$counter',),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+      floatingActionButton: new FloatingActionButton(
+        onPressed: incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: new Icon(Icons.add),
       ),
     );
   }

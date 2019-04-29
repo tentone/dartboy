@@ -2,20 +2,19 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:wave_generator/wave_generator.dart';
-
-import 'package:audioplayers/audioplayers.dart';
 
 import 'gui/main_screen.dart';
 
 void main()
 {
-  runApp(MyApp());
+  runApp(DartBoyApp());
 }
 
-class MyApp extends StatelessWidget
+class DartBoyApp extends StatelessWidget
 {
-  void overrideTargetPlatformForDesktop() {
+  /// Override the target platform is running on desktop.
+  void overrideTargetPlatformForDesktop()
+  {
     TargetPlatform targetPlatform;
 
     if(Platform.isMacOS)
@@ -38,45 +37,15 @@ class MyApp extends StatelessWidget
   {
     overrideTargetPlatformForDesktop();
 
-    if(Platform.isIOS || Platform.isAndroid)
-    {
-      AudioPlayer audioPlayer = new AudioPlayer();
-      audioPlayer.play('output.wav');
-    }
-
-    testSoundGenerator () async {
-
-      WaveGenerator generator = new WaveGenerator(
-        /* sample rate */ 44100,
-          BitDepth.Depth8bit);
-
-      Note note = new Note(
-      /* frequency */ 220,
-      /* msDuration */ 3000,
-      /* waveform */ Waveform.Sine,
-      /* volume */ 0.5);
-
-      File file = new File('output.wav');
-
-      List<int> bytes = List<int>();
-      await for (int byte in generator.generate(note))
-      {
-        bytes.add(byte);
-      }
-
-      file.writeAsBytes(bytes, mode: FileMode.append);
-    }
-
-    testSoundGenerator();
-
     return new MaterialApp
     (
       title: 'DartBoy',
-      theme: new ThemeData
-      (
-        primarySwatch: Colors.blue,
-      ),
-      home: new MyHomePage(title: 'GBC'),
+      theme: new ThemeData(primarySwatch: Colors.blue),
+      home: new MainScreen(title: 'GBC'),
+      debugShowCheckedModeBanner: false,
+      showPerformanceOverlay: false,
+      showSemanticsDebugger: false,
+      debugShowMaterialGrid: false
     );
   }
 }
