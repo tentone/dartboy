@@ -32,3 +32,5 @@
 *.app
 
 wgbc/\.vs/
+
+*.wav
