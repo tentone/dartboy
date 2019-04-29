@@ -10,9 +10,29 @@ void main()
 
 class MyApp extends StatelessWidget
 {
+  void overrideTargetPlatformForDesktop() {
+    TargetPlatform targetPlatform;
+
+    if(Platform.isMacOS)
+    {
+      targetPlatform = TargetPlatform.iOS;
+    }
+    else if (Platform.isLinux || Platform.isWindows)
+    {
+      targetPlatform = TargetPlatform.android;
+    }
+
+    if(targetPlatform != null)
+    {
+      debugDefaultTargetPlatformOverride = targetPlatform;
+    }
+  }
+
   @override
   Widget build(BuildContext context)
   {
+    overrideTargetPlatformForDesktop();
+
     return new MaterialApp
     (
       title: 'DartBoy',
@@ -39,25 +59,7 @@ class _MyHomePageState extends State<MyHomePage>
 {
   int _counter = 0;
 
-  /// If the current platform is desktop, override the default platform to a supported platform (iOS for macOS, Android for Linux and Windows).
-  /// Otherwise, do nothing.
-  void setTargetPlatformForDesktop() {
-    TargetPlatform targetPlatform;
 
-    if(Platform.isMacOS)
-    {
-      targetPlatform = TargetPlatform.iOS;
-    }
-    else if (Platform.isLinux || Platform.isWindows)
-    {
-      targetPlatform = TargetPlatform.android;
-    }
-
-    if(targetPlatform != null)
-    {
-      debugDefaultTargetPlatformOverride = targetPlatform;
-    }
-  }
   void _incrementCounter()
   {
     setState(()

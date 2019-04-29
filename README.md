@@ -19,6 +19,8 @@
 ```
 flutter channel master
 flutter precache --windows
+set ENABLE_FLUTTER_DESKTOP=true
+flutter devices
 ```
 
 - Set the `ENABLE_FLUTTER_DESKTOP` environment variable true, to enable desktop support.
@@ -39,5 +41,8 @@ TODO
 
 ### Resources
 
-- https://github.com/retrio/gb-test-roms
+- [Flutter desktop quick start guide](https://github.com/google/flutter-desktop-embedding/blob/master/Quick-Start.md)
+- [Flutter desktop example](https://github.com/google/flutter-desktop-embedding)
+- [Game boy test roms](https://github.com/retrio/gb-test-roms)
+- [The Ultimate Game Boy Talk (33c3)](https://www.youtube.com/watch?v=HyzD8pNlpwI)
 
