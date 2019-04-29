@@ -37,9 +37,9 @@ class DartBoyApp extends StatelessWidget
   {
     overrideTargetPlatformForDesktop();
 
-    File rom = new File('./roms/cpu_instrs.gb');
-    List<int> data = rom.readAsBytesSync();
-    print(data.length);
+    //File rom = new File('./roms/cpu_instrs.gb');
+    //List<int> data = rom.readAsBytesSync();
+    //print(data.length);
 
     return new MaterialApp
     (

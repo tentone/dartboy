@@ -8,22 +8,37 @@
 
 ### Todo
 
-- Everything
+- ROM
+- CPU
+- PPU
+- Sound
+- RAM
 
 
 
 ### Setup Flutter Desktop
 
+- In Windows install visual studio with C++ support and make sure that the command `msbuild` works properly. (If visual studio is installed but `msbuild` is not found, add it to your path).
 - Flutter desktop support is still experimental and not enabled by default, its only available on the master channel.
 
 ```
 flutter channel master
 flutter precache --windows
+flutter upgrade
+```
+
+- Set the `ENABLE_FLUTTER_DESKTOP` environment variable true, to enable desktop support.
+
+```
 set ENABLE_FLUTTER_DESKTOP=true
 flutter devices
 ```
 
-- Set the `ENABLE_FLUTTER_DESKTOP` environment variable true, to enable desktop support.
+
+
+### ROM
+
+TODO
 
 
 

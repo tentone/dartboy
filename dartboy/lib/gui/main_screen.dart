@@ -19,10 +19,8 @@ class MainScreenState extends State<MainScreen>
 
   void incrementCounter()
   {
-    setState(()
-    {
-      counter++;
-    });
+    this.counter++;
+    setState((){});
   }
 
   @override
@@ -41,7 +39,7 @@ class MainScreenState extends State<MainScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>
           [
-            new Text('$counter',),
+            new Text(counter.toString()),
           ],
         ),
       ),
