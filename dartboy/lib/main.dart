@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget
     {
       targetPlatform = TargetPlatform.iOS;
     }
-    else if (Platform.isLinux || Platform.isWindows)
+    else if(Platform.isLinux || Platform.isWindows)
     {
       targetPlatform = TargetPlatform.android;
     }
@@ -38,37 +38,25 @@ class MyApp extends StatelessWidget
   {
     overrideTargetPlatformForDesktop();
 
-    AudioPlayer audioPlayer = new AudioPlayer();
-
-    play() async
+    if(Platform.isIOS || Platform.isAndroid)
     {
-      int result = await audioPlayer.play('output.wav');
-
-      if (result == 1)
-      {
-        print('success');
-      }
-      else
-      {
-        print('failed');
-      }
+      AudioPlayer audioPlayer = new AudioPlayer();
+      audioPlayer.play('output.wav');
     }
-
-    //play();
 
     testSoundGenerator () async {
 
-      var generator = WaveGenerator(
+      WaveGenerator generator = new WaveGenerator(
         /* sample rate */ 44100,
           BitDepth.Depth8bit);
 
-      var note = Note(
+      Note note = new Note(
       /* frequency */ 220,
       /* msDuration */ 3000,
       /* waveform */ Waveform.Sine,
       /* volume */ 0.5);
 
-      var file = new File('output.wav');
+      File file = new File('output.wav');
 
       List<int> bytes = List<int>();
       await for (int byte in generator.generate(note))
