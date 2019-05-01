@@ -5,19 +5,32 @@
 ///
 class Registers
 {
-  /// Generic CPU registers
-  int a = 0;
-  int b = 0, c = 0;
-  int d = 0, e = 0;
-  int h = 0, l = 0;
+  /// CPU registers store temporally the result of the instructions.
+  ///
+  /// F is the flag register.
+  int a, f;
+  int b, c;
+  int d, e;
+  int h, l;
 
-  /// Flags register
-  int f = 0;
+  Registers()
+  {
+    this.reset();
+  }
 
   /// Reset the registers to default values
+  ///
+  /// (Check page 17 and 18 of the GB CPU manual)
   void reset()
   {
-    a = b = c = d = e = f = h = l = 0;
+    a = 0x01;
+    f = 0xB0;
+    b = 0x00;
+    c = 0x13;
+    d = 0x00;
+    e = 0xD8;
+    h = 0x01;
+    l = 0x4D;
   }
 
   /// Set the flags on the flag register.

@@ -6,6 +6,9 @@ import 'memory.dart';
 /// Sharp LR35902
 class CPU
 {
+  /// Frequency hz
+  static const int FREQUENCY = 4194304;
+
   /// CPU addressable memory
   Memory memory;
 
@@ -31,21 +34,26 @@ class CPU
   CPU()
   {
     this.registers = new Registers();
-
     this.memory = new Memory();
   }
 
-  void instructionFetch()
+  void reset()
   {
+    this.registers.reset();
+    this.memory.reset();
+    this.sp = 0xFFFE;
+    this.pc = 0x100;
+  }
+  void step()
+  {
+    //Instruction fetch
+    int instruction = this.memory.readByte(this.pc);
+
 
   }
 
-  void decode()
-  {
-
-  }
-
-  void execute()
+  /// Decode the instruction execute it and return the next PC address
+  int execute()
   {
 
   }
