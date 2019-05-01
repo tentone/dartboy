@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'emulator/cpu.dart';
 import 'gui/main_screen.dart';
 
 void main()
@@ -41,9 +42,16 @@ class DartBoyApp extends StatelessWidget
     List<int> data = rom.readAsBytesSync();
     print(data.length);
 
+    CPU cpu = new CPU();
+    cpu.memory.cartridge.load(data);
+
+    print('Catridge info:');
+    print('Type: ' + cpu.memory.cartridge.type.toString());
+    print('Name: ' + cpu.memory.cartridge.name);
+
     return new MaterialApp
     (
-      title: 'DartBoy',
+      title: 'GBC',
       theme: new ThemeData(primarySwatch: Colors.blue),
       home: new MainScreen(title: 'GBC'),
       debugShowCheckedModeBanner: false,

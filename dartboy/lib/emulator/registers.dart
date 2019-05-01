@@ -18,8 +18,6 @@ class Registers
   void reset()
   {
     a = b = c = d = e = f = h = l = 0;
-    sp = 0;
-    pc = 0x100;
   }
 
   /// Set the flags on the flag register.
@@ -31,32 +29,6 @@ class Registers
     f = subtract ? f | 0x40 : f & 0xBF;
     f = halfCarry ? f | 0x20 : f & 0xDF;
     f = carry ? f | 0x10 : f & 0xEF;
-  }
-
-  /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int _sp = 0;
-
-  set sp(int value)
-  {
-    _sp = value & 0xFFFF;
-  }
-
-  get sp
-  {
-    return _sp & 0xFFFF;
-  }
-
-  /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  int _pc = 0;
-
-  set pc(int value)
-  {
-    _pc = value & 0xFFFF;
-  }
-
-  get pc
-  {
-    return _pc & 0xFFFF;
   }
 
   /// 16 bit mixed af register
