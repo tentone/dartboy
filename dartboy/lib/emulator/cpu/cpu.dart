@@ -7,17 +7,22 @@ class CPU
 {
   Registers registers;
 
-  void fetchInstruction()
+  CPU()
+  {
+    this.registers = new Registers();
+  }
+
+  void intructionFetch()
   {
 
   }
 
   void decode()
   {
-    
+
   }
 
-  void step()
+  void execute()
   {
 
   }

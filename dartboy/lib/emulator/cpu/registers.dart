@@ -5,11 +5,61 @@
 ///
 class Registers
 {
-  int a, b;
-  int c, d;
-  int e, f;
-  int h, l;
+  /// Generic CPU registers
+  int a = 0;
+  int b = 0, c = 0;
+  int d = 0, e = 0;
+  int h = 0, l = 0;
 
+  /// Flags register
+  int f = 0;
+
+  /// Reset the registers to default values
+  void reset()
+  {
+    a = b = c = d = e = f = h = l = 0;
+    sp = 0;
+    pc = 0x100;
+  }
+
+  /// Set the flags on the flag register.
+  ///
+  /// There are four values on the upper bits of the register that are set depending on the instruction being executed.
+  void setFlags(bool zero, bool subtract, bool halfCarry, bool carry)
+  {
+    f = zero ? f | 0x80 : f & 0x7F;
+    f = subtract ? f | 0x40 : f & 0xBF;
+    f = halfCarry ? f | 0x20 : f & 0xDF;
+    f = carry ? f | 0x10 : f & 0xEF;
+  }
+
+  /// 16 bit Stack Pointer, the memory address of the top of the stack
+  int _sp = 0;
+
+  set sp(int value)
+  {
+    _sp = value & 0xFFFF;
+  }
+
+  get sp
+  {
+    return _sp & 0xFFFF;
+  }
+
+  /// 16 bit Program Counter, the memory address of the next instruction to be fetched
+  int _pc = 0;
+
+  set pc(int value)
+  {
+    _pc = value & 0xFFFF;
+  }
+
+  get pc
+  {
+    return _pc & 0xFFFF;
+  }
+
+  /// 16 bit mixed af register
   get af
   {
     return ((a & 0xFF) << 8) | (f & 0xFF);
@@ -21,6 +71,7 @@ class Registers
     f = (value & 0xFF);
   }
 
+  /// 16 bit mixed bc register
   get bc
   {
     return ((b & 0xFF) << 8) | (c & 0xFF);
@@ -32,6 +83,7 @@ class Registers
     c = (value & 0xFF);
   }
 
+  /// 16 bit mixed de register
   get de
   {
     return ((d & 0xFF) << 8) | (e & 0xFF);
@@ -43,6 +95,7 @@ class Registers
     e = (value & 0xFF);
   }
 
+  /// 16 bit mixed hl register
   get hl
   {
     return ((h & 0xFF) << 8) | (l & 0xFF);
