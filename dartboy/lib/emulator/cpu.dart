@@ -46,15 +46,18 @@ class CPU
   }
   void step()
   {
-    //Instruction fetch
     int instruction = this.memory.readByte(this.pc);
-
-
+    this.pc = execute(instruction);
   }
 
   /// Decode the instruction execute it and return the next PC address
-  int execute()
+  int execute(int instruction)
   {
+    // Pre filter instruction value
+    instruction &= 0xFF;
 
+    //TODO <ADD CODE HERE>
+
+    return this.pc + 1;
   }
 }
