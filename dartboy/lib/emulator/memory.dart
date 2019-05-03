@@ -32,10 +32,10 @@ class Memory
   /// The rest of the the data stored in the system after the cartridge.
   List<int> data;
 
-  Memory()
+  Memory(Cartridge cartridge)
   {
     this.data = new List<int>(ADDRESS_SIZE - CARTRIDGE_END_ADDRESS);
-    this.reset();
+    this.cartridge = cartridge;
   }
 
   /// Reset the memory to default boot values.
@@ -43,8 +43,6 @@ class Memory
   /// (Check page 17 and 18 of the GB CPU manual)
   void reset()
   {
-    this.cartridge = new Cartridge();
-
     this.writeByte(0xFF04, 0xAB);
     this.writeByte(0xFF05, 0x00);
     this.writeByte(0xFF06, 0x00);
@@ -66,7 +64,7 @@ class Memory
     this.writeByte(0xFF23, 0xBF);
     this.writeByte(0xFF24, 0x77);
     this.writeByte(0xFF25, 0xF3);
-    this.writeByte(0xFF26, 0xF1);	//0xF0 SGB
+    this.writeByte(0xFF26, this.cartridge.superGameboy ? 0xF0 : 0xF1);
     this.writeByte(0xFF40, 0x91);
     this.writeByte(0xFF42, 0x00);
     this.writeByte(0xFF43, 0x00);

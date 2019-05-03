@@ -17,12 +17,6 @@ class MainScreenState extends State<MainScreen>
 {
   int counter = 0;
 
-  void incrementCounter()
-  {
-    this.counter++;
-    setState((){});
-  }
-
   @override
   Widget build(BuildContext context)
   {
@@ -39,14 +33,18 @@ class MainScreenState extends State<MainScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>
           [
-            new Text(counter.toString()),
+            new Text(this.counter.toString()),
           ],
         ),
       ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: incrementCounter,
-        tooltip: 'Increment',
-        child: new Icon(Icons.add),
+      floatingActionButton: new FloatingActionButton
+      (
+        onPressed: ()
+        {
+          this.counter++;
+          this.setState((){});
+        },
+        child: new Icon(Icons.grain),
       ),
     );
   }

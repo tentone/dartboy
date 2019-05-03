@@ -25,6 +25,14 @@ class Cartridge
   /// (Check page 12 of the GB CPU manual for details)
   int ramType;
 
+  /// In CGB cartridges the upper bit is used to enable CGB functions. This is required, otherwise the CGB switches itself into Non-CGB-Mode.
+  ///
+  /// There are two different CGB modes 80h Game supports CGB functions, but works on old gameboys also, C0h Game works on CGB only.
+  GameboyType gameboyType;
+
+  /// SGB mode indicates if the game has super gameboy features
+  bool superGameboy;
+
   /// Load cartridge byte data
   void load(List<int> data)
   {
@@ -33,6 +41,8 @@ class Cartridge
     this.name = String.fromCharCodes(this.readBytes(0x134, 0x142));
     this.romType = this.readByte(0x148);
     this.ramType = this.readByte(0x149);
+    this.gameboyType = this.readByte(0x143) != 0 ? GameboyType.COLOR : GameboyType.CLASSIC;
+    this.superGameboy = this.readByte(0x146) == 0x3;
   }
 
   /// Read a range of bytes from the cartridge.
@@ -52,6 +62,12 @@ class Cartridge
   {
     return ((this.data[address] << 8) | this.data[address + 1]) & 0xFFFF;
   }
+}
+
+/// Enum to indicate the gameboy type present in the cartridge.
+enum GameboyType
+{
+  CLASSIC, COLOR
 }
 
 /// List of all cartridge types available in the game boy.

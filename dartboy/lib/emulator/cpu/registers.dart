@@ -1,3 +1,4 @@
+import 'cpu.dart';
 
 /// CPU registers, each register has 8 bits
 ///
@@ -13,9 +14,44 @@ class Registers
   int d, e;
   int h, l;
 
-  Registers()
+  /// Pointer to the CPU object
+  CPU cpu;
+
+  Registers(CPU cpu)
   {
+    this.cpu = cpu;
     this.reset();
+  }
+
+  /// Fetches the byte value contained in a register, r is the register id as encoded by opcode.
+  /// Returns the value of the register
+  int getRegister(int r)
+  {
+    if(r == 0x7) {return a;}
+    if(r == 0x0) {return b;}
+    if(r == 0x1) {return c;}
+    if(r == 0x2) {return d;}
+    if(r == 0x3) {return e;}
+    if(r == 0x4) {return h;}
+    if(r == 0x5) {return l;}
+    if(r == 0x6) {return cpu.memory.readByte((h << 8) | l);}
+
+    return 0;
+  }
+
+  /// Alters the byte value contained in a register, r is the register id as encoded by opcode.
+  void setRegister(int r, int value)
+  {
+    value &= 0xff;
+
+    if(r == 0x7) {a = value;}
+    else if(r == 0x0) {b = value;}
+    else if(r == 0x1) {c = value;}
+    else if(r == 0x2) {d = value;}
+    else if(r == 0x3) {e = value;}
+    else if(r == 0x4) {h = value;}
+    else if(r == 0x5) {l = value;}
+    else if(r == 0x6) {cpu.memory.writeByte((h << 8) | l, value);}
   }
 
   /// Reset the registers to default values

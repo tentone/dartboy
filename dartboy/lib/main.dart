@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'emulator/cpu.dart';
+import 'emulator/emulator.dart';
 import 'gui/main_screen.dart';
 
 void main()
@@ -38,16 +38,8 @@ class DartBoyApp extends StatelessWidget
   {
     overrideTargetPlatformForDesktop();
 
-    File rom = new File('./roms/cpu_instrs.gb');
-    List<int> data = rom.readAsBytesSync();
-    print(data.length);
-
-    CPU cpu = new CPU();
-    cpu.memory.cartridge.load(data);
-
-    print('Catridge info:');
-    print('Type: ' + cpu.memory.cartridge.type.toString());
-    print('Name: ' + cpu.memory.cartridge.name);
+    Emulator emulator = new Emulator();
+    emulator.loadROM('./roms/cpu_instrs.gb');
 
     return new MaterialApp
     (
