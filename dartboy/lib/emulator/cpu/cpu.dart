@@ -12,10 +12,8 @@ class CPU
 
   Cartridge cartridge;
 
-  /// CPU addressable memory
   Memory memory;
 
-  /// CPU internal registers
   Registers registers;
 
   /// Whether the CPU is currently halted if so, it will still operate at 4MHz, but will not execute any instructions until an interrupt is cyclesExecutedThisSecond.

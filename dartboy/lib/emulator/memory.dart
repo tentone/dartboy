@@ -131,5 +131,4 @@ class Memory
       return (this.data[address + 1 - CARTRIDGE_END_ADDRESS] << 8) + this.data[address - CARTRIDGE_END_ADDRESS];
     }
   }
-
 }

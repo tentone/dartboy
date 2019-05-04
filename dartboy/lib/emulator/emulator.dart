@@ -9,7 +9,6 @@ import 'cartridge.dart';
 class Emulator
 {
   CPU cpu;
-
   Cartridge cartridge;
 
   /// Load a ROM from a file and create the HW components for the emulator.
