@@ -15,17 +15,23 @@ class Emulator
   void loadROM(String fname)
   {
     File rom = new File(fname);
-
     List<int> data = rom.readAsBytesSync();
-    print(data.length);
 
     this.cartridge = new Cartridge();
     this.cartridge.load(data);
+
     this.cpu = new CPU(this.cartridge);
 
-    print('Catridge info:');
+    printCartridgeInfo();
+  }
+
+  void printCartridgeInfo()
+  {
+    print('Catridge info');
     print('Type: ' + this.cpu.memory.cartridge.type.toString());
     print('Name: ' + this.cpu.memory.cartridge.name);
+    print('GB: ' + this.cpu.memory.cartridge.gameboyType.toString());
+    print('SGB: ' + this.cpu.memory.cartridge.superGameboy.toString());
   }
 
   void start()

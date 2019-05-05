@@ -72,17 +72,23 @@ class CPU
 
   void step()
   {
-    int instruction = this.memory.readByte(this.pc);
 
-    this.pc = execute(instruction);
+
+    execute();
   }
 
   /// Decode the instruction execute it and return the next PC address
-  int execute(int instruction)
+  int execute()
   {
+    int op = this.memory.readByte(this.pc);
+    this.pc++;
+
+    /// NOP
+    if(op == 0x0){}
+
+
 
     //TODO <ADD CODE HERE>
 
-    return this.pc + 1;
   }
 }

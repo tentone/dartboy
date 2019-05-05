@@ -1,4 +1,4 @@
-class MemoryConsts
+class MemoryAddresses
 {
   static const int R_DIV = 0x04;
   static const int R_JOYPAD = 0x00;
@@ -43,14 +43,14 @@ class MemoryConsts
   static const int R_WY = 0x4a;
   static const int R_WX = 0x4b;
 
-  /// Masks for R_TRIGGERED_INTERRUPTS and R_ENABLED_INTERRUPTS.
+  // Masks for R_TRIGGERED_INTERRUPTS and R_ENABLED_INTERRUPTS.
   static const int VBLANK_BIT = 0x1;
   static const int LCDC_BIT = 0x2;
   static const int TIMER_OVERFLOW_BIT = 0x4;
   static const int SERIAL_TRANSFER_BIT = 0x8;
   static const int HILO_BIT = 0x10;
 
-  /// The addresses to jump to when an interrupt is triggered.
+  // The addresses to jump to when an interrupt is triggered.
   static const int VBLANK_HANDLER_ADDRESS = 0x40;
   static const int LCDC_HANDLER_ADDRESS = 0x48;
   static const int TIMER_OVERFLOW_HANDLER_ADDRESS = 0x50;
@@ -59,6 +59,7 @@ class MemoryConsts
   static const int W = 160;
   static const int H = 144;
 
+  // LCD Related values
   static const int LCDC_BGWINDOW_DISPLAY_BIT = 0x01;
   static const int LCDC_SPRITE_DISPLAY_BIT = 0x02;
   static const int LCDC_SPRITE_SIZE_BIT = 0x04;
