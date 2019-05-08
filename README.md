@@ -18,7 +18,7 @@
 
 ### Setup Flutter Desktop
 
-- In Windows install visual studio with C++ support and make sure that the command `msbuild` works properly. (If visual studio is installed but `msbuild` is not found, add it to your path).
+- In Windows install visual studio with C++ support and make sure that the command `msbuild` works properly and that `vcvars64.bat` is in the path. (If visual studio is installed but `msbuild` is not found, add it to your path).
 - Flutter desktop support is still experimental and not enabled by default, its only available on the master channel.
 
 ```
