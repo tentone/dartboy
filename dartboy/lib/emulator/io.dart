@@ -1,4 +1,4 @@
-import 'memory.dart';
+import 'package:dartboy/emulator/memory/memory.dart';
 
 /// Class to handle the IO function of the GBC
 ///

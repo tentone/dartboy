@@ -1,5 +1,5 @@
 
-import 'cartridge.dart';
+import '../cartridge.dart';
 
 /// Implements the GBC memory model
 ///
@@ -75,6 +75,18 @@ class Memory
     this.writeByte(0xFF4A, 0x00);
     this.writeByte(0xFF4B, 0x00);
     this.writeByte(0xFFFF, 0x00);
+  }
+
+  /// Read a register value, register values are mapped between FF00 to FFFF
+  int readRegisterByte(int address)
+  {
+    return this.readByte(0xFF00 + address);
+  }
+
+  /// Read a register value, register values are mapped between FF00 to FFFF
+  void writeRegisterByte(int address, int value)
+  {
+    this.writeByte(0xFF00 + address, value);
   }
 
   /// Write a byte of data into memory.

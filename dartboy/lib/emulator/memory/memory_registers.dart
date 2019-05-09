@@ -1,4 +1,4 @@
-class MemoryAddresses
+class MemoryRegisters
 {
   static const int R_DIV = 0x04;
   static const int R_JOYPAD = 0x00;
