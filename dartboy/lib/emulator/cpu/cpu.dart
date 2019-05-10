@@ -132,14 +132,13 @@ class CPU
     this.clocks = 0;
   }
 
+  /// Next step in the CPU processing, should be called at a fixed rate.
   void step()
   {
-
-
     execute();
   }
 
-  /// Decode the instruction execute it and return the next PC address
+  /// Decode the instruction, execute it, update the CPU timer variables, check for interrupts.
   void execute()
   {
     if(this.halted)
@@ -158,19 +157,19 @@ class CPU
     switch (op)
     {
       case 0x00:
-        return Instructions.NOP(this);
+        Instructions.NOP(this);
       case 0xC4:
       case 0xCC:
       case 0xD4:
       case 0xDC:
-        return Instructions.CALL_cc_nn(this, op);
+        Instructions.CALL_cc_nn(this, op);
       case 0xCD:
-        return Instructions.CALL_nn(this);
+        Instructions.CALL_nn(this);
       case 0x01:
       case 0x11:
       case 0x21:
       case 0x31:
-        return Instructions.LD_dd_nn(this, op);
+        Instructions.LD_dd_nn(this, op);
       case 0x06:
       case 0x0E:
       case 0x16:
@@ -179,45 +178,45 @@ class CPU
       case 0x2E:
       case 0x36:
       case 0x3E:
-        return Instructions.LD_r_n(this, op);
+        Instructions.LD_r_n(this, op);
       case 0x0A:
-        return Instructions.LD_A_BC(this);
+        Instructions.LD_A_BC(this);
       case 0x1A:
-        return Instructions.LD_A_DE(this);
+        Instructions.LD_A_DE(this);
       case 0x02:
-        return Instructions.LD_BC_A(this);
+        Instructions.LD_BC_A(this);
       case 0x12:
-        return Instructions.LD_DE_A(this);
+        Instructions.LD_DE_A(this);
       case 0xF2:
-        return Instructions.LD_A_C(this);
+        Instructions.LD_A_C(this);
       case 0xE8:
-        return Instructions.ADD_SP_n(this);
+        Instructions.ADD_SP_n(this);
       case 0x37:
-        return Instructions.SCF(this);
+        Instructions.SCF(this);
       case 0x3F:
-        return Instructions.CCF(this);
+        Instructions.CCF(this);
       case 0x3A:
-        return Instructions.LD_A_n(this);
+        Instructions.LD_A_n(this);
       case 0xEA:
-        return Instructions.LD_nn_A(this);
+        Instructions.LD_nn_A(this);
       case 0xF8:
-        return Instructions.LDHL_SP_n(this);
+        Instructions.LDHL_SP_n(this);
       case 0x2F:
-        return Instructions.CPL(this);
+        Instructions.CPL(this);
       case 0xE0:
-        return Instructions.LD_FFn_A(this);
+        Instructions.LD_FFn_A(this);
       case 0xE2:
-        return Instructions.LDH_FFC_A(this);
+        Instructions.LDH_FFC_A(this);
       case 0xFA:
-        return Instructions.LD_A_nn(this);
+        Instructions.LD_A_nn(this);
       case 0x2A:
-        return Instructions.LD_A_HLI(this);
+        Instructions.LD_A_HLI(this);
       case 0x22:
-        return Instructions.LD_HLI_A(this);
+        Instructions.LD_HLI_A(this);
       case 0x32:
-        return Instructions.LD_HLD_A(this);
+        Instructions.LD_HLD_A(this);
       case 0x10:
-        return Instructions.STOP(this);
+        Instructions.STOP(this);
       case 0xf9:
         {
           setRegisterPair(RegisterPair.SP, getRegisterPair(RegisterPair.HL));
@@ -227,18 +226,18 @@ class CPU
       case 0xd5: // DE
       case 0xe5: // HL
       case 0xf5: // AF
-        return Instructions.PUSH_rr(this, op);
+        Instructions.PUSH_rr(this, op);
       case 0xc1: // BC
       case 0xd1: // DE
       case 0xe1: // HL
       case 0xf1: // AF
-        return Instructions.POP_rr(this, op);
+        Instructions.POP_rr(this, op);
       case 0x08:
         return LD_a16Instructions._SP(this);
       case 0xd9:
-        return Instructions.RETI(this);
+        Instructions.RETI(this);
       case 0xc3:
-        return Instructions.JP_nn(this);
+        Instructions.JP_nn(this);
       case 0x07:
         {
           Instructions.RLCA(this);
@@ -394,7 +393,7 @@ class CPU
         Instructions.OR_r(this, op);
         break;
       case 0x18:
-        return Instructions.JR_e(this);
+        Instructions.JR_e(this);
       case 0x27:
         Instructions.DAA(this);
         break;
@@ -402,22 +401,22 @@ class CPU
       case 0xc2: // NZ
       case 0xd2:
       case 0xda:
-        return Instructions.JP_c_nn(this, op);
+        Instructions.JP_c_nn(this, op);
       case 0x20: // NZ
       case 0x28:
       case 0x30:
       case 0x38:
-        return Instructions.JR_c_e(this, op);
+        Instructions.JR_c_e(this, op);
       case 0xf0:
         Instructions.LDH_FFnn(this);
         break;
       case 0x76:
-        return Instructions.HALT(this);
+        Instructions.HALT(this);
       case 0xc0: // NZ non zero (Z)
       case 0xc8: // Z zero (Z)
       case 0xd0: // NC non carry (C)
       case 0xd8: // Carry (C)
-        return Instructions.RET_c(this, op);
+        Instructions.RET_c(this, op);
       case 0xc7:
       case 0xcf:
       case 0xd7:
@@ -426,12 +425,12 @@ class CPU
       case 0xef:
       case 0xf7:
       case 0xff:
-        return Instructions.RST_p(this, op);
+        Instructions.RST_p(this, op);
       case 0xf3:
         Instructions.DI(this);
         break;
       case 0xfb:
-        return Instructions.EI(this);
+        Instructions.EI(this);
       case 0xE6:
         Instructions.AND_n(this);
         break;
@@ -439,7 +438,7 @@ class CPU
         Instructions.XOR_n(this);
         break;
       case 0xc9:
-        return Instructions.RET(this);
+        Instructions.RET(this);
       case 0xce:
         Instructions.ADC_n(this);
         break;
