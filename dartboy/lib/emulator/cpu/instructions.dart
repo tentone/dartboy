@@ -67,16 +67,16 @@ class Instructions
   static int ADD_SP_n(CPU cpu)
   {
     int offset = nextByte();
-    int nsp = (SP + offset);
+    int nsp = (cpu.sp + offset);
 
     F = 0;
-    int carry = nsp ^ SP ^ offset;
+    int carry = nsp ^ cpu.sp ^ offset;
     if((carry & 0x100) != 0) F |= F_C;
     if((carry & 0x10) != 0) F |= F_H;
 
     nsp &= 0xffff;
 
-    SP = nsp;
+    cpu.sp = nsp;
     cpu.clocks += 4;
 }
 
@@ -105,10 +105,10 @@ class Instructions
   static int LDHL_SP_n(CPU cpu)
   {
     int offset = nextByte();
-    int nsp = (SP + offset);
+    int nsp = (cpu.sp + offset);
 
     F = 0; // (short) (F & F_Z);
-    int carry = nsp ^ SP ^ offset;
+    int carry = nsp ^ cpu.sp ^ offset;
     if((carry & 0x100) != 0) F |= F_C;
     if((carry & 0x10) != 0) F |= F_H;
     nsp &= 0xffff;
@@ -395,8 +395,8 @@ class Instructions
 
   static int RET(CPU cpu)
   {
-    cpu.pc = (getUByte(SP + 1) << 8) | getUByte(SP);
-    SP += 2;
+    cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+    cpu.sp += 2;
     cpu.clocks += 4;
 }
 
@@ -442,8 +442,8 @@ class Instructions
   {
     if(getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
     {
-    cpu.pc = (getUByte(SP + 1) << 8) | getUByte(SP);
-    SP += 2;
+    cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+    cpu.sp += 2;
     }
     cpu.clocks += 4;
 }
@@ -751,22 +751,22 @@ return;
   static int RETI(CPU cpu)
   {
     cpu.interruptsEnabled = true;
-    cpu.pc = (getUByte(SP + 1) << 8) | getUByte(SP);
-    SP += 2;
+    cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+    cpu.sp += 2;
     cpu.clocks += 4;
   }
 
-  static int LD_a16_SP()
+  static int LD_a16_SP(CPU cpu)
   {
     int pos = ((nextUByte()) | (nextUByte() << 8));
-    setByte(pos + 1, (SP & 0xFF00) >> 8);
-    setByte(pos, (SP & 0x00FF));
+    setByte(pos + 1, (cpu.sp & 0xFF00) >> 8);
+    setByte(pos, (cpu.sp & 0x00FF));
   }
 
   static int POP_rr(CPU cpu, int op)
   {
-    setRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3], getByte(SP + 1), getByte(SP));
-    SP += 2;
+    setRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3], getByte(cpu.sp + 1), getByte(cpu.sp));
+    cpu.sp += 2;
   }
 
   static int PUSH_rr(CPU cpu, int op)
