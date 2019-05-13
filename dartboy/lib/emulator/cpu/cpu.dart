@@ -57,6 +57,19 @@ class CPU
     this.memory = new Memory(this.cartridge);
   }
 
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode.
+  /// It can return a register pair or the CPU SP value.
+  /// Returns the value of the register
+  int getRegisterPairSP(int r)
+  {
+    if(r == 0x0) {return this.registers.bc;}
+    if(r == 0x1) {return this.registers.de;}
+    if(r == 0x2) {return this.registers.hl;}
+    if(r == 0x3) {return this.sp;}
+
+    throw new Exception('Unknown register pair address getRegisterPair().');
+  }
+
   ///Increase the clock cycles and trigger interrupts as needed.
   void tick(int clocks)
   {

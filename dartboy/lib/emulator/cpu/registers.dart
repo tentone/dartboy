@@ -6,6 +6,13 @@ import 'cpu.dart';
 ///
 class Registers
 {
+  /// The DMG has 4 flag registers, zero, subtract, half-carry and carry.
+  /// Half-carry is only ever used for the DAA instruction. Half-carry is usually carry over lower nibble, and carry is over bit 7.
+  static const int F_ZERO = 0x80;
+  static const int F_SUBTRACT = 0x40;
+  static const int F_HALF_CARRY = 0x20;
+  static const int F_CARRY = 0x10;
+
   /// CPU registers store temporally the result of the instructions.
   ///
   /// F is the flag register.
@@ -36,7 +43,19 @@ class Registers
     if(r == 0x5) {return l;}
     if(r == 0x6) {return cpu.memory.readByte((h << 8) | l);}
 
-    return 0;
+    throw new Exception('Unknown register address getRegister().');
+  }
+
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
+  /// Returns the value of the register
+  int getRegisterPair(int r)
+  {
+    if(r == 0x0) {return bc;}
+    if(r == 0x1) {return de;}
+    if(r == 0x2) {return hl;}
+    if(r == 0x3) {return af;}
+
+    throw new Exception('Unknown register pair address getRegisterPair().');
   }
 
   /// Alters the byte value contained in a register, r is the register id as encoded by opcode.
@@ -52,6 +71,19 @@ class Registers
     else if(r == 0x4) {h = value;}
     else if(r == 0x5) {l = value;}
     else if(r == 0x6) {cpu.memory.writeByte((h << 8) | l, value);}
+  }
+
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
+  /// Returns the value of the register
+  int setRegisterPair(int r, int hi, int lo)
+  {
+    hi &= 0xff;
+    lo &= 0xff;
+
+    if(r == 0x0) {b = hi; c = lo;}
+    else if(r == 0x1) {d = hi; e = lo;}
+    else if(r == 0x2) {h = hi; l = lo;}
+    else if(r == 0x3) {a = hi; f = lo;} //TODO F = lo & (F_C | F_H | F_N | F_Z);
   }
 
   /// Reset the registers to default values

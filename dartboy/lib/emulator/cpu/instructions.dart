@@ -41,27 +41,27 @@ class Instructions
 
   static int LD_A_BC(CPU cpu)
   {
-    A = getUByte(getRegisterPair(RegisterPair.BC));
+    cpu.registers.a = getUByte(cpu.registers.bc);
   }
 
   static int LD_A_DE(CPU cpu)
   {
-    A = getUByte(getRegisterPair(RegisterPair.DE));
+    cpu.registers.a = getUByte(cpu.registers.de);
   }
 
   static int LD_BC_A(CPU cpu)
   {
-    setByte(getRegisterPair(RegisterPair.BC), A);
+    setByte(cpu.registers.bc, A);
   }
 
   static int LD_DE_A(CPU cpu)
   {
-    setByte(getRegisterPair(RegisterPair.DE), A);
+    setByte(cpu.registers.de, A);
   }
 
   static int LD_A_C(CPU cpu)
   {
-    A = getUByte(0xFF00 | C);
+    cpu.registers.a = getUByte(0xFF00 | C);
   }
 
   static int ADD_SP_n(CPU cpu)
@@ -69,10 +69,11 @@ class Instructions
     int offset = nextByte();
     int nsp = (cpu.sp + offset);
 
-    F = 0;
+    cpu.registers.f = 0;
     int carry = nsp ^ cpu.sp ^ offset;
-    if((carry & 0x100) != 0) F |= F_C;
-    if((carry & 0x10) != 0) F |= F_H;
+    
+    if((carry & 0x100) != 0) cpu.registers.f |= F_C;
+    if((carry & 0x10) != 0) cpu.registers.f |= F_H;
 
     nsp &= 0xffff;
 
@@ -82,19 +83,20 @@ class Instructions
 
   static int SCF(CPU cpu)
   {
-    F &= F_Z;
-    F |= F_C;
+    cpu.registers.f &= F_Z;
+    cpu.registers.f |= F_C;
   }
 
   static int CCF(CPU cpu)
   {
-    F = (F & F_C) != 0 ? (F & F_Z) : ((F & F_Z) | F_C);
+    cpu.registers.f = (cpu.registers.f & F_C) != 0 ? (cpu.registers.f & F_Z) : ((cpu.registers.f & F_Z) | F_C);
   }
 
   static int LD_A_n(CPU cpu)
   {
-    A = getUByte(getRegisterPair(RegisterPair.HL) & 0xffff);
-    setRegisterPair(RegisterPair.HL, (getRegisterPair(RegisterPair.HL) - 1) & 0xFFFF);
+    cpu.registers.a = getUByte(cpu.registers.hl & 0xffff);
+
+    cpu.registers.hl = (cpu.registers.hl - 1) & 0xFFFF;
   }
 
   static int LD_nn_A(CPU cpu)
@@ -107,19 +109,19 @@ class Instructions
     int offset = nextByte();
     int nsp = (cpu.sp + offset);
 
-    F = 0; // (short) (F & F_Z);
+    cpu.registers.f = 0; // (short) (cpu.registers.f & F_Z);
     int carry = nsp ^ cpu.sp ^ offset;
-    if((carry & 0x100) != 0) F |= F_C;
-    if((carry & 0x10) != 0) F |= F_H;
+    if((carry & 0x100) != 0) cpu.registers.f |= F_C;
+    if((carry & 0x10) != 0) cpu.registers.f |= F_H;
     nsp &= 0xffff;
 
-    setRegisterPair(RegisterPair.HL, nsp);
+    cpu.registers.hl =  nsp;
   }
 
   static int CPL(CPU cpu)
   {
-    A = (~A) & 0xFF;
-    F = (F & (F_C | F_Z)) | F_H | F_N;
+    cpu.registers.a = (~A) & 0xFF;
+    cpu.registers.f = (cpu.registers.f & (F_cpu.registers.c | F_Z)) | F_cpu.registers.h | F_N;
   }
 
   static int LD_FFn_A(CPU cpu)
@@ -129,32 +131,32 @@ class Instructions
 
   static int LDH_FFC_A(CPU cpu)
   {
-    setByte(0xFF00 | (C & 0xFF), A);
+    setByte(0xFF00 | (cpu.registers.c & 0xFF), A);
   }
 
   static int LD_A_nn(CPU cpu)
   {
     int nn = nextUByte() | (nextUByte() << 8);
-    A = getUByte(nn);
+    cpu.registers.a = getUByte(nn);
   }
 
   static int LD_A_HLI(CPU cpu)
   {
-    A = getUByte(getRegisterPair(RegisterPair.HL) & 0xffff);
-    setRegisterPair(RegisterPair.HL, (getRegisterPair(RegisterPair.HL) + 1) & 0xFFFF);
+    cpu.registers.a = getUByte(cpu.registers.hl & 0xffff);
+    cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
   }
 
   static int LD_HLI_A(CPU cpu)
   {
-    setByte(getRegisterPair(RegisterPair.HL) & 0xFFFF, A);
-    setRegisterPair(RegisterPair.HL, (getRegisterPair(RegisterPair.HL) + 1) & 0xFFFF);
+    setByte(cpu.registers.hl & 0xFFFF, A);
+    cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
   }
 
   static int LD_HLD_A(CPU cpu)
   {
-    int hl = getRegisterPair(RegisterPair.HL);
+    int hl = cpu.registers.hl;
     setByte(hl, A);
-    setRegisterPair(RegisterPair.HL, (hl - 1) & 0xFFFF);
+    cpu.registers.hl = (hl - 1) & 0xFFFF;
 
   }
 
@@ -175,7 +177,6 @@ class Instructions
   static void CBPrefix(CPU cpu)
   {
     int x = cpu.pc++;
-
     int cbop = getUByte(x);
     int r = cbop & 0x7;
     int d = getRegister(r) & 0xff;
@@ -200,110 +201,113 @@ class Instructions
         {
           // BIT b, r
           // 0 1 b b b r r r
-          F &= F_C;
-          F |= F_H;
-          if((d & (0x1 << (cbop >> 3 & 0x7))) == 0) F |= F_Z;
+          cpu.registers.f &= F_C;
+          cpu.registers.f |= F_H;
+          if((d & (0x1 << (cbop >> 3 & 0x7))) == 0) cpu.registers.f |= F_Z;
           return;
         }
       case 0x0:
         {
           switch(cbop & 0xf8)
           {
-            case 0x00: // RLC m
+            case 0x00: // RLcpu.registers.c m
               {
-                F = 0;
-                if((d & 0x80) != 0) F |= F_C;
+                cpu.registers.f = 0;
+                if((d & 0x80) != 0) cpu.registers.f |= F_C;
                 d <<= 1;
 
                 // we're shifting circular left, add back bit 7
-                if((F & F_C) != 0) d |= 0x01;
+                if((cpu.registers.f & F_C) != 0) d |= 0x01;
                 d &= 0xff;
-                if(d == 0) F |= F_Z;
+                if(d == 0) cpu.registers.f |= F_Z;
                 setRegister(r, d);
                 return;
               }
-            case 0x08: // RRC m
+            case 0x08: // RRcpu.registers.c m
               {
-                F = 0;
-                if((d & 0b1) != 0) F |= F_C;
+                cpu.registers.f = 0;
+                if((d & 0b1) != 0) cpu.registers.f |= F_C;
                 d >>= 1;
 
                 // we're shifting circular right, add back bit 7
-                if((F & F_C) != 0) d |= 0x80;
+                if((cpu.registers.f & F_C) != 0) d |= 0x80;
                 d &= 0xff;
-                if(d == 0) F |= F_Z;
+                if(d == 0) cpu.registers.f |= F_Z;
                 setRegister(r, d);
                 return;
               }
-            case 0x10: // RL m
+            case 0x10: // Rcpu.registers.l m
               {
-                boolean carryflag = (F & F_C) != 0;
-                F = 0;
+                bool carryflag = (cpu.registers.f & F_C) != 0;
+                cpu.registers.f = 0;
 
                 // we'll be shifting left, so if bit 7 is set we set carry
-                if((d & 0x80) == 0x80) F |= F_C;
+                if((d & 0x80) == 0x80) cpu.registers.f |= F_C;
                 d <<= 1;
                 d &= 0xff;
 
-                // move old C into bit 0
+                // move old cpu.registers.c into bit 0
                 if(carryflag) d |= 0b1;
-                if(d == 0) F |= F_Z;
+                if(d == 0) cpu.registers.f |= F_Z;
                 setRegister(r, d);
                 return;
               }
             case 0x18: // RR m
               {
-                boolean carryflag = (F & F_C) != 0;
-                F = 0;
+                bool carryflag = (cpu.registers.f & F_C) != 0;
+                cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
-                if((d & 0x1) == 0x1) F |= F_C;
+                if((d & 0x1) == 0x1) cpu.registers.f |= F_C;
                 d >>= 1;
 
-                // move old C into bit 7
+                // move old cpu.registers.c into bit 7
                 if(carryflag) d |= 0b10000000;
-                if(d == 0) F |= F_Z;
+
+                if(d == 0) cpu.registers.f |= F_Z;
+                
                 setRegister(r, d);
+                
                 return;
               }
-            case 0x38: // SRL m
+            case 0x38: // SRcpu.registers.l m
               {
-                F = 0;
+                cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
-                if((d & 0x1) != 0) F |= F_C;
+                if((d & 0x1) != 0) cpu.registers.f |= F_C;
                 d >>= 1;
-                if(d == 0) F |= F_Z;
+                if(d == 0) cpu.registers.f |= F_Z;
                 setRegister(r, d);
                 return;
               }
-            case 0x20: // SLA m
+            case 0x20: // SLcpu.registers.a m
               {
-                F = 0;
+                cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
-                if((d & 0x80) != 0) F |= F_C;
+                if((d & 0x80) != 0) cpu.registers.f |= F_C;
                 d <<= 1;
                 d &= 0xff;
-                if(d == 0) F |= F_Z;
+                if(d == 0) cpu.registers.f |= F_Z;
                 setRegister(r, d);
                 return;
               }
-            case 0x28: // SRA m
+            case 0x28: // SRcpu.registers.a m
               {
-                boolean bit7 = (d & 0x80) != 0;
-                F = 0;
-                if((d & 0b1) != 0) F |= F_C;
+                bool bit7 = (d & 0x80) != 0;
+                cpu.registers.f = 0;
+                if((d & 0b1) != 0) cpu.registers.f |= F_C;
                 d >>= 1;
                 if(bit7) d |= 0x80;
-                if(d == 0) F |= F_Z;
+                if(d == 0) cpu.registers.f |= F_Z;
                 setRegister(r, d);
                 return;
               }
             case 0x30: // SWAP m
               {
                 d = ((d & 0xF0) >> 4) | ((d & 0x0F) << 4);
-                F = d == 0 ? F_Z : 0;
+                cpu.registers.f = d == 0 ? F_Z : 0;
                 setRegister(r, d);
                 return;
               }
@@ -325,72 +329,72 @@ class Instructions
 
   static void RLA(CPU cpu)
   {
-    boolean carryflag = (F & F_C) != 0;
-    F = 0; // &= F_Z;?
+    bool carryflag = (cpu.registers.f & F_C) != 0;
+    cpu.registers.f = 0; // &= F_Z;?
 
     // we'll be shifting left, so if bit 7 is set we set carry
-    if((A & 0x80) == 0x80) F |= F_C;
-    A <<= 1;
-    A &= 0xff;
+    if((cpu.registers.a & 0x80) == 0x80) cpu.registers.f |= F_C;
+    cpu.registers.a <<= 1;
+    cpu.registers.a &= 0xff;
 
-    // move old C into bit 0
-    if(carryflag) A |= 1;
+    // move old cpu.registers.c into bit 0
+    if(carryflag) cpu.registers.a |= 1;
   }
 
   static void RRA(CPU cpu)
   {
-    boolean carryflag = (F & F_C) != 0;
-    F = 0;
+    bool carryflag = (cpu.registers.f & F_C) != 0;
+    cpu.registers.f = 0;
 
     // we'll be shifting right, so if bit 1 is set we set carry
-    if((A & 0x1) == 0x1) F |= F_C;
-    A >>= 1;
+    if((cpu.registers.a & 0x1) == 0x1) cpu.registers.f |= F_C;
+    cpu.registers.a >>= 1;
 
-    // move old C into bit 7
-    if(carryflag) A |= 0x80;
+    // move old cpu.registers.c into bit 7
+    if(carryflag) cpu.registers.a |= 0x80;
   }
 
   static void RRCA(CPU cpu)
   {
-    F = 0;//F_Z;
-    if((A & 0x1) == 0x1) F |= F_C;
-    A >>= 1;
+    cpu.registers.f = 0;//F_Z;
+    if((cpu.registers.a & 0x1) == 0x1) cpu.registers.f |= F_C;
+    cpu.registers.a >>= 1;
 
     // we're shifting circular right, add back bit 7
-    if((F & F_C) != 0) A |= 0x80;
+    if((cpu.registers.f & F_C) != 0) cpu.registers.a |= 0x80;
   }
 
   static void SBC_r(CPU cpu, int op)
   {
-    int carry = (F & F_C) != 0 ? 1 : 0;
+    int carry = (cpu.registers.f & F_C) != 0 ? 1 : 0;
     int reg = getRegister(op & 0b111) & 0xff;
 
-    F = F_N;
-    if((A & 0x0f) - (reg & 0x0f) - carry < 0) F |= F_H;
-    A -= reg + carry;
-    if(A < 0)
+    cpu.registers.f = F_N;
+    if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0) cpu.registers.f |= F_H;
+    cpu.registers.a -= reg + carry;
+    if(cpu.registers.a < 0)
     {
-      F |= F_C;
-      A &= 0xFF;
+      cpu.registers.f |= F_C;
+      cpu.registers.a &= 0xFF;
     }
-    if(A == 0) F |= F_Z;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void ADC_n(CPU cpu)
   {
     int val = nextUByte();
-    int carry = ((F & F_C) != 0 ? 1 : 0);
+    int carry = ((cpu.registers.f & F_C) != 0 ? 1 : 0);
     int n = val + carry;
 
-    F = 0;
-    if((((A & 0xf) + (val & 0xf)) + carry & 0xF0) != 0) F |= F_H;
-    A += n;
-    if(A > 0xFF)
+    cpu.registers.f = 0;
+    if((((cpu.registers.a & 0xf) + (val & 0xf)) + carry & 0xF0) != 0) cpu.registers.f |= F_H;
+    cpu.registers.a += n;
+    if(cpu.registers.a > 0xFF)
     {
-      F |= F_C;
-      A &= 0xFF;
+      cpu.registers.f |= F_C;
+      cpu.registers.a &= 0xFF;
     }
-    if(A == 0) F |= F_Z;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static int RET(CPU cpu)
@@ -402,27 +406,25 @@ class Instructions
 
   static void XOR_n(CPU cpu)
   {
-    A ^= nextUByte();
-    F = 0;
-    if(A == 0) F |= F_Z;
+    cpu.registers.a ^= nextUByte();
+    cpu.registers.f = 0;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void AND_n(CPU cpu)
   {
-    A &= nextUByte();
-    F = F_H;
-    if(A == 0) F |= F_Z;
+    cpu.registers.a &= nextUByte();
+    cpu.registers.f = F_H;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static int EI(CPU cpu)
   {
     cpu.interruptsEnabled = true;
 
-    // Note that during the execution of this instruction and the following instruction,
-    // maskable interrupts are disabled.
-
-    // we still need to increment div etc
+    // Note that during the execution of this instruction and the following instruction, maskable interrupts are disabled. we still need to increment div etc
     cpu.tick(4);
+
     return _exec();
   }
 
@@ -442,20 +444,20 @@ class Instructions
   {
     if(getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
     {
-    cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
-    cpu.sp += 2;
+      cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+      cpu.sp += 2;
     }
     cpu.clocks += 4;
 }
 
   static int HALT(CPU cpu)
   {
-    cpuHalted = true;
+    cpu.halted = true;
   }
 
   static void LDH_FFnn(CPU cpu)
   {
-    A = getUByte(0xFF00 | nextUByte());
+    cpu.registers.a = getUByte(0xFF00 | nextUByte());
   }
 
   static int JR_c_e(CPU cpu, int op)
@@ -465,18 +467,19 @@ class Instructions
     {
       cpu.pc += e;
       cpu.clocks += 4;
-return;
+      return;
     }
   }
 
   static int JP_c_nn(CPU cpu, int op)
   {
-    int ncpu.pc = nextUByte() | (nextUByte() << 8);
+    int npc = nextUByte() | (nextUByte() << 8);
+
     if(getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
     {
-    cpu.pc = ncpu.pc;
-    cpu.clocks += 4;
-return;
+      cpu.pc = npc;
+      cpu.clocks += 4;
+      return;
     }
   }
 
@@ -486,10 +489,10 @@ return;
     /**
      * <code><pre>tmp := a,
      * if nf then
-     *      if hf or [a AND 0x0f > 9] then tmp -= 0x06
+     *      if hf or [a ANcpu.registers.d 0x0f > 9] then tmp -= 0x06
      *      if cf or [a > 0x99] then tmp -= 0x60
      * else
-     *      if hf or [a AND 0x0f > 9] then tmp += 0x06
+     *      if hf or [a ANcpu.registers.d 0x0f > 9] then tmp += 0x06
      *      if cf or [a > 0x99] then tmp += 0x60
      * endif,
      * tmp => flags, cf := cf OR [a > 0x99],
@@ -498,27 +501,29 @@ return;
      * </code>
      * @see http://wikiti.brandonw.net/?title=Z80_Instruction_Set
      */
-    int tmp = A;
-    if((F & F_N) == 0)
+    
+    int tmp = cpu.registers.a;
+
+    if((cpu.registers.f & F_N) == 0)
     {
-      if((F & F_H) != 0 || ((tmp & 0x0f) > 9)) tmp += 0x06;
-      if((F & F_C) != 0 || ((tmp > 0x9f))) tmp += 0x60;
+      if((cpu.registers.f & F_H) != 0 || ((tmp & 0x0f) > 9)) tmp += 0x06;
+      if((cpu.registers.f & F_C) != 0 || ((tmp > 0x9f))) tmp += 0x60;
     } else
     {
-      if((F & F_H) != 0) tmp = ((tmp - 6) & 0xff);
-      if((F & F_C) != 0) tmp -= 0x60;
+      if((cpu.registers.f & F_H) != 0) tmp = ((tmp - 6) & 0xff);
+      if((cpu.registers.f & F_C) != 0) tmp -= 0x60;
     }
-    F &= F_N | F_C;
+    cpu.registers.f &= F_N | F_C;
 
     if(tmp > 0xff)
     {
-      F |= F_C;
+      cpu.registers.f |= F_C;
       tmp &= 0xff;
     }
 
-    if(tmp == 0) F |= F_Z;
+    if(tmp == 0) cpu.registers.f |= F_Z;
 
-    A = tmp;
+    cpu.registers.a = tmp;
   }
 
   static int JR_e(CPU cpu)
@@ -530,9 +535,9 @@ return;
 
   static void OR(CPU cpu, int n)
   {
-    A |= n;
-    F = 0;
-    if(A == 0) F |= F_Z;
+    cpu.registers.a |= n;
+    cpu.registers.f = 0;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void OR_r(CPU cpu, int op)
@@ -548,47 +553,47 @@ return;
 
   static void XOR_r(CPU cpu, int op)
   {
-    A = (A ^ getRegister(op & 0b111)) & 0xff;
-    F = 0;
-    if(A == 0) F |= F_Z;
+    cpu.registers.a = (cpu.registers.a ^ getRegister(op & 0b111)) & 0xff;
+    cpu.registers.f = 0;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void AND_r(CPU cpu, int op)
   {
-    A = (A & getRegister(op & 0b111)) & 0xff;
-    F = F_H;
-    if(A == 0) F |= F_Z;
+    cpu.registers.a = (cpu.registers.a & getRegister(op & 0b111)) & 0xff;
+    cpu.registers.f = F_H;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void ADC_r(CPU cpu, int op)
   {
-    int carry = ((F & F_C) != 0 ? 1 : 0);
+    int carry = ((cpu.registers.f & F_C) != 0 ? 1 : 0);
     int reg = (getRegister(op & 0b111) & 0xff);
 
     int d = carry + reg;
-    F = 0;
-    if((((A & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0) F |= F_H;
+    cpu.registers.f = 0;
+    if((((cpu.registers.a & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0) cpu.registers.f |= F_H;
 
-    A += d;
-    if(A > 0xFF)
+    cpu.registers.a += d;
+    if(cpu.registers.a > 0xFF)
     {
-      F |= F_C;
-      A &= 0xFF;
+      cpu.registers.f |= F_C;
+      cpu.registers.a &= 0xFF;
     }
-    if(A == 0) F |= F_Z;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void ADD(CPU cpu, int n)
   {
-    F = 0;
-    if((((A & 0xf) + (n & 0xf)) & 0xF0) != 0) F |= F_H;
-    A += n;
-    if(A > 0xFF)
+    cpu.registers.f = 0;
+    if((((cpu.registers.a & 0xf) + (n & 0xf)) & 0xF0) != 0) cpu.registers.f |= F_H;
+    cpu.registers.a += n;
+    if(cpu.registers.a > 0xFF)
     {
-      F |= F_C;
-      A &= 0xFF;
+      cpu.registers.f |= F_C;
+      cpu.registers.a &= 0xFF;
     }
-    if(A == 0) F |= F_Z;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void ADD_r(CPU cpu, int op)
@@ -605,12 +610,12 @@ return;
 
   static void SUB(CPU cpu, int n)
   {
-    F = F_N;
-    if((A & 0xf) - (n & 0xf) < 0) F |= F_H;
-    A -= n;
-    if((A & 0xFF00) != 0) F |= F_C;
-    A &= 0xFF;
-    if(A == 0) F |= F_Z;
+    cpu.registers.f = F_N;
+    if((cpu.registers.a & 0xf) - (n & 0xf) < 0) cpu.registers.f |= F_H;
+    cpu.registers.a -= n;
+    if((cpu.registers.a & 0xFF00) != 0) cpu.registers.f |= F_C;
+    cpu.registers.a &= 0xFF;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void SUB_r(CPU cpu, int op)
@@ -628,60 +633,60 @@ return;
   static void SBC_n(CPU cpu)
   {
     int val = nextUByte();
-    int carry = ((F & F_C) != 0 ? 1 : 0);
+    int carry = ((cpu.registers.f & F_C) != 0 ? 1 : 0);
     int n = val + carry;
 
-    F = F_N;
-    if((A & 0xf) - (val & 0xf) - carry < 0) F |= F_H;
-    A -= n;
-    if(A < 0)
+    cpu.registers.f = F_N;
+    if((cpu.registers.a & 0xf) - (val & 0xf) - carry < 0) cpu.registers.f |= F_H;
+    cpu.registers.a -= n;
+    if(cpu.registers.a < 0)
     {
-      F |= F_C;
-      A &= 0xff;
+      cpu.registers.f |= F_C;
+      cpu.registers.a &= 0xff;
     }
-    if(A == 0) F |= F_Z;
+    if(cpu.registers.a == 0) cpu.registers.f |= F_Z;
   }
 
   static void JP_HL(CPU cpu)
   {
-    cpu.pc = getRegisterPair(RegisterPair.HL) & 0xFFFF;
+    cpu.pc = cpu.registers.hl & 0xFFFF;
   }
 
   static void ADD_HL_rr(CPU cpu, int op)
   {
     /**
      * Z is not affected
-     * H is set if carry out of bit 11; reset otherwise
+     * cpu.registers.h is set if carry out of bit 11; reset otherwise
      * N is reset
-     * C is set if carry from bit 15; reset otherwise
+     * cpu.registers.c is set if carry from bit 15; reset otherwise
      */
     int ss = getRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3]);
-    int hl = getRegisterPair(RegisterPair.HL);
+    int hl = cpu.registers.hl;
 
-    F &= F_Z;
+    cpu.registers.f &= F_Z;
 
     if(((hl & 0xFFF) + (ss & 0xFFF)) > 0xFFF)
     {
-      F |= F_H;
+      cpu.registers.f |= F_H;
     }
 
     hl += ss;
 
     if(hl > 0xFFFF)
     {
-      F |= F_C;
+      cpu.registers.f |= F_C;
       hl &= 0xFFFF;
     }
 
-    setRegisterPair(RegisterPair.HL, hl);
+    cpu.registers.hl =  hl;
   }
 
   static void CP(CPU cpu, int n)
   {
-    F = F_N;
-    if(A < n) F |= F_C;
-    if(A == n) F |= F_Z;
-    if((A & 0xf) < ((A - n) & 0xf)) F |= F_H;
+    cpu.registers.f = F_N;
+    if(cpu.registers.a < n) cpu.registers.f |= F_C;
+    if(cpu.registers.a == n) cpu.registers.f |= F_Z;
+    if((cpu.registers.a & 0xf) < ((cpu.registers.a - n) & 0xf)) cpu.registers.f |= F_H;
   }
 
   static void CP_n(CPU cpu)
@@ -708,7 +713,7 @@ return;
     int reg = (op >> 3) & 0x7;
     int a = getRegister(reg) & 0xff;
 
-    F = (F & F_C) | Tables.DEC[a];
+    cpu.registers.f = (cpu.registers.f & F_C) | Tables.DEC[a];
 
     a = (a - 1) & 0xff;
 
@@ -720,7 +725,7 @@ return;
     int reg = (op >> 3) & 0x7;
     int a = getRegister(reg) & 0xff;
 
-    F = (F & F_C) | Tables.INC[a];
+    cpu.registers.f = (cpu.registers.f & F_C) | Tables.INC[a];
 
     a = (a + 1) & 0xff;
 
@@ -729,17 +734,17 @@ return;
 
   static void RLCA(CPU cpu)
   {
-    boolean carry = (A & 0x80) != 0;
-    A <<= 1;
-    F = 0; // &= F_Z?
+    bool carry = (cpu.registers.a & 0x80) != 0;
+    cpu.registers.a <<= 1;
+    cpu.registers.f = 0; // &= F_Z?
 
     if(carry)
     {
-      F |= F_C;
-      A |= 1;
-    } else F = 0;
+      cpu.registers.f |= F_C;
+      cpu.registers.a |= 1;
+    } else cpu.registers.f = 0;
 
-    A &= 0xff;
+    cpu.registers.a &= 0xff;
   }
 
   static int JP_nn(CPU cpu)
@@ -771,7 +776,7 @@ return;
 
   static int PUSH_rr(CPU cpu, int op)
   {
-    int val = getRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3]);
+    int val = cpu.registers.getRegisterPair((op >> 4) & 0x3);
     pushWord(val);
     cpu.clocks += 4;
   }
