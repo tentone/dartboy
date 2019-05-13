@@ -101,6 +101,25 @@ class Registers
     l = 0x4D;
   }
 
+  ///Checks a condition from an opcode.
+  ///Returns a boolean based off the result of the conditional.
+  bool getFlag(int which)
+  {
+    // Condition code is in last 3 bits
+    switch (which & 0x7)
+    {
+      case 0x4:
+      return (f & F_ZERO) == 0;
+      case 0x5:
+      return (f & F_ZERO) != 0;
+      case 0x6:
+      return (f & F_CARRY) == 0;
+      case 0x7:
+      return (f & F_CARRY) != 0;
+    }
+    return false;
+  }
+
   /// Set the flags on the flag register.
   ///
   /// There are four values on the upper bits of the register that are set depending on the instruction being executed.

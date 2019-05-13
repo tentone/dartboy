@@ -11,11 +11,11 @@ class Instructions
 
   static void CALL_cc_nn(CPU cpu, int op)
   {
-    int jmp = (nextUByte()) | (nextUByte() << 8);
+    int jmp = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
 
-    if(getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
+    if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
-      pushWord(cpu.pc);
+      cpu.pushWordSP(cpu.pc);
       cpu.pc = jmp;
       cpu.clocks += 4;
     }
@@ -23,52 +23,52 @@ class Instructions
 
   static void CALL_nn(CPU cpu)
   {
-    int jmp = (nextUByte()) | (nextUByte() << 8);
-    pushWord(cpu.pc);
+    int jmp = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
+    cpu.pushWordSP(cpu.pc);
     cpu.pc = jmp;
     cpu.clocks += 4;
   }
 
   static void LD_dd_nn(CPU cpu, int op)
   {
-    setRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3], nextUByte() | (nextUByte() << 8));
+    setRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3], cpu.nextUBytePC() | (cpu.nextUBytePC() << 8));
   }
 
   static void LD_r_n(CPU cpu, int op)
   {
     int to = (op >> 3) & 0x7;
-    int n = nextUByte();
+    int n = cpu.nextUBytePC();
     setRegister(to, n);
   }
 
   static void LD_A_BC(CPU cpu)
   {
-    cpu.registers.a = getUByte(cpu.registers.bc);
+    cpu.registers.a = cpu.getUByte(cpu.registers.bc);
   }
 
   static void LD_A_DE(CPU cpu)
   {
-    cpu.registers.a = getUByte(cpu.registers.de);
+    cpu.registers.a = cpu.getUByte(cpu.registers.de);
   }
 
   static void LD_BC_A(CPU cpu)
   {
-    setByte(cpu.registers.bc, A);
+    cpu.memory.writeByte(cpu.registers.bc, cpu.registers.a);
   }
 
   static void LD_DE_A(CPU cpu)
   {
-    setByte(cpu.registers.de, A);
+    cpu.memory.writeByte(cpu.registers.de, cpu.registers.a);
   }
 
   static void LD_A_C(CPU cpu)
   {
-    cpu.registers.a = getUByte(0xFF00 | C);
+    cpu.registers.a = cpu.getUByte(0xFF00 | C);
   }
 
   static void ADD_SP_n(CPU cpu)
   {
-    int offset = nextByte();
+    int offset = cpu.nextBytePC();
     int nsp = (cpu.sp + offset);
 
     cpu.registers.f = 0;
@@ -96,19 +96,19 @@ class Instructions
 
   static void LD_A_n(CPU cpu)
   {
-    cpu.registers.a = getUByte(cpu.registers.hl & 0xffff);
+    cpu.registers.a = cpu.getUByte(cpu.registers.hl & 0xffff);
 
     cpu.registers.hl = (cpu.registers.hl - 1) & 0xFFFF;
   }
 
   static void LD_nn_A(CPU cpu)
   {
-    setByte(nextUByte() | (nextUByte() << 8), A);
+    cpu.memory.writeByte(cpu.nextUBytePC() | (cpu.nextUBytePC() << 8), cpu.registers.a);
   }
 
   static void LDHL_SP_n(CPU cpu)
   {
-    int offset = nextByte();
+    int offset = cpu.nextBytePC();
     int nsp = (cpu.sp + offset);
 
     cpu.registers.f = 0; // (short) (cpu.registers.f & Registers.F_ZERO);
@@ -128,36 +128,36 @@ class Instructions
 
   static void LD_FFn_A(CPU cpu)
   {
-    setByte(0xff00 | nextUByte(), A);
+    cpu.memory.writeByte(0xff00 | cpu.nextUBytePC(), cpu.registers.a);
   }
 
   static void LDH_FFC_A(CPU cpu)
   {
-    setByte(0xFF00 | (cpu.registers.c & 0xFF), A);
+    cpu.memory.writeByte(0xFF00 | (cpu.registers.c & 0xFF), cpu.registers.a);
   }
 
   static void LD_A_nn(CPU cpu)
   {
-    int nn = nextUByte() | (nextUByte() << 8);
-    cpu.registers.a = getUByte(nn);
+    int nn = cpu.nextUBytePC() | (cpu.nextUBytePC() << 8);
+    cpu.registers.a = cpu.getUByte(nn);
   }
 
   static void LD_A_HLI(CPU cpu)
   {
-    cpu.registers.a = getUByte(cpu.registers.hl & 0xffff);
+    cpu.registers.a = cpu.getUByte(cpu.registers.hl & 0xffff);
     cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
   }
 
   static void LD_HLI_A(CPU cpu)
   {
-    setByte(cpu.registers.hl & 0xFFFF, A);
+    cpu.memory.writeByte(cpu.registers.hl & 0xFFFF, cpu.registers.a);
     cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
   }
 
   static void LD_HLD_A(CPU cpu)
   {
     int hl = cpu.registers.hl;
-    setByte(hl, A);
+    cpu.memory.writeByte(hl, cpu.registers.a);
     cpu.registers.hl = (hl - 1) & 0xFFFF;
 
   }
@@ -179,7 +179,7 @@ class Instructions
   static void CBPrefix(CPU cpu)
   {
     int x = cpu.pc++;
-    int cbop = getUByte(x);
+    int cbop = cpu.getUByte(x);
     int r = cbop & 0x7;
     int d = getRegister(r) & 0xff;
 
@@ -384,7 +384,7 @@ class Instructions
 
   static void ADC_n(CPU cpu)
   {
-    int val = nextUByte();
+    int val = cpu.nextUBytePC();
     int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
     int n = val + carry;
 
@@ -401,21 +401,21 @@ class Instructions
 
   static void RET(CPU cpu)
   {
-    cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+    cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
     cpu.sp += 2;
     cpu.clocks += 4;
 }
 
   static void XOR_n(CPU cpu)
   {
-    cpu.registers.a ^= nextUByte();
+    cpu.registers.a ^= cpu.nextUBytePC();
     cpu.registers.f = 0;
     if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
   }
 
   static void AND_n(CPU cpu)
   {
-    cpu.registers.a &= nextUByte();
+    cpu.registers.a &= cpu.nextUBytePC();
     cpu.registers.f = Registers.F_HALF_CARRY;
     if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
   }
@@ -437,16 +437,16 @@ class Instructions
 
   static void RST_p(CPU cpu, int op)
   {
-    pushWord(cpu.pc);
+    cpu.pushWordSP(cpu.pc);
     cpu.pc = op & 0x38;
     cpu.clocks += 4;
 }
 
   static void RET_c(CPU cpu, int op)
   {
-    if(getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
+    if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
-      cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+      cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
       cpu.sp += 2;
     }
     cpu.clocks += 4;
@@ -459,13 +459,13 @@ class Instructions
 
   static void LDH_FFnn(CPU cpu)
   {
-    cpu.registers.a = getUByte(0xFF00 | nextUByte());
+    cpu.registers.a = cpu.getUByte(0xFF00 | cpu.nextUBytePC());
   }
 
   static void JR_c_e(CPU cpu, int op)
   {
-    int e = nextByte();
-    if(getConditionalFlag((op >> 3) & 0x7))
+    int e = cpu.nextBytePC();
+    if(cpu.registers.getFlag((op >> 3) & 0x7))
     {
       cpu.pc += e;
       cpu.clocks += 4;
@@ -475,9 +475,9 @@ class Instructions
 
   static void JP_c_nn(CPU cpu, int op)
   {
-    int npc = nextUByte() | (nextUByte() << 8);
+    int npc = cpu.nextUBytePC() | (cpu.nextUBytePC() << 8);
 
-    if(getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
+    if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
       cpu.pc = npc;
       cpu.clocks += 4;
@@ -530,7 +530,7 @@ class Instructions
 
   static void JR_e(CPU cpu)
   {
-    int e = nextByte();
+    int e = cpu.nextBytePC();
     cpu.pc += e;
     cpu.clocks += 4;
 }
@@ -549,7 +549,7 @@ class Instructions
 
   static void OR_n(CPU cpu)
   {
-    int n = nextUByte();
+    int n = cpu.nextUBytePC();
     OR(cpu, n);
   }
 
@@ -606,7 +606,7 @@ class Instructions
 
   static void ADD_n(CPU cpu)
   {
-    int n = nextUByte();
+    int n = cpu.nextUBytePC();
     ADD(cpu, n);
   }
 
@@ -628,13 +628,13 @@ class Instructions
 
   static void SUB_n(CPU cpu)
   {
-    int n = nextUByte();
+    int n = cpu.nextUBytePC();
     SUB(cpu, n);
   }
 
   static void SBC_n(CPU cpu)
   {
-    int val = nextUByte();
+    int val = cpu.nextUBytePC();
     int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
     int n = val + carry;
 
@@ -693,7 +693,7 @@ class Instructions
 
   static void CP_n(CPU cpu)
   {
-    int n = nextUByte();
+    int n = cpu.nextUBytePC();
     CP(cpu, n);
   }
 
@@ -751,35 +751,35 @@ class Instructions
 
   static void JP_nn(CPU cpu)
   {
-    cpu.pc = (nextUByte()) | (nextUByte() << 8);
+    cpu.pc = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
     cpu.clocks += 4;
   }
 
   static void RETI(CPU cpu)
   {
     cpu.interruptsEnabled = true;
-    cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
+    cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
     cpu.sp += 2;
     cpu.clocks += 4;
   }
 
   static void LD_a16_SP(CPU cpu)
   {
-    int pos = ((nextUByte()) | (nextUByte() << 8));
-    setByte(pos + 1, (cpu.sp & 0xFF00) >> 8);
-    setByte(pos, (cpu.sp & 0x00FF));
+    int pos = ((cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8));
+    cpu.memory.writeByte(pos + 1, (cpu.sp & 0xFF00) >> 8);
+    cpu.memory.writeByte(pos, (cpu.sp & 0x00FF));
   }
 
   static void POP_rr(CPU cpu, int op)
   {
-    setRegisterPair2(RegisterPair.byValue[(op >> 4) & 0x3], getByte(cpu.sp + 1), getByte(cpu.sp));
+    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getByte(cpu.sp + 1), cpu.getByte(cpu.sp));
     cpu.sp += 2;
   }
 
   static void PUSH_rr(CPU cpu, int op)
   {
     int val = cpu.registers.getRegisterPair((op >> 4) & 0x3);
-    pushWord(val);
+    cpu.pushWordSP(val);
     cpu.clocks += 4;
   }
 }

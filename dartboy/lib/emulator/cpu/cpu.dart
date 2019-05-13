@@ -57,6 +57,46 @@ class CPU
     this.memory = new Memory(this.cartridge);
   }
 
+  /// Read the next program byte and update the PC value
+  int nextUBytePC()
+  {
+    return this.getUByte(this.pc++);
+  }
+
+  /// Read the next program byte and update the PC value
+  int nextBytePC()
+  {
+    return this.getByte(this.pc++);
+  }
+
+  /// Read and filter value from memory
+  int getUByte(int address)
+  {
+    return this.getByte(address) & 0xff;
+  }
+
+  /// Read a byte from memory (takes 4 clocks)
+  int getByte(int address)
+  {
+    this.tick(4);
+    return this.memory.readByte(address);
+  }
+
+  /// Write a byte into memory (takes 4 clocks)
+  void setByte(int address, int value)
+  {
+    this.tick(4);
+    this.memory.writeByte(address, value);
+  }
+
+  /// Push word into the temporary stack and update the stack pointer
+  void pushWordSP(int value)
+  {
+    this.sp -= 2;
+    this.memory.writeByte(this.sp, value & 0x00FF);
+    this.memory.writeByte(this.sp + 1, (value & 0xFF00) >> 8);
+  }
+
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode.
   /// It can return a register pair or the CPU SP value.
   /// Returns the value of the register
@@ -103,7 +143,7 @@ class CPU
     // If this is nonzero, then some interrupt that we are checking for was triggered
     if ((triggeredInterrupts & enabledInterrupts) != 0)
     {
-      pushWord(pc);
+      pushWordSP(pc);
 
       // This is important
       interruptsEnabled = false;
