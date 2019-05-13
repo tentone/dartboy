@@ -110,6 +110,29 @@ class CPU
     throw new Exception('Unknown register pair address getRegisterPair().');
   }
 
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
+  /// It can set a register pair or the CPU SP value.
+  /// Returns the value of the register
+  void setRegisterPairSP(int r, int hi, {int lo})
+  {
+    if(lo == null)
+    {
+      int value = hi;
+      hi = (value >> 8) & 0xFF;
+      lo = value & 0xFF;
+    }
+    else
+    {
+      hi &= 0xff;
+      lo &= 0xff;
+    }
+
+    if(r == 0x0) {this.registers.b = hi; this.registers.c = lo;}
+    else if(r == 0x1) {this.registers.d = hi; this.registers.e = lo;}
+    else if(r == 0x2) {this.registers.h = hi; this.registers.l = lo;}
+    else if(r == 0x3) {this.sp = ((hi & 0xff) << 8) | lo & 0xff;}
+  }
+
   ///Increase the clock cycles and trigger interrupts as needed.
   void tick(int clocks)
   {
@@ -345,7 +368,7 @@ class CPU
       case 0xf9:
         {
           this.sp = this.registers.hl;
-          //setRegisterPair(RegisterPair.SP, getRegisterPair(RegisterPair.HL));
+          this.setRegisterPairSP(Registers.ADDR_SP, this.registers.hl);
           break;
         }
       case 0xc5: // BC

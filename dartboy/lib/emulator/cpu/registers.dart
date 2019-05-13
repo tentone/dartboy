@@ -13,6 +13,12 @@ class Registers
   static const int F_HALF_CARRY = 0x20;
   static const int F_CARRY = 0x10;
 
+  static const int ADDR_BC = 0x0;
+  static const int ADDR_DE = 0x1;
+  static const int ADDR_HL = 0x2;
+  static const int ADDR_AF = 0x3;
+  static const int ADDR_SP = 0x3;
+
   /// CPU registers store temporally the result of the instructions.
   ///
   /// F is the flag register.
@@ -74,17 +80,28 @@ class Registers
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
+  /// Can be used with a single word value as the second argument.
   /// Returns the value of the register
-  int setRegisterPair(int r, int hi, int lo)
+  void setRegisterPair(int r, int hi, {int lo})
   {
-    hi &= 0xff;
-    lo &= 0xff;
+    if(lo == null)
+    {
+      int value = hi;
+      hi = (value >> 8) & 0xFF;
+      lo = value & 0xFF;
+    }
+    else
+    {
+      hi &= 0xff;
+      lo &= 0xff;
+    }
 
     if(r == 0x0) {b = hi; c = lo;}
     else if(r == 0x1) {d = hi; e = lo;}
     else if(r == 0x2) {h = hi; l = lo;}
     else if(r == 0x3) {a = hi; f = lo & 0xF;}
   }
+
 
   /// Reset the registers to default values
   ///

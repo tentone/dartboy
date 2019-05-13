@@ -31,7 +31,7 @@ class Instructions
 
   static void LD_dd_nn(CPU cpu, int op)
   {
-    setRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3], cpu.nextUBytePC() | (cpu.nextUBytePC() << 8));
+    cpu.setRegisterPairSP((op >> 4) & 0x3, cpu.nextUBytePC() | (cpu.nextUBytePC() << 8));
   }
 
   static void LD_r_n(CPU cpu, int op)
@@ -173,7 +173,7 @@ class Instructions
     int to = (op >> 3) & 0x7;
 
     // important note: getIO(6) fetches (HL)
-    setRegister(to, getRegister(from) & 0xFF);
+    setRegister(to, cpu.registers.getRegister(from) & 0xFF);
   }
 
   static void CBPrefix(CPU cpu)
@@ -181,7 +181,7 @@ class Instructions
     int x = cpu.pc++;
     int cbop = cpu.getUByte(x);
     int r = cbop & 0x7;
-    int d = getRegister(r) & 0xff;
+    int d = cpu.registers.getRegister(r) & 0xff;
 
     switch(cbop & 0xC0)
     {
@@ -326,7 +326,7 @@ class Instructions
   {
     RegisterPair p = RegisterPair.byValue[(op >> 4) & 0x3];
     int o = getRegisterPair(p);
-    setRegisterPair(p, o - 1);
+    cpu.setRegisterPairSP(p, o - 1);
   }
 
   static void RLA(CPU cpu)
@@ -369,7 +369,7 @@ class Instructions
   static void SBC_r(CPU cpu, int op)
   {
     int carry = (cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0;
-    int reg = getRegister(op & 0x7) & 0xff;
+    int reg = cpu.registers.getRegister(op & 0x7) & 0xff;
 
     cpu.registers.f = Registers.F_SUBTRACT;
     if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0) cpu.registers.f |= Registers.F_HALF_CARRY;
@@ -544,7 +544,7 @@ class Instructions
 
   static void OR_r(CPU cpu, int op)
   {
-    OR(getRegister(op & 0x7) & 0xff);
+    OR(cpu.registers.getRegister(op & 0x7) & 0xff);
   }
 
   static void OR_n(CPU cpu)
@@ -555,14 +555,14 @@ class Instructions
 
   static void XOR_r(CPU cpu, int op)
   {
-    cpu.registers.a = (cpu.registers.a ^ getRegister(op & 0x7)) & 0xff;
+    cpu.registers.a = (cpu.registers.a ^ cpu.registers.getRegister(op & 0x7)) & 0xff;
     cpu.registers.f = 0;
     if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
   }
 
   static void AND_r(CPU cpu, int op)
   {
-    cpu.registers.a = (cpu.registers.a & getRegister(op & 0x7)) & 0xff;
+    cpu.registers.a = (cpu.registers.a & cpu.registers.getRegister(op & 0x7)) & 0xff;
     cpu.registers.f = Registers.F_HALF_CARRY;
     if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
   }
@@ -570,7 +570,7 @@ class Instructions
   static void ADC_r(CPU cpu, int op)
   {
     int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
-    int reg = (getRegister(op & 0x7) & 0xff);
+    int reg = (cpu.registers.getRegister(op & 0x7) & 0xff);
 
     int d = carry + reg;
     cpu.registers.f = 0;
@@ -600,7 +600,7 @@ class Instructions
 
   static void ADD_r(CPU cpu, int op)
   {
-    int n = getRegister(op & 0x7) & 0xff;
+    int n = cpu.registers.getRegister(op & 0x7) & 0xff;
     ADD(cpu, n);
   }
 
@@ -622,7 +622,7 @@ class Instructions
 
   static void SUB_r(CPU cpu, int op)
   {
-    int n = getRegister(op & 0x7) & 0xff;
+    int n = cpu.registers.getRegister(op & 0x7) & 0xff;
     SUB(cpu, n);
   }
 
@@ -699,7 +699,7 @@ class Instructions
 
   static void CP_rr(CPU cpu, int op)
   {
-    int n = getRegister(op & 0x7) & 0xFF;
+    int n = cpu.registers.getRegister(op & 0x7) & 0xFF;
     CP(cpu, n);
   }
 
@@ -707,13 +707,13 @@ class Instructions
   {
     RegisterPair pair = RegisterPair.byValue[(op >> 4) & 0x3];
     int o = getRegisterPair(pair) & 0xffff;
-    setRegisterPair(pair, o + 1);
+    cpu.setRegisterPairSP(pair, o + 1);
   }
 
   static void DEC_r(CPU cpu, int op)
   {
     int reg = (op >> 3) & 0x7;
-    int a = getRegister(reg) & 0xff;
+    int a = cpu.registers.getRegister(reg) & 0xff;
 
     cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | Tables.DEC[a];
 
@@ -725,7 +725,7 @@ class Instructions
   static void INC_r(CPU cpu, int op)
   {
     int reg = (op >> 3) & 0x7;
-    int a = getRegister(reg) & 0xff;
+    int a = cpu.registers.getRegister(reg) & 0xff;
 
     cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | Tables.INC[a];
 
