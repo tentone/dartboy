@@ -56,6 +56,7 @@ class MemoryRegisters
   static const int TIMER_OVERFLOW_HANDLER_ADDRESS = 0x50;
   static const int SERIAL_TRANSFER_HANDLER_ADDRESS = 0x58;
   static const int HILO_HANDLER_ADDRESS = 0x60;
+  
   static const int W = 160;
   static const int H = 144;
 

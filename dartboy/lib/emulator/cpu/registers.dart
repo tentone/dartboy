@@ -83,7 +83,7 @@ class Registers
     if(r == 0x0) {b = hi; c = lo;}
     else if(r == 0x1) {d = hi; e = lo;}
     else if(r == 0x2) {h = hi; l = lo;}
-    else if(r == 0x3) {a = hi; f = lo;} //TODO F = lo & (F_C | F_H | F_N | F_Z);
+    else if(r == 0x3) {a = hi; f = lo & 0xF;}
   }
 
   /// Reset the registers to default values

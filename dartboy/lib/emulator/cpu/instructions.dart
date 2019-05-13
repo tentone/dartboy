@@ -13,7 +13,7 @@ class Instructions
   {
     int jmp = (nextUByte()) | (nextUByte() << 8);
 
-    if(getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
+    if(getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
     {
       pushWord(cpu.pc);
       cpu.pc = jmp;
@@ -183,7 +183,7 @@ class Instructions
     int r = cbop & 0x7;
     int d = getRegister(r) & 0xff;
 
-    switch(cbop & 0b11000000)
+    switch(cbop & 0xC0)
     {
       case 0x80:
         {
@@ -228,7 +228,7 @@ class Instructions
             case 0x08: // RRcpu.registers.c m
               {
                 cpu.registers.f = 0;
-                if((d & 0b1) != 0) cpu.registers.f |= Registers.F_CARRY;
+                if((d & 0x1) != 0) cpu.registers.f |= Registers.F_CARRY;
                 d >>= 1;
 
                 // we're shifting circular right, add back bit 7
@@ -249,7 +249,7 @@ class Instructions
                 d &= 0xff;
 
                 // move old cpu.registers.c into bit 0
-                if(carryflag) d |= 0b1;
+                if(carryflag) d |= 0x1;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
                 setRegister(r, d);
                 return;
@@ -264,7 +264,7 @@ class Instructions
                 d >>= 1;
 
                 // move old cpu.registers.c into bit 7
-                if(carryflag) d |= 0b10000000;
+                if(carryflag) d |= 0x80;
 
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
                 
@@ -299,7 +299,7 @@ class Instructions
               {
                 bool bit7 = (d & 0x80) != 0;
                 cpu.registers.f = 0;
-                if((d & 0b1) != 0) cpu.registers.f |= Registers.F_CARRY;
+                if((d & 0x1) != 0) cpu.registers.f |= Registers.F_CARRY;
                 d >>= 1;
                 if(bit7) d |= 0x80;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
@@ -369,7 +369,7 @@ class Instructions
   static void SBC_r(CPU cpu, int op)
   {
     int carry = (cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0;
-    int reg = getRegister(op & 0b111) & 0xff;
+    int reg = getRegister(op & 0x7) & 0xff;
 
     cpu.registers.f = Registers.F_SUBTRACT;
     if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0) cpu.registers.f |= Registers.F_HALF_CARRY;
@@ -438,13 +438,13 @@ class Instructions
   static void RST_p(CPU cpu, int op)
   {
     pushWord(cpu.pc);
-    cpu.pc = op & 0b00111000;
+    cpu.pc = op & 0x38;
     cpu.clocks += 4;
 }
 
   static void RET_c(CPU cpu, int op)
   {
-    if(getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
+    if(getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
     {
       cpu.pc = (getUByte(cpu.sp + 1) << 8) | getUByte(cpu.sp);
       cpu.sp += 2;
@@ -465,7 +465,7 @@ class Instructions
   static void JR_c_e(CPU cpu, int op)
   {
     int e = nextByte();
-    if(getConditionalFlag((op >> 3) & 0b111))
+    if(getConditionalFlag((op >> 3) & 0x7))
     {
       cpu.pc += e;
       cpu.clocks += 4;
@@ -477,7 +477,7 @@ class Instructions
   {
     int npc = nextUByte() | (nextUByte() << 8);
 
-    if(getConditionalFlag(0b100 | ((op >> 3) & 0x7)))
+    if(getConditionalFlag(0x4 | ((op >> 3) & 0x7)))
     {
       cpu.pc = npc;
       cpu.clocks += 4;
@@ -544,25 +544,25 @@ class Instructions
 
   static void OR_r(CPU cpu, int op)
   {
-    OR(getRegister(op & 0b111) & 0xff);
+    OR(getRegister(op & 0x7) & 0xff);
   }
 
   static void OR_n(CPU cpu)
   {
     int n = nextUByte();
-    OR(n);
+    OR(cpu, n);
   }
 
   static void XOR_r(CPU cpu, int op)
   {
-    cpu.registers.a = (cpu.registers.a ^ getRegister(op & 0b111)) & 0xff;
+    cpu.registers.a = (cpu.registers.a ^ getRegister(op & 0x7)) & 0xff;
     cpu.registers.f = 0;
     if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
   }
 
   static void AND_r(CPU cpu, int op)
   {
-    cpu.registers.a = (cpu.registers.a & getRegister(op & 0b111)) & 0xff;
+    cpu.registers.a = (cpu.registers.a & getRegister(op & 0x7)) & 0xff;
     cpu.registers.f = Registers.F_HALF_CARRY;
     if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
   }
@@ -570,7 +570,7 @@ class Instructions
   static void ADC_r(CPU cpu, int op)
   {
     int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
-    int reg = (getRegister(op & 0b111) & 0xff);
+    int reg = (getRegister(op & 0x7) & 0xff);
 
     int d = carry + reg;
     cpu.registers.f = 0;
@@ -600,14 +600,14 @@ class Instructions
 
   static void ADD_r(CPU cpu, int op)
   {
-    int n = getRegister(op & 0b111) & 0xff;
-    ADD(n);
+    int n = getRegister(op & 0x7) & 0xff;
+    ADD(cpu, n);
   }
 
   static void ADD_n(CPU cpu)
   {
     int n = nextUByte();
-    ADD(n);
+    ADD(cpu, n);
   }
 
   static void SUB(CPU cpu, int n)
@@ -622,14 +622,14 @@ class Instructions
 
   static void SUB_r(CPU cpu, int op)
   {
-    int n = getRegister(op & 0b111) & 0xff;
-    SUB(n);
+    int n = getRegister(op & 0x7) & 0xff;
+    SUB(cpu, n);
   }
 
   static void SUB_n(CPU cpu)
   {
     int n = nextUByte();
-    SUB(n);
+    SUB(cpu, n);
   }
 
   static void SBC_n(CPU cpu)
@@ -694,13 +694,13 @@ class Instructions
   static void CP_n(CPU cpu)
   {
     int n = nextUByte();
-    CP(n);
+    CP(cpu, n);
   }
 
   static void CP_rr(CPU cpu, int op)
   {
     int n = getRegister(op & 0x7) & 0xFF;
-    CP(n);
+    CP(cpu, n);
   }
 
   static void INC_rr(CPU cpu, int op)
