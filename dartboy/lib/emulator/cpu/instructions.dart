@@ -1,6 +1,7 @@
 import 'package:dartboy/emulator/cpu/registers.dart';
 
 import 'cpu.dart';
+import 'tables.dart';
 
 /// Class to handle instruction implementation, instructions run on top of the CPU object.
 ///
@@ -38,7 +39,7 @@ class Instructions
   {
     int to = (op >> 3) & 0x7;
     int n = cpu.nextUBytePC();
-    setRegister(to, n);
+    cpu.registers.setRegister(to, n);
   }
 
   static void LD_A_BC(CPU cpu)
@@ -63,7 +64,7 @@ class Instructions
 
   static void LD_A_C(CPU cpu)
   {
-    cpu.registers.a = cpu.getUByte(0xFF00 | C);
+    cpu.registers.a = cpu.getUByte(0xFF00 | cpu.registers.c);
   }
 
   static void ADD_SP_n(CPU cpu)
@@ -122,8 +123,8 @@ class Instructions
 
   static void CPL(CPU cpu)
   {
-    cpu.registers.a = (~A) & 0xFF;
-    cpu.registers.f = (cpu.registers.f & (F_cpu.registers.c | Registers.F_ZERO)) | F_cpu.registers.h | Registers.F_SUBTRACT;
+    cpu.registers.a = (~cpu.registers.a) & 0xFF;
+    cpu.registers.f = (cpu.registers.f & (Registers.F_CARRY | Registers.F_ZERO)) | Registers.F_HALF_CARRY | Registers.F_SUBTRACT;
   }
 
   static void LD_FFn_A(CPU cpu)
@@ -173,7 +174,7 @@ class Instructions
     int to = (op >> 3) & 0x7;
 
     // important note: getIO(6) fetches (HL)
-    setRegister(to, cpu.registers.getRegister(from) & 0xFF);
+    cpu.registers.setRegister(to, cpu.registers.getRegister(from) & 0xFF);
   }
 
   static void CBPrefix(CPU cpu)
@@ -189,14 +190,14 @@ class Instructions
         {
           // RES b, r
           // 1 0 b b b r r r
-          setRegister(r, d & ~(0x1 << (cbop >> 3 & 0x7)));
+          cpu.registers.setRegister(r, d & ~(0x1 << (cbop >> 3 & 0x7)));
           return;
         }
       case 0xc0:
         {
           // SET b, r
           // 1 1 b b b r r r
-          setRegister(r, d | (0x1 << (cbop >> 3 & 0x7)));
+          cpu.registers.setRegister(r, d | (0x1 << (cbop >> 3 & 0x7)));
           return;
         }
       case 0x40:
@@ -222,7 +223,7 @@ class Instructions
                 if((cpu.registers.f & Registers.F_CARRY) != 0) d |= 0x01;
                 d &= 0xff;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             case 0x08: // RRcpu.registers.c m
@@ -235,7 +236,7 @@ class Instructions
                 if((cpu.registers.f & Registers.F_CARRY) != 0) d |= 0x80;
                 d &= 0xff;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             case 0x10: // Rcpu.registers.l m
@@ -251,7 +252,7 @@ class Instructions
                 // move old cpu.registers.c into bit 0
                 if(carryflag) d |= 0x1;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             case 0x18: // RR m
@@ -268,7 +269,7 @@ class Instructions
 
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
                 
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 
                 return;
               }
@@ -280,7 +281,7 @@ class Instructions
                 if((d & 0x1) != 0) cpu.registers.f |= Registers.F_CARRY;
                 d >>= 1;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             case 0x20: // SLcpu.registers.a m
@@ -292,7 +293,7 @@ class Instructions
                 d <<= 1;
                 d &= 0xff;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             case 0x28: // SRcpu.registers.a m
@@ -303,29 +304,30 @@ class Instructions
                 d >>= 1;
                 if(bit7) d |= 0x80;
                 if(d == 0) cpu.registers.f |= Registers.F_ZERO;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             case 0x30: // SWAP m
               {
                 d = ((d & 0xF0) >> 4) | ((d & 0x0F) << 4);
                 cpu.registers.f = d == 0 ? Registers.F_ZERO : 0;
-                setRegister(r, d);
+                cpu.registers.setRegister(r, d);
                 return;
               }
             default:
-              throw new UnsupportedOperationException("cb-&f8-" + Integer.toHexString(cbop));
+              throw new Exception("cb-&f8-" + cbop.toRadixString(16));
           }
+          break;
         }
       default:
-        throw new UnsupportedOperationException("cb-" + Integer.toHexString(cbop));
+        throw new Exception("cb-" + cbop.toRadixString(16));
     }
   }
 
   static void DEC_rr(CPU cpu, int op)
   {
-    RegisterPair p = RegisterPair.byValue[(op >> 4) & 0x3];
-    int o = getRegisterPair(p);
+    int p = (op >> 4) & 0x3;
+    int o = cpu.getRegisterPairSP(p);
     cpu.setRegisterPairSP(p, o - 1);
   }
 
@@ -427,7 +429,7 @@ class Instructions
     // Note that during the execution of this instruction and the following instruction, maskable interrupts are disabled. we still need to increment div etc
     cpu.tick(4);
 
-    return _exec();
+    //return _exec();
   }
 
   static void DI(CPU cpu)
@@ -544,7 +546,7 @@ class Instructions
 
   static void OR_r(CPU cpu, int op)
   {
-    OR(cpu.registers.getRegister(op & 0x7) & 0xff);
+    OR(cpu, cpu.registers.getRegister(op & 0x7) & 0xff);
   }
 
   static void OR_n(CPU cpu)
@@ -662,7 +664,7 @@ class Instructions
      * N is reset
      * cpu.registers.c is set if carry from bit 15; reset otherwise
      */
-    int ss = getRegisterPair(RegisterPair.byValue[(op >> 4) & 0x3]);
+    int ss = cpu.getRegisterPairSP((op >> 4) & 0x3);
     int hl = cpu.registers.hl;
 
     cpu.registers.f &= Registers.F_ZERO;
@@ -705,8 +707,8 @@ class Instructions
 
   static void INC_rr(CPU cpu, int op)
   {
-    RegisterPair pair = RegisterPair.byValue[(op >> 4) & 0x3];
-    int o = getRegisterPair(pair) & 0xffff;
+    int pair = (op >> 4) & 0x3;
+    int o = cpu.getRegisterPairSP(pair) & 0xffff;
     cpu.setRegisterPairSP(pair, o + 1);
   }
 
@@ -719,7 +721,7 @@ class Instructions
 
     a = (a - 1) & 0xff;
 
-    setRegister(reg, a);
+    cpu.registers.setRegister(reg, a);
   }
 
   static void INC_r(CPU cpu, int op)
@@ -731,7 +733,7 @@ class Instructions
 
     a = (a + 1) & 0xff;
 
-    setRegister(reg, a);
+    cpu.registers.setRegister(reg, a);
   }
 
   static void RLCA(CPU cpu)
@@ -772,7 +774,7 @@ class Instructions
 
   static void POP_rr(CPU cpu, int op)
   {
-    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getByte(cpu.sp + 1), cpu.getByte(cpu.sp));
+    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getByte(cpu.sp + 1), lo: cpu.getByte(cpu.sp));
     cpu.sp += 2;
   }
 
