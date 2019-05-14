@@ -38,9 +38,6 @@ class DartBoyApp extends StatelessWidget
   {
     overrideTargetPlatformForDesktop();
 
-    Emulator emulator = new Emulator();
-    emulator.loadROM('./roms/cpu_instrs.gb');
-
     return new MaterialApp
     (
       title: 'GBC',

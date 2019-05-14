@@ -55,6 +55,7 @@ class CPU
     this.cartridge = cartridge;
     this.registers = new Registers(this);
     this.memory = new Memory(this.cartridge);
+    this.reset();
   }
 
   /// Read the next program byte and update the PC value
@@ -202,10 +203,16 @@ class CPU
   {
     this.registers.reset();
     this.memory.reset();
+
     this.sp = 0xFFFE;
     this.pc = 0x100;
+
     this.halted = false;
+    this.interruptsEnabled = false;
+
     this.clocks = 0;
+    this.cyclesSinceLastSleep = 0;
+    this.cyclesExecutedThisSecond = 0;
   }
 
   /// Next step in the CPU processing, should be called at a fixed rate.
@@ -227,8 +234,12 @@ class CPU
       this.halted = false;
     }
 
-    int op = this.memory.readByte(this.pc);
-    this.pc++;
+    int op = this.memory.readByte(this.pc++);
+
+    if(op == null)
+    {
+      throw new Exception('DartBoy: Read null op. PC: ' + this.pc.toString());
+    }
 
     switch (op)
     {
@@ -647,13 +658,12 @@ class CPU
       default:
         switch (op & 0xC0)
         {
-          case 0x40: // LD r, r'
+          case 0x40: // LD r, r
             Instructions.LD_r_r(this, op);
             break;
           default:
             throw new Exception('Unsupported operations, clocks: ' +  this.clocks.toString() + ", op: " + op.toRadixString(16));
             break;
-
         }
     }
 
