@@ -148,55 +148,66 @@ class CPU
     //TODO <ADD CODE HERE>
   }
 
+
+
   /// Fires interrupts if interrupts are enabled.
   void fireInterrupts()
   {
+    // Auxiliary method to check if an interruption was triggered.
+    bool interruptTriggered(int interrupt)
+    {
+      return (this.memory.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) & this.memory.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS) & interrupt) != 0;
+    }
+
     // If interrupts are disabled (via the DI instruction), ignore this call
     if(!this.interruptsEnabled)
     {
       return;
     }
 
-    /*
     // Flag of which interrupts should be triggered
-    byte triggeredInterrupts = mmu.registers[R.R_TRIGGERED_INTERRUPTS];
+    int triggeredInterrupts = this.memory.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS);
 
     // Which interrupts the program is actually interested in, these are the ones we will fire
-    int enabledInterrupts = mmu.registers[R.R_ENABLED_INTERRUPTS];
+    int enabledInterrupts =  this.memory.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS);
 
     // If this is nonzero, then some interrupt that we are checking for was triggered
-    if ((triggeredInterrupts & enabledInterrupts) != 0)
+    if((triggeredInterrupts & enabledInterrupts) != 0)
     {
-      pushWordSP(pc);
+      this.pushWordSP(this.pc);
 
       // This is important
-      interruptsEnabled = false;
+      this.interruptsEnabled = false;
 
       // Interrupt priorities are vblank > lcdc > tima overflow > serial transfer > hilo
-      if (isInterruptTriggered(R.VBLANK_BIT))
+      if(interruptTriggered(MemoryRegisters.VBLANK_BIT))
       {
-        pc = R.VBLANK_HANDLER_ADDRESS;
-        triggeredInterrupts &= ~R.VBLANK_BIT;
-      } else if (isInterruptTriggered(R.LCDC_BIT))
-      {
-        pc = R.LCDC_HANDLER_ADDRESS;
-        triggeredInterrupts &= ~R.LCDC_BIT;
-      } else if (isInterruptTriggered(R.TIMER_OVERFLOW_BIT))
-      {
-        pc = R.TIMER_OVERFLOW_HANDLER_ADDRESS;
-        triggeredInterrupts &= ~R.TIMER_OVERFLOW_BIT;
-      } else if (isInterruptTriggered(R.SERIAL_TRANSFER_BIT))
-      {
-        pc = R.SERIAL_TRANSFER_HANDLER_ADDRESS;
-        triggeredInterrupts &= ~R.SERIAL_TRANSFER_BIT;
-      } else if (isInterruptTriggered(R.HILO_BIT))
-      {
-        pc = R.HILO_HANDLER_ADDRESS;
-        triggeredInterrupts &= ~R.HILO_BIT;
+        this.pc = MemoryRegisters.VBLANK_HANDLER_ADDRESS;
+        triggeredInterrupts &= ~MemoryRegisters.VBLANK_BIT;
       }
-      mmu.registers[R.R_TRIGGERED_INTERRUPTS] = triggeredInterrupts;
+      else if(interruptTriggered(MemoryRegisters.LCDC_BIT))
+      {
+        this.pc = MemoryRegisters.LCDC_HANDLER_ADDRESS;
+        triggeredInterrupts &= ~MemoryRegisters.LCDC_BIT;
+      }
+      else if(interruptTriggered(MemoryRegisters.TIMER_OVERFLOW_BIT))
+      {
+        this.pc = MemoryRegisters.TIMER_OVERFLOW_HANDLER_ADDRESS;
+        triggeredInterrupts &= ~MemoryRegisters.TIMER_OVERFLOW_BIT;
+      }
+      else if(interruptTriggered(MemoryRegisters.SERIAL_TRANSFER_BIT))
+      {
+        this.pc = MemoryRegisters.SERIAL_TRANSFER_HANDLER_ADDRESS;
+        triggeredInterrupts &= ~MemoryRegisters.SERIAL_TRANSFER_BIT;
+      }
+      else if(interruptTriggered(MemoryRegisters.HILO_BIT))
+      {
+        this.pc = MemoryRegisters.HILO_HANDLER_ADDRESS;
+        triggeredInterrupts &= ~MemoryRegisters.HILO_BIT;
+      }
+
+      this.memory.writeRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS, triggeredInterrupts);
     }
-    */
   }
 
   void reset()
@@ -669,7 +680,7 @@ class CPU
 
     if(this.interruptsEnabled)
     {
-        //this.fireInterrupts();
+        this.fireInterrupts();
     }
 
     /*if (System.nanoTime() - last > 1_000_000_000)
