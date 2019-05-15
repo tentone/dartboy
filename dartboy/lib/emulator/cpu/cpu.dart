@@ -229,7 +229,44 @@ class CPU
   /// Next step in the CPU processing, should be called at a fixed rate.
   void step()
   {
-    execute();
+    this.execute();
+
+    if(this.interruptsEnabled)
+    {
+      this.fireInterrupts();
+    }
+
+    /*if (System.nanoTime() - last > 1_000_000_000)
+    {
+        System.err.println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * cyclesExecutedThisSecond / clockSpeed));
+        last = System.nanoTime();
+        cyclesExecutedThisSecond = 0;
+    }*/
+
+    /*int t = 100000;
+    if (cyclesSinceLastSleep >= t)
+    {
+        executeLock.release();
+        try
+        {
+            if (emulateSpeed)
+            {
+                LockSupport.parkNanos(1_000_000_000L * t / clockSpeed + _last - System.nanoTime());
+            } else
+            {
+                clockSpeed = (int) (1_000_000_000L * t / (System.nanoTime() - _last));
+                sound.updateClockSpeed(clockSpeed);
+            }
+            _last = System.nanoTime();
+        } catch (Exception e)
+        {
+            // #error there is no reason for this to fail, but if it does
+            //        all we can do is printing the stacktrace for debugging
+            e.printStackTrace();
+        }
+        executeLock.acquireUninterruptibly();
+        cyclesSinceLastSleep -= t;
+    }*/
   }
 
   /// Decode the instruction, execute it, update the CPU timer variables, check for interrupts.
@@ -677,42 +714,6 @@ class CPU
             break;
         }
     }
-
-    if(this.interruptsEnabled)
-    {
-        this.fireInterrupts();
-    }
-
-    /*if (System.nanoTime() - last > 1_000_000_000)
-    {
-        System.err.println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * cyclesExecutedThisSecond / clockSpeed));
-        last = System.nanoTime();
-        cyclesExecutedThisSecond = 0;
-    }*/
-
-    /*int t = 100000;
-    if (cyclesSinceLastSleep >= t)
-    {
-        executeLock.release();
-        try
-        {
-            if (emulateSpeed)
-            {
-                LockSupport.parkNanos(1_000_000_000L * t / clockSpeed + _last - System.nanoTime());
-            } else
-            {
-                clockSpeed = (int) (1_000_000_000L * t / (System.nanoTime() - _last));
-                sound.updateClockSpeed(clockSpeed);
-            }
-            _last = System.nanoTime();
-        } catch (Exception e)
-        {
-            // #error there is no reason for this to fail, but if it does
-            //        all we can do is printing the stacktrace for debugging
-            e.printStackTrace();
-        }
-        executeLock.acquireUninterruptibly();
-        cyclesSinceLastSleep -= t;
-    }*/
   }
+
 }

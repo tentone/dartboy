@@ -99,7 +99,8 @@ class Memory
   {
     if(address < CARTRIDGE_END_ADDRESS)
     {
-      throw 'Cannot write data into ROM memory.';
+      //throw 'Cannot write data into ROM memory.';
+      return;
     }
     else
     {

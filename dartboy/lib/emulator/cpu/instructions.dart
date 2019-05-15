@@ -457,11 +457,10 @@ class Instructions
   {
     cpu.interruptsEnabled = true;
 
-    // Note that during the execution of this instruction and the following instruction, maskable interrupts are disabled. we still need to increment div etc
+    // Note that during the execution of this instruction and the following instruction, maskable interrupts are disabled.
     cpu.tick(4);
 
-    //TODO <CHECK CODE HERE>
-    //return _exec();
+    cpu.execute();
   }
 
   static void DI(CPU cpu)
