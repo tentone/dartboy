@@ -114,8 +114,10 @@ class Instructions
 
     cpu.registers.f = 0; // (short) (cpu.registers.f & Registers.F_ZERO);
     int carry = nsp ^ cpu.sp ^ offset;
+
     if((carry & 0x100) != 0) cpu.registers.f |= Registers.F_CARRY;
     if((carry & 0x10) != 0) cpu.registers.f |= Registers.F_HALF_CARRY;
+
     nsp &= 0xffff;
 
     cpu.registers.hl =  nsp;
@@ -337,12 +339,18 @@ class Instructions
     cpu.registers.f = 0; // &= Registers.F_ZERO;?
 
     // we'll be shifting left, so if bit 7 is set we set carry
-    if((cpu.registers.a & 0x80) == 0x80) cpu.registers.f |= Registers.F_CARRY;
+    if((cpu.registers.a & 0x80) == 0x80)
+    {
+      cpu.registers.f |= Registers.F_CARRY;
+    }
     cpu.registers.a <<= 1;
     cpu.registers.a &= 0xff;
 
     // move old cpu.registers.c into bit 0
-    if(carryflag) cpu.registers.a |= 1;
+    if(carryflag)
+    {
+      cpu.registers.a |= 1;
+    }
   }
 
   static void RRA(CPU cpu)
@@ -351,21 +359,30 @@ class Instructions
     cpu.registers.f = 0;
 
     // we'll be shifting right, so if bit 1 is set we set carry
-    if((cpu.registers.a & 0x1) == 0x1) cpu.registers.f |= Registers.F_CARRY;
+    if((cpu.registers.a & 0x1) == 0x1)
+    {
+      cpu.registers.f |= Registers.F_CARRY;
+    }
     cpu.registers.a >>= 1;
 
     // move old cpu.registers.c into bit 7
-    if(carryflag) cpu.registers.a |= 0x80;
+    if(carryflag){cpu.registers.a |= 0x80;}
   }
 
   static void RRCA(CPU cpu)
   {
     cpu.registers.f = 0;//Registers.F_ZERO;
-    if((cpu.registers.a & 0x1) == 0x1) cpu.registers.f |= Registers.F_CARRY;
+    if((cpu.registers.a & 0x1) == 0x1)
+    {
+      cpu.registers.f |= Registers.F_CARRY;
+    }
     cpu.registers.a >>= 1;
 
     // we're shifting circular right, add back bit 7
-    if((cpu.registers.f & Registers.F_CARRY) != 0) cpu.registers.a |= 0x80;
+    if((cpu.registers.f & Registers.F_CARRY) != 0)
+    {
+      cpu.registers.a |= 0x80;
+    }
   }
 
   static void SBC_r(CPU cpu, int op)
@@ -374,14 +391,22 @@ class Instructions
     int reg = cpu.registers.getRegister(op & 0x7) & 0xff;
 
     cpu.registers.f = Registers.F_SUBTRACT;
-    if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0) cpu.registers.f |= Registers.F_HALF_CARRY;
+    if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0)
+    {
+      cpu.registers.f |= Registers.F_HALF_CARRY;
+    }
+
     cpu.registers.a -= reg + carry;
     if(cpu.registers.a < 0)
     {
       cpu.registers.f |= Registers.F_CARRY;
       cpu.registers.a &= 0xFF;
     }
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+
+    if(cpu.registers.a == 0)
+    {
+      cpu.registers.f |= Registers.F_ZERO;
+    }
   }
 
   static void ADC_n(CPU cpu)
@@ -398,7 +423,7 @@ class Instructions
       cpu.registers.f |= Registers.F_CARRY;
       cpu.registers.a &= 0xFF;
     }
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0){cpu.registers.f |= Registers.F_ZERO;}
   }
 
   static void RET(CPU cpu)
@@ -412,14 +437,20 @@ class Instructions
   {
     cpu.registers.a ^= cpu.nextUBytePC();
     cpu.registers.f = 0;
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0)
+    {
+      cpu.registers.f |= Registers.F_ZERO;
+    }
   }
 
   static void AND_n(CPU cpu)
   {
     cpu.registers.a &= cpu.nextUBytePC();
     cpu.registers.f = Registers.F_HALF_CARRY;
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0)
+    {
+      cpu.registers.f |= Registers.F_ZERO;
+    }
   }
 
   static void EI(CPU cpu)
@@ -429,6 +460,7 @@ class Instructions
     // Note that during the execution of this instruction and the following instruction, maskable interrupts are disabled. we still need to increment div etc
     cpu.tick(4);
 
+    //TODO <CHECK CODE HERE>
     //return _exec();
   }
 
@@ -467,11 +499,11 @@ class Instructions
   static void JR_c_e(CPU cpu, int op)
   {
     int e = cpu.nextBytePC();
+
     if(cpu.registers.getFlag((op >> 3) & 0x7))
     {
       cpu.pc += e;
       cpu.clocks += 4;
-      return;
     }
   }
 
@@ -483,7 +515,6 @@ class Instructions
     {
       cpu.pc = npc;
       cpu.clocks += 4;
-      return;
     }
   }
 
@@ -510,13 +541,27 @@ class Instructions
 
     if((cpu.registers.f & Registers.F_SUBTRACT) == 0)
     {
-      if((cpu.registers.f & Registers.F_HALF_CARRY) != 0 || ((tmp & 0x0f) > 9)) tmp += 0x06;
-      if((cpu.registers.f & Registers.F_CARRY) != 0 || ((tmp > 0x9f))) tmp += 0x60;
-    } else
-    {
-      if((cpu.registers.f & Registers.F_HALF_CARRY) != 0) tmp = ((tmp - 6) & 0xff);
-      if((cpu.registers.f & Registers.F_CARRY) != 0) tmp -= 0x60;
+      if((cpu.registers.f & Registers.F_HALF_CARRY) != 0 || ((tmp & 0x0f) > 9))
+      {
+        tmp += 0x06;
+      }
+      if((cpu.registers.f & Registers.F_CARRY) != 0 || ((tmp > 0x9f)))
+      {
+        tmp += 0x60;
+      }
     }
+    else
+    {
+      if((cpu.registers.f & Registers.F_HALF_CARRY) != 0)
+      {
+        tmp = ((tmp - 6) & 0xff);
+      }
+      if((cpu.registers.f & Registers.F_CARRY) != 0)
+      {
+        tmp -= 0x60;
+      }
+    }
+
     cpu.registers.f &= Registers.F_SUBTRACT | Registers.F_CARRY;
 
     if(tmp > 0xff)
@@ -525,7 +570,7 @@ class Instructions
       tmp &= 0xff;
     }
 
-    if(tmp == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(tmp == 0){cpu.registers.f |= Registers.F_ZERO;}
 
     cpu.registers.a = tmp;
   }
@@ -541,7 +586,7 @@ class Instructions
   {
     cpu.registers.a |= n;
     cpu.registers.f = 0;
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0){cpu.registers.f |= Registers.F_ZERO;}
   }
 
   static void OR_r(CPU cpu, int op)
@@ -559,7 +604,7 @@ class Instructions
   {
     cpu.registers.a = (cpu.registers.a ^ cpu.registers.getRegister(op & 0x7)) & 0xff;
     cpu.registers.f = 0;
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0){cpu.registers.f |= Registers.F_ZERO;}
   }
 
   static void AND_r(CPU cpu, int op)
@@ -576,7 +621,7 @@ class Instructions
 
     int d = carry + reg;
     cpu.registers.f = 0;
-    if((((cpu.registers.a & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0) cpu.registers.f |= Registers.F_HALF_CARRY;
+    if((((cpu.registers.a & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0){cpu.registers.f |= Registers.F_HALF_CARRY;}
 
     cpu.registers.a += d;
     if(cpu.registers.a > 0xFF)
@@ -584,20 +629,22 @@ class Instructions
       cpu.registers.f |= Registers.F_CARRY;
       cpu.registers.a &= 0xFF;
     }
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0){cpu.registers.f |= Registers.F_ZERO;}
   }
 
   static void ADD(CPU cpu, int n)
   {
     cpu.registers.f = 0;
-    if((((cpu.registers.a & 0xf) + (n & 0xf)) & 0xF0) != 0) cpu.registers.f |= Registers.F_HALF_CARRY;
+    if((((cpu.registers.a & 0xf) + (n & 0xf)) & 0xF0) != 0){cpu.registers.f |= Registers.F_HALF_CARRY;}
+
     cpu.registers.a += n;
     if(cpu.registers.a > 0xFF)
     {
       cpu.registers.f |= Registers.F_CARRY;
       cpu.registers.a &= 0xFF;
     }
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+
+    if(cpu.registers.a == 0){cpu.registers.f |= Registers.F_ZERO;}
   }
 
   static void ADD_r(CPU cpu, int op)
@@ -615,11 +662,13 @@ class Instructions
   static void SUB(CPU cpu, int n)
   {
     cpu.registers.f = Registers.F_SUBTRACT;
-    if((cpu.registers.a & 0xf) - (n & 0xf) < 0) cpu.registers.f |= Registers.F_HALF_CARRY;
+    if((cpu.registers.a & 0xf) - (n & 0xf) < 0){cpu.registers.f |= Registers.F_HALF_CARRY;}
+
     cpu.registers.a -= n;
-    if((cpu.registers.a & 0xFF00) != 0) cpu.registers.f |= Registers.F_CARRY;
+    if((cpu.registers.a & 0xFF00) != 0){cpu.registers.f |= Registers.F_CARRY;}
+
     cpu.registers.a &= 0xFF;
-    if(cpu.registers.a == 0) cpu.registers.f |= Registers.F_ZERO;
+    if(cpu.registers.a == 0){cpu.registers.f |= Registers.F_ZERO;}
   }
 
   static void SUB_r(CPU cpu, int op)
@@ -641,7 +690,9 @@ class Instructions
     int n = val + carry;
 
     cpu.registers.f = Registers.F_SUBTRACT;
-    if((cpu.registers.a & 0xf) - (val & 0xf) - carry < 0) cpu.registers.f |= Registers.F_HALF_CARRY;
+
+    if((cpu.registers.a & 0xf) - (val & 0xf) - carry < 0){cpu.registers.f |= Registers.F_HALF_CARRY;}
+
     cpu.registers.a -= n;
     if(cpu.registers.a < 0)
     {
@@ -688,9 +739,10 @@ class Instructions
   static void CP(CPU cpu, int n)
   {
     cpu.registers.f = Registers.F_SUBTRACT;
-    if(cpu.registers.a < n) cpu.registers.f |= Registers.F_CARRY;
-    if(cpu.registers.a == n) cpu.registers.f |= Registers.F_ZERO;
-    if((cpu.registers.a & 0xf) < ((cpu.registers.a - n) & 0xf)) cpu.registers.f |= Registers.F_HALF_CARRY;
+
+    if(cpu.registers.a < n){cpu.registers.f |= Registers.F_CARRY;}
+    if(cpu.registers.a == n){cpu.registers.f |= Registers.F_ZERO;}
+    if((cpu.registers.a & 0xf) < ((cpu.registers.a - n) & 0xf)){cpu.registers.f |= Registers.F_HALF_CARRY;}
   }
 
   static void CP_n(CPU cpu)

@@ -35,6 +35,11 @@ class Memory
   Memory(Cartridge cartridge)
   {
     this.data = new List<int>(ADDRESS_SIZE - CARTRIDGE_END_ADDRESS);
+    for(int i = 0; i < this.data.length; i++)
+    {
+      this.data[i] = 0;
+    }
+
     this.cartridge = cartridge;
   }
 
