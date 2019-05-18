@@ -7,7 +7,6 @@ class LCDPainter extends CustomPainter
 {
   LCDPainter();
 
-
   @override
   void paint(Canvas canvas, Size size)
   {
@@ -17,7 +16,7 @@ class LCDPainter extends CustomPainter
     paint.color = Colors.black;
     paint.strokeWidth = 2.0;
 
-    canvas.drawRect(new Rect.fromLTRB(-100, 20, 100, 100), paint);
+    canvas.drawRect(new Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
 
   @override

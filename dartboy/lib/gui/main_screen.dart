@@ -26,6 +26,10 @@ class MainScreenState extends State<MainScreen>
   @override
   Widget build(BuildContext context)
   {
+    RoundedRectangleBorder shape = new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0));
+
+    CircleBorder circleShape = new CircleBorder();
+
     return new Scaffold
     (
       body: new Container
@@ -59,16 +63,16 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new FlatButton(onPressed: null, child: new Text("Up")),
+                        new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Up")),
                         new Row
                         (
                           children: <Widget>
                           [
-                            new FlatButton(onPressed: null, child: new Text("Left")),
-                            new FlatButton(onPressed: null, child: new Text("Right"))
+                            new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Left")),
+                            new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Right"))
                           ]
                         ),
-                        new FlatButton(onPressed: null, child: new Text("Down"))
+                        new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Down"))
                       ],
                     ),
                     // AB
@@ -76,8 +80,8 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new FlatButton(onPressed: null, child: new Text("A")),
-                        new FlatButton(onPressed: null, child: new Text("B"))
+                        new RaisedButton(color: Colors.red, shape: circleShape, onPressed: (){}, child: new Text("A")),
+                        new RaisedButton(color: Colors.green, shape: circleShape, onPressed: (){}, child: new Text("B"))
                       ],
                     ),
                   ],
@@ -89,8 +93,8 @@ class MainScreenState extends State<MainScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>
                   [
-                    new FlatButton(onPressed: null, child: new Text("Start")),
-                    new FlatButton(onPressed: null, child: new Text("Select"))
+                    new RaisedButton(color: Colors.orange, shape: shape, onPressed: (){}, child: new Text("Start")),
+                    new RaisedButton(color: Colors.yellowAccent, shape: shape, onPressed: (){}, child: new Text("Select"))
                   ],
                 ),
                 // Button (Start + Pause + Load)
@@ -100,19 +104,19 @@ class MainScreenState extends State<MainScreen>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>
                   [
-                    new FlatButton(onPressed: ()
+                    new RaisedButton(onPressed: ()
                     {
                       this.widget.emulator.run();
                     }, child: new Text("Run")),
-                    new FlatButton(onPressed: ()
+                    new RaisedButton(onPressed: ()
                     {
                       this.widget.emulator.pause();
                     }, child: new Text("Pause")),
-                    new FlatButton(onPressed: ()
+                    new RaisedButton(onPressed: ()
                     {
                       this.widget.emulator.reset();
                     }, child: new Text("Reset")),
-                    new FlatButton(onPressed: ()
+                    new RaisedButton(onPressed: ()
                     {
                       this.widget.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
                     }, child: new Text("Load"))
