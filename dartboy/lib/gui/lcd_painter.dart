@@ -18,13 +18,13 @@ class LCDPainter extends CustomPainter
 
     var center = Offset(size.width / 2, size.height / 2);
 
-    canvas.drawRect(new Rect.fromCenter(center: center, width: size.width, height: size.height), paint);
-    //canvas.drawCircle(center, 75.0, paint);
+    //canvas.drawRect(new Rect.fromCenter(center: center, width: size.width, height: size.height), paint);
+    canvas.drawCircle(center, 75.0, paint);
   }
 
   @override
   bool shouldRepaint(LCDPainter oldDelegate)
   {
-    return false;
+    return true;
   }
 }
