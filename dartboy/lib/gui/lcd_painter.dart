@@ -16,7 +16,10 @@ class LCDPainter extends CustomPainter
     paint.color = Colors.black;
     paint.strokeWidth = 2.0;
 
-    canvas.drawRect(new Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    var center = Offset(size.width / 2, size.height / 2);
+
+    canvas.drawRect(new Rect.fromCenter(center: center, width: size.width, height: size.height), paint);
+    //canvas.drawCircle(center, 75.0, paint);
   }
 
   @override
