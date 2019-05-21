@@ -14,7 +14,6 @@ class LCDPainter extends CustomPainter
     var paint = new Paint();
     paint.style = PaintingStyle.fill;
     paint.color = Colors.black;
-    paint.strokeWidth = 2.0;
 
     var center = Offset(size.width / 2, size.height / 2);
 

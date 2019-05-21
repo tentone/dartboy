@@ -84,6 +84,7 @@ class Emulator
     }
 
     this.state = EmulatorState.RUNNING;
+
     this.timer = new Timer.periodic(const Duration(microseconds: 1), (Timer t)
     {
       if(this.state != EmulatorState.RUNNING)

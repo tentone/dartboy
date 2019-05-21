@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 /// Stores the cartridge information and data.
 ///
 /// Also manages the cartridge type and is responsible for the memory bank switching.
@@ -20,10 +22,20 @@ class Cartridge
   /// (Check page 12 of the GB CPU manual for details)
   int romType;
 
+  /// Indicates how many rom banks there are available.
+  ///
+  /// Each ROM bank has 32KB in size
+  int romBanks;
+
   /// In cartridge RAM configuration. Read from the address 0x149.
   ///
   /// (Check page 12 of the GB CPU manual for details)
   int ramType;
+
+  /// Indicates how many RAM banks are available in the cartridge.
+  ///
+  /// Each bank has 8KBytes in size.
+  int ramBanks;
 
   /// In CGB cartridges the upper bit is used to enable CGB functions. This is required, otherwise the CGB switches itself into Non-CGB-Mode.
   ///
@@ -43,6 +55,49 @@ class Cartridge
     this.ramType = this.readByte(0x149);
     this.gameboyType = this.readByte(0x143) != 0 ? GameboyType.COLOR : GameboyType.CLASSIC;
     this.superGameboy = this.readByte(0x146) == 0x3;
+  }
+
+  /// Read the RAM and ROM bank size of the cartridge.
+  void readBankSize()
+  {
+    if(this.romType == 52)
+    {
+      this.romBanks = 72;
+    }
+    else if(this.romType == 53)
+    {
+      this.romBanks = 80;
+    }
+    else if(this.romType == 54)
+    {
+      this.romBanks = 96;
+    }
+    else
+    {
+      this.romBanks = (pow(2, this.romType + 1)).toInt();
+    }
+
+    if(this.ramType == 0)
+    {
+      this.ramBanks = 0;
+    }
+    else if(this.ramType == 1)
+    {
+      this.ramBanks = 1;
+    }
+    else if(this.ramType == 2)
+    {
+      this.ramBanks = 1;
+    }
+    else if(this.ramType == 3)
+    {
+      this.ramBanks = 4;
+    }
+    else if(this.ramType == 4)
+    {
+      this.ramBanks = 16;
+    }
+
   }
 
   /// Read a range of bytes from the cartridge.
