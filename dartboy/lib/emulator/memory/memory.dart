@@ -24,7 +24,7 @@ class Memory
   static const ADDRESS_SIZE = 65536;
 
   /// Cartridge end address
-  static const CARTRIDGE_END_ADDRESS = 0x8000;
+  static const CARTRIDGE_ROM_END = 0x8000;
 
   /// Cartridge loaded into the system
   Cartridge cartridge;
@@ -34,7 +34,7 @@ class Memory
 
   Memory(Cartridge cartridge)
   {
-    this.data = new List<int>(ADDRESS_SIZE - CARTRIDGE_END_ADDRESS);
+    this.data = new List<int>(ADDRESS_SIZE - CARTRIDGE_ROM_END);
     for(int i = 0; i < this.data.length; i++)
     {
       this.data[i] = 0;
@@ -97,14 +97,14 @@ class Memory
   /// Write a byte of data into memory.
   void writeByte(int address, int value)
   {
-    if(address < CARTRIDGE_END_ADDRESS)
+    if(address < CARTRIDGE_ROM_END)
     {
       //throw 'Cannot write data into ROM memory.';
       return;
     }
     else
     {
-      this.data[address - CARTRIDGE_END_ADDRESS] = value & 0xFF;
+      this.data[address - CARTRIDGE_ROM_END] = value & 0xFF;
     }
   }
 
@@ -125,13 +125,13 @@ class Memory
   /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
   int readByte(int address)
   {
-    if(address < CARTRIDGE_END_ADDRESS)
+    if(address < CARTRIDGE_ROM_END)
     {
       return this.cartridge.readByte(address);
     }
     else
     {
-      return this.data[address - CARTRIDGE_END_ADDRESS];
+      return this.data[address - CARTRIDGE_ROM_END];
     }
   }
 
@@ -140,13 +140,13 @@ class Memory
   /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
   int readWord(int address)
   {
-    if(address < CARTRIDGE_END_ADDRESS)
+    if(address < CARTRIDGE_ROM_END)
     {
-      return this.cartridge.readWord(address);
+      return this.cartridge.readByte(address + 1) << 8 + this.cartridge.readByte(address);
     }
     else
     {
-      return (this.data[address + 1 - CARTRIDGE_END_ADDRESS] << 8) + this.data[address - CARTRIDGE_END_ADDRESS];
+      return this.readByte(address + 1) << 8 + this.readByte(address);
     }
   }
 }

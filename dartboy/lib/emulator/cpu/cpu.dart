@@ -1,8 +1,8 @@
-import 'registers.dart';
-import 'instructions.dart';
-import 'package:dartboy/emulator/cartridge/cartridge.dart';
+import '../cartridge/cartridge.dart';
 import '../memory/memory.dart';
 import '../memory/memory_registers.dart';
+import 'registers.dart';
+import 'instructions.dart';
 
 /// CPU class is responsible for the instruction execution, interrupts and timing of the system.
 ///
