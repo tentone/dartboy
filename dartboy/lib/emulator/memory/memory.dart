@@ -1,5 +1,5 @@
 
-import '../cartridge.dart';
+import 'package:dartboy/emulator/cartridge/cartridge.dart';
 
 /// Implements the GBC memory model
 ///

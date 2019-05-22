@@ -55,20 +55,54 @@ class Cartridge
     this.ramType = this.readByte(0x149);
     this.gameboyType = this.readByte(0x143) != 0 ? GameboyType.COLOR : GameboyType.CLASSIC;
     this.superGameboy = this.readByte(0x146) == 0x3;
+
+    this.setBankSizeRAM();
+    this.setBankSizeROM();
   }
 
-  /// Read the RAM and ROM bank size of the cartridge.
-  void readBankSize()
+  /// Create a the memory controller of the cartridge.
+  void createController()
   {
-    if(this.romType == 52)
+    if(this.type == CartridgeType.ROM)
+    {
+      //TODO <JUST MEMORY>
+    }
+    else if(this.type == CartridgeType.MBC1 || this.type == CartridgeType.MBC1_RAM || this.type == CartridgeType.MBC1_RAM_BATT)
+    {
+      //TODO <MBC1>
+    }
+    else if(this.type == CartridgeType.MBC2 || this.type == CartridgeType.MBC2_BATT)
+    {
+      //TODO <MBC2>
+    }
+    else if(this.type == CartridgeType.MBC3 || this.type == CartridgeType.MBC3_RAM || this.type == CartridgeType.MBC3_RAM_BATT || this.type == CartridgeType.MBC3_TIMER_BATT || this.type == CartridgeType.MBC3_TIMER_RAM_BATT)
+    {
+      //TODO <MBC3>
+    }
+    else if(this.type == CartridgeType.MBC5 || this.type == CartridgeType.MBC5_RAM || this.type == CartridgeType.MBC5_RAM_BATT || this.type == CartridgeType.MBC5_RUMBLE || this.type == CartridgeType.MBC5_RUMBLE_SRAM || this.type == CartridgeType.MBC5_RUMBLE_SRAM_BATT)
+    {
+      //TODO <MBC5>
+    }
+  }
+
+  /// Checks if the cartridge has battery.
+  bool hasBattery()
+  {
+    return this.type == CartridgeType.ROM_RAM_BATT || this.type == CartridgeType.ROM_MMM01_SRAM_BATT || this.type == CartridgeType.MBC1_RAM_BATT || this.type == CartridgeType.MBC3_TIMER_BATT || this.type == CartridgeType.MBC3_TIMER_RAM_BATT || this.type == CartridgeType.MBC3_RAM_BATT || this.type == CartridgeType.MBC5_RAM_BATT || this.type == CartridgeType.MBC5_RUMBLE_SRAM_BATT;
+  }
+
+  /// Set how many ROM banks exist based on the ROM type.
+  void setBankSizeROM()
+  {
+    if (this.romType == 52)
     {
       this.romBanks = 72;
     }
-    else if(this.romType == 53)
+    else if (this.romType == 53)
     {
       this.romBanks = 80;
     }
-    else if(this.romType == 54)
+    else if (this.romType == 54)
     {
       this.romBanks = 96;
     }
@@ -76,7 +110,11 @@ class Cartridge
     {
       this.romBanks = (pow(2, this.romType + 1)).toInt();
     }
+  }
 
+  /// Set how many RAM banks exist in the cartridge based on the RAM type.
+  void setBankSizeRAM()
+  {
     if(this.ramType == 0)
     {
       this.ramBanks = 0;
@@ -97,7 +135,6 @@ class Cartridge
     {
       this.ramBanks = 16;
     }
-
   }
 
   /// Read a range of bytes from the cartridge.

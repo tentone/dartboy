@@ -1,6 +1,6 @@
 import 'registers.dart';
 import 'instructions.dart';
-import '../cartridge.dart';
+import 'package:dartboy/emulator/cartridge/cartridge.dart';
 import '../memory/memory.dart';
 import '../memory/memory_registers.dart';
 
