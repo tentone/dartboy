@@ -47,7 +47,7 @@ class Registers
     if(r == 0x3) {return e;}
     if(r == 0x4) {return h;}
     if(r == 0x5) {return l;}
-    if(r == 0x6) {return cpu.memory.readByte((h << 8) | l);}
+    if(r == 0x6) {return cpu.mmu.readByte((h << 8) | l);}
 
     throw new Exception('Unknown register address getRegister().');
   }
@@ -76,7 +76,7 @@ class Registers
     else if(r == 0x3) {e = value;}
     else if(r == 0x4) {h = value;}
     else if(r == 0x5) {l = value;}
-    else if(r == 0x6) {cpu.memory.writeByte((h << 8) | l, value);}
+    else if(r == 0x6) {cpu.mmu.writeByte((h << 8) | l, value);}
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).

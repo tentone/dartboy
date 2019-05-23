@@ -61,10 +61,10 @@ class Emulator
   void printCartridgeInfo()
   {
     print('Catridge info');
-    print('Type: ' + this.cpu.memory.cartridge.type.toString());
-    print('Name: ' + this.cpu.memory.cartridge.name);
-    print('GB: ' + this.cpu.memory.cartridge.gameboyType.toString());
-    print('SGB: ' + this.cpu.memory.cartridge.superGameboy.toString());
+    print('Type: ' + this.cpu.mmu.cartridge.type.toString());
+    print('Name: ' + this.cpu.mmu.cartridge.name);
+    print('GB: ' + this.cpu.mmu.cartridge.gameboyType.toString());
+    print('SGB: ' + this.cpu.mmu.cartridge.superGameboy.toString());
   }
 
   /// Reset the emulator, stop running the code and unload the cartridge

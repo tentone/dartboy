@@ -12,10 +12,16 @@ class CPU
   /// Frequency frequency (hz)
   static const int FREQUENCY = 4194304;
 
+  /// Cartridge memory
   Cartridge cartridge;
 
+  /// On board game boy memory
   Memory memory;
 
+  /// Memory controll unit decides from where the addresses are read and written to
+  Memory mmu;
+
+  /// Internal CPU registers
   Registers registers;
 
   /// Whether the CPU is currently halted if so, it will still operate at 4MHz, but will not execute any instructions until an interrupt is cyclesExecutedThisSecond.
@@ -54,7 +60,7 @@ class CPU
   {
     this.cartridge = cartridge;
     this.registers = new Registers(this);
-    this.memory = new Memory(this.cartridge);
+    this.mmu = new Memory(this.cartridge);
     this.reset();
   }
 
@@ -80,22 +86,22 @@ class CPU
   int getByte(int address)
   {
     this.tick(4);
-    return this.memory.readByte(address);
+    return this.mmu.readByte(address);
   }
 
   /// Write a byte into memory (takes 4 clocks)
   void setByte(int address, int value)
   {
     this.tick(4);
-    this.memory.writeByte(address, value);
+    this.mmu.writeByte(address, value);
   }
 
   /// Push word into the temporary stack and update the stack pointer
   void pushWordSP(int value)
   {
     this.sp -= 2;
-    this.memory.writeByte(this.sp, value & 0x00FF);
-    this.memory.writeByte(this.sp + 1, (value & 0xFF00) >> 8);
+    this.mmu.writeByte(this.sp, value & 0x00FF);
+    this.mmu.writeByte(this.sp + 1, (value & 0xFF00) >> 8);
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode.
@@ -156,7 +162,7 @@ class CPU
     // Auxiliary method to check if an interruption was triggered.
     bool interruptTriggered(int interrupt)
     {
-      return (this.memory.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) & this.memory.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS) & interrupt) != 0;
+      return (this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) & this.mmu.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS) & interrupt) != 0;
     }
 
     // If interrupts are disabled (via the DI instruction), ignore this call
@@ -166,10 +172,10 @@ class CPU
     }
 
     // Flag of which interrupts should be triggered
-    int triggeredInterrupts = this.memory.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS);
+    int triggeredInterrupts = this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS);
 
     // Which interrupts the program is actually interested in, these are the ones we will fire
-    int enabledInterrupts =  this.memory.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS);
+    int enabledInterrupts =  this.mmu.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS);
 
     // If this is nonzero, then some interrupt that we are checking for was triggered
     if((triggeredInterrupts & enabledInterrupts) != 0)
@@ -206,14 +212,14 @@ class CPU
         triggeredInterrupts &= ~MemoryRegisters.HILO_BIT;
       }
 
-      this.memory.writeRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS, triggeredInterrupts);
+      this.mmu.writeRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS, triggeredInterrupts);
     }
   }
 
   void reset()
   {
     this.registers.reset();
-    this.memory.reset();
+    this.mmu.reset();
 
     this.sp = 0xFFFE;
     this.pc = 0x100;
@@ -274,7 +280,7 @@ class CPU
   {
     if(this.halted)
     {
-      if(this.memory.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) == 0)
+      if(this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) == 0)
       {
         this.clocks += 4;
       }
@@ -282,7 +288,7 @@ class CPU
       this.halted = false;
     }
 
-    int op = this.memory.readByte(this.pc++);
+    int op = this.mmu.readByte(this.pc++);
 
     if(op == null)
     {
