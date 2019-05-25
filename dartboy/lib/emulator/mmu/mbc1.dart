@@ -1,15 +1,9 @@
 import '../../emulator/cartridge/cartridge.dart';
-import '../../emulator/memory/memory.dart';
-
 import 'mmu.dart';
 
-class MBC1 implements MMU
+class MBC1 extends MMU
 {
-  MBC1(Memory memory, Cartridge cartridge)
-  {
-    super(memory, cartridge);
-
-  }
+  MBC1(Cartridge cartridge) : super(cartridge);
 
   @override
   int readByte(int address)
@@ -22,5 +16,4 @@ class MBC1 implements MMU
   {
     // TODO: implement writeByte
   }
-
 }

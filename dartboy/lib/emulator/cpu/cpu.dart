@@ -1,6 +1,6 @@
 import '../cartridge/cartridge.dart';
-import '../memory/memory.dart';
 import '../memory/memory_registers.dart';
+import '../mmu/mmu.dart';
 import 'registers.dart';
 import 'instructions.dart';
 
@@ -12,14 +12,8 @@ class CPU
   /// Frequency frequency (hz)
   static const int FREQUENCY = 4194304;
 
-  /// Cartridge memory
-  Cartridge cartridge;
-
-  /// On board game boy memory
-  Memory memory;
-
   /// Memory controll unit decides from where the addresses are read and written to
-  Memory mmu;
+  MMU mmu;
 
   /// Internal CPU registers
   Registers registers;
@@ -58,9 +52,10 @@ class CPU
 
   CPU(Cartridge cartridge)
   {
-    this.cartridge = cartridge;
     this.registers = new Registers(this);
-    this.mmu = new Memory(this.cartridge);
+
+    this.mmu = new MMU(cartridge);
+
     this.reset();
   }
 
