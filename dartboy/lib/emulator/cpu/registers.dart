@@ -120,20 +120,16 @@ class Registers
 
   ///Checks a condition from an opcode.
   ///Returns a boolean based off the result of the conditional.
-  bool getFlag(int which)
+  bool getFlag(int flag)
   {
+    flag &= 0x7;
+
     // Condition code is in last 3 bits
-    switch (which & 0x7)
-    {
-      case 0x4:
-      return (f & F_ZERO) == 0;
-      case 0x5:
-      return (f & F_ZERO) != 0;
-      case 0x6:
-      return (f & F_CARRY) == 0;
-      case 0x7:
-      return (f & F_CARRY) != 0;
-    }
+    if(flag == 0x4) {return (f & F_ZERO) == 0;}
+    if(flag == 0x5) {return (f & F_ZERO) != 0;}
+    if(flag == 0x6) {return (f & F_CARRY) == 0;}
+    if(flag == 0x7) {return (f & F_CARRY) != 0;}
+
     return false;
   }
 

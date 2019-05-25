@@ -1,12 +1,17 @@
-
 import 'dart:math';
+
+import '../mmu/mmu.dart';
+import '../mmu/mbc1.dart';
+import '../mmu/mbc2.dart';
+import '../mmu/mbc3.dart';
+import '../mmu/mbc5.dart';
 
 /// Stores the cartridge information and data.
 ///
 /// Also manages the cartridge type and is responsible for the memory bank switching.
 class Cartridge
 {
-  /// Data read from the cartridge.
+  /// Data stored in the cartridge read from the rom file
   List<int> data;
 
   /// Cartridge name read from the
@@ -61,27 +66,29 @@ class Cartridge
   }
 
   /// Create a the memory controller of the cartridge.
-  void createController()
+  MMU createController()
   {
+    MMU mmu;
+
     if(this.type == CartridgeType.ROM)
     {
-      //TODO <JUST MEMORY>
+      return new MMU(this);
     }
     else if(this.type == CartridgeType.MBC1 || this.type == CartridgeType.MBC1_RAM || this.type == CartridgeType.MBC1_RAM_BATT)
     {
-      //TODO <MBC1>
+      return new MBC1(this);
     }
     else if(this.type == CartridgeType.MBC2 || this.type == CartridgeType.MBC2_BATT)
     {
-      //TODO <MBC2>
+      return new MBC2(this);
     }
     else if(this.type == CartridgeType.MBC3 || this.type == CartridgeType.MBC3_RAM || this.type == CartridgeType.MBC3_RAM_BATT || this.type == CartridgeType.MBC3_TIMER_BATT || this.type == CartridgeType.MBC3_TIMER_RAM_BATT)
     {
-      //TODO <MBC3>
+      return new MBC3(this);
     }
     else if(this.type == CartridgeType.MBC5 || this.type == CartridgeType.MBC5_RAM || this.type == CartridgeType.MBC5_RAM_BATT || this.type == CartridgeType.MBC5_RUMBLE || this.type == CartridgeType.MBC5_RUMBLE_SRAM || this.type == CartridgeType.MBC5_RUMBLE_SRAM_BATT)
     {
-      //TODO <MBC5>
+      return new MBC5(this);
     }
   }
 

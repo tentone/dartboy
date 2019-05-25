@@ -1,4 +1,3 @@
-
 import '../../emulator/cartridge/cartridge.dart';
 import '../../emulator/memory/memory.dart';
 
@@ -6,7 +5,24 @@ import '../../emulator/memory/memory.dart';
 ///
 /// Depending on the cartridge type it may select different data sources and switch memory banks as required.
 ///
-/// This is the base implementation that considers only a sing ROM bank in the cartridge and a access to the system memory.
+/// This is the base implementation that considers only a single ROM bank in the cartridge and a access to the system memory.
+///
+/// Interrupt Enable Register FF80 - FFFF
+/// Internal RAM FF4C - FF80
+/// Empty but unusable for I/O FF4C - FF80
+/// I/O ports FEA0 - FF00 - FF4C
+/// Empty but unusable for I/O FEA0 - FF00
+/// Sprite Attrib Memory (OAM) FE00 - FEA0
+/// Echo of 8kB Internal RAM E000 - FE00
+/// 8kB Internal RAM C000 - E000
+/// 8kB switchable RAM bank A000 - C000
+/// 8kB Video RAM 8000 - A000
+/// 16kB switchable ROM bank 4000 - 8000 (32kB Cartridge)
+/// 16kB ROM bank #0 0000 - 4000
+///
+/// From address 0x0000 to index 0x00FF is the bootstrap code.
+///
+/// Address 0x100 until index 0x3FFF include the contents of the cartridge (depending on the cartridge size this memory bank can change totally)
 class MMU
 {
   /// Total memory addressable size
@@ -33,7 +49,8 @@ class MMU
   {
     if(address < CARTRIDGE_ROM_END)
     {
-      throw 'Cannot write data into ROM memory.';
+      //throw 'Cannot write data into ROM memory.';
+      return;
     }
     else
     {
@@ -51,21 +68,6 @@ class MMU
     else
     {
       return this.memory.readByte(address - CARTRIDGE_ROM_END);
-    }
-  }
-
-  /// Read 16 bits from the memory.
-  ///
-  /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
-  int readWord(int address)
-  {
-    if(address < CARTRIDGE_ROM_END)
-    {
-      return this.cartridge.readByte(address + 1) << 8 + this.cartridge.readByte(address);
-    }
-    else
-    {
-      return this.memory.readByte(address - CARTRIDGE_ROM_END + 1) << 8 + this.memory.readByte(address - CARTRIDGE_ROM_END);
     }
   }
 

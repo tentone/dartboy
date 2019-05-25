@@ -43,6 +43,8 @@ class MainScreenState extends State<MainScreen>
             // LCD
             new Expanded(child: new CustomPaint
             (
+              isComplex: true,
+              willChange: true,
               painter: new LCDPainter(),
             )),
             new Expanded(child: new Column
@@ -63,7 +65,7 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Up")),
+                        new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){print("UP");}, child: new Text("Up")),
                         new Row
                         (
                           children: <Widget>
