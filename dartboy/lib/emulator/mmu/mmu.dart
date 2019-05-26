@@ -1,5 +1,6 @@
 import '../../emulator/cartridge/cartridge.dart';
 import '../../emulator/memory/memory.dart';
+import '../../emulator/memory/memory_addresses.dart';
 
 /// The MMU (memory management unit) is used to access memory.
 ///
@@ -7,29 +8,12 @@ import '../../emulator/memory/memory.dart';
 ///
 /// This is the base implementation that considers only a single ROM bank in the cartridge and a access to the system memory.
 ///
-/// Interrupt Enable Register FF80 - FFFF
-/// Internal RAM FF4C - FF80
-/// Empty but unusable for I/O FF4C - FF80
-/// I/O ports FEA0 - FF00 - FF4C
-/// Empty but unusable for I/O FEA0 - FF00
-/// Sprite Attrib Memory (OAM) FE00 - FEA0
-/// Echo of 8kB Internal RAM E000 - FE00
-/// 8kB Internal RAM C000 - E000
-/// 8kB switchable RAM bank A000 - C000
-/// 8kB Video RAM 8000 - A000
-/// 16kB switchable ROM bank 4000 - 8000 (32kB Cartridge)
-/// 16kB ROM bank #0 0000 - 4000
-///
 /// From address 0x0000 to index 0x00FF is the bootstrap code.
 ///
 /// Address 0x100 until index 0x3FFF include the contents of the cartridge (depending on the cartridge size this memory bank can change totally)
 class MMU
 {
-  /// Total memory addressable size
-  static const ADDRESS_SIZE = 65536;
 
-  /// Cartridge end address
-  static const CARTRIDGE_ROM_END = 0x8000;
 
   /// Cartridge memory (contains booth RAM and ROM memory)
   Cartridge cartridge;
@@ -41,33 +25,33 @@ class MMU
   {
     this.cartridge = cartridge;
 
-    this.memory = new Memory(ADDRESS_SIZE - CARTRIDGE_ROM_END);
+    this.memory = new Memory(MemoryAddresses.ADDRESS_SIZE - MemoryAddresses.CARTRIDGE_ROM_END);
   }
 
   /// Write a byte into memory
   void writeByte(int address, int value)
   {
-    if(address < CARTRIDGE_ROM_END)
+    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
       //throw 'Cannot write data into ROM memory.';
       return;
     }
     else
     {
-      this.memory.writeByte(address - CARTRIDGE_ROM_END, value);
+      this.memory.writeByte(address - MemoryAddresses.CARTRIDGE_ROM_END, value);
     }
   }
 
   /// Read a byte from memory
   int readByte(int address)
   {
-    if(address < CARTRIDGE_ROM_END)
+    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
       return this.cartridge.readByte(address);
     }
     else
     {
-      return this.memory.readByte(address - CARTRIDGE_ROM_END);
+      return this.memory.readByte(address - MemoryAddresses.CARTRIDGE_ROM_END);
     }
   }
 
