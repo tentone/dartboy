@@ -32,15 +32,25 @@ class MemoryAddresses
   static const SWITCHABLE_RAM_END = 0xC000;
 
   // 8Kb Internal RAM
-  static const INTERNAL_RAM_START = 0xC000;
-  static const INTERNAL_RAM_END = 0xE000;
-  static const INTERNAL_RAM_ECHO_START = 0xE000;
-  static const INTERNAL_RAM_ECHO_END = 0xFE00;
+  static const INTERNAL_RAM_A_START = 0xC000;
+  static const INTERNAL_RAM_A_END = 0xE000;
+  static const INTERNAL_RAM_A_ECHO_START = 0xE000;
+  static const INTERNAL_RAM_A_ECHO_END = 0xFE00;
 
   // Sprite attribute
   static const OAM_START = 0xFE00;
   static const OAM_END = 0xFEA0;
 
+  // IO ports
+  static const IO_START = 0xFF00;
+  static const IO_END = 0xFF4C;
 
+  // RAM
+  static const INTERNAL_RAM_B_START = 0xFF4C;
+  static const INTERNAL_RAM_B_END = 0xFF80;
+
+  // Interrupt registers
+  static const INTERRUPT_REGISTERS_START = 0xFF80;
+  static const INTERRUPT_REGISTERS_END = 0xFFFF;
 }
 
