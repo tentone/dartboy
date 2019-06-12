@@ -1,3 +1,5 @@
+
+/// Static class stores the IO related memory addresses.
 class IO
 {
   static const int KEY_A = 0;
