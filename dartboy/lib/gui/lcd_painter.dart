@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -15,27 +16,32 @@ class LCDPainter extends CustomPainter
   @override
   void paint(Canvas canvas, Size size)
   {
-
-    Paint paint = new Paint();
-    paint.style = PaintingStyle.fill;
-    paint.color = Colors.black;
-
-    Offset center = new Offset(size.width / 2, size.height / 2);
+    //Paint paint = new Paint();
+    //paint.style = PaintingStyle.fill;
+    //paint.color = Colors.blue;
 
     //Clear rect
-    canvas.drawRect(new Rect.fromCenter(center: center, width: LCD_WIDTH.toDouble(), height: LCD_HEIGHT.toDouble()), paint);
+    Offset center = new Offset(size.width / 2, size.height / 2);
+    //canvas.drawRect(new Rect.fromCenter(center: center, width: LCD_WIDTH.toDouble(), height: LCD_HEIGHT.toDouble()), paint);
 
     // Points test
-    paint.color = Colors.red;
+    Paint linePaint = new Paint();
+    linePaint.style = PaintingStyle.stroke;
+    linePaint.strokeWidth = 1.0;
+    linePaint.color = Color.fromRGBO(255, 0, 0, 1.0);
 
-    List<Offset> points = List<Offset>();
+    List<double> points = new List<double>();
 
-    for(int i = 0; i < LCD_WIDTH; i++)
+    for(int x = 0; x < LCD_WIDTH; x++)
     {
-      points.add(new Offset(i.toDouble(), 0));
+      for(int y = 0; y < LCD_HEIGHT; y++)
+      {
+        points.add(x.toDouble());
+        points.add(y.toDouble());
+      }
     }
 
-    canvas.drawPoints(PointMode.points, points, paint);
+    canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), linePaint);
   }
 
   @override

@@ -13,8 +13,6 @@ import '../../emulator/memory/memory_addresses.dart';
 /// Address 0x100 until index 0x3FFF include the contents of the cartridge (depending on the cartridge size this memory bank can change totally)
 class MMU
 {
-
-
   /// Cartridge memory (contains booth RAM and ROM memory)
   Cartridge cartridge;
 
