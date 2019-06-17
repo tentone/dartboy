@@ -7,7 +7,7 @@
 /// I/O ports FEA0 - FF00 - FF4C
 /// Empty but unusable for I/O FEA0 - FF00
 /// Sprite attribute Memory (OAM) FE00 - FEA0
-/// Echo of 8kB Internal RAM E000 - FE00
+/// Echo of 8kB Internal RAM E000 - FE00 (E000-FE00 appear to access the internal RAM the same as C000-DE00)
 /// 8kB Internal RAM C000 - E000
 /// 8kB switchable RAM bank A000 - C000
 /// 8kB Video RAM 8000 - A000
@@ -32,12 +32,12 @@ class MemoryAddresses
   static const SWITCHABLE_RAM_END = 0xC000;
 
   // 8KB Internal RAM A
-  static const INTERNAL_RAM_A_START = 0xC000;
-  static const INTERNAL_RAM_A_END = 0xE000;
+  static const RAM_A_START = 0xC000;
+  static const RAM_A_END = 0xE000;
 
   // 8KB RAM A echo
-  static const INTERNAL_RAM_A_ECHO_START = 0xE000;
-  static const INTERNAL_RAM_A_ECHO_END = 0xFE00;
+  static const RAM_A_ECHO_START = 0xE000;
+  static const RAM_A_ECHO_END = 0xFE00;
 
   // Sprite attribute
   static const OAM_START = 0xFE00;
@@ -56,8 +56,8 @@ class MemoryAddresses
   static const EMPTY_B_END = 0xFF80;
 
   // Internal RAM B
-  static const INTERNAL_RAM_B_START = 0xFF80;
-  static const INTERNAL_RAM_B_END = 0xFFFF;
+  static const RAM_B_START = 0xFF80;
+  static const RAM_B_END = 0xFFFF;
 
   // Interrupt enable register
   static const INTERRUPT_ENABLE_REGISTER = 0xFFFF;

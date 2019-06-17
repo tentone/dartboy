@@ -28,24 +28,27 @@ class MMU
     this.memory = new Memory(MemoryAddresses.ADDRESS_SIZE - MemoryAddresses.CARTRIDGE_ROM_END);
   }
 
-
-
-  /// Write a byte into memory
+  /// Write a byte into memory address
   void writeByte(int address, int value)
   {
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      throw 'Cannot write data into ROM memory.';
-      //return;
+      //throw 'Cannot write data into ROM memory.';
+      return;
     }
     else
     {
+      // Echo of RAM A
+      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+      {
+        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
+      }
 
       this.memory.writeByte(address - MemoryAddresses.CARTRIDGE_ROM_END, value);
     }
   }
 
-  /// Read a byte from memory
+  /// Read a byte from memory address
   int readByte(int address)
   {
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
@@ -54,17 +57,27 @@ class MMU
     }
     else
     {
+      // Echo of RAM A
+      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+      {
+        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
+      }
+
       return this.memory.readByte(address - MemoryAddresses.CARTRIDGE_ROM_END);
     }
   }
 
   /// Read a register value, register values are mapped between FF00 to FFFF
+  ///
+  /// Meaning of the values is stored in the MemoryRegisters class
   int readRegisterByte(int address)
   {
     return this.readByte(0xFF00 + address);
   }
 
   /// Read a register value, register values are mapped between FF00 to FFFF
+  ///
+  /// Meaning of the values is stored in the MemoryRegisters class
   void writeRegisterByte(int address, int value)
   {
     this.writeByte(0xFF00 + address, value);
