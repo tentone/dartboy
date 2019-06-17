@@ -6,16 +6,6 @@
 
 
 
-### Todo
-
-- ROM
-- CPU
-- PPU
-- Sound
-- RAM
-
-
-
 ### Setup Flutter Desktop
 
 - In Windows install visual studio with C++ support and make sure that the command `msbuild` works properly and that `vcvars64.bat` is in the path. (If visual studio is installed but `msbuild` is not found, add it to your path).
@@ -36,26 +26,9 @@ flutter devices
 
 
 
-### ROM
-
-TODO
-
-
-
-### CPU
-
-TODO
-
-
-
-### PPU
-
-TODO
-
-
-
 ### Resources
 
+- [GameBoy CPU Manual](http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf)
 - [Flutter desktop quick start guide](https://github.com/google/flutter-desktop-embedding/blob/master/Quick-Start.md)
 - [Flutter desktop embedding example](https://github.com/google/flutter-desktop-embedding)
 - [Flutter desktop plugins (file chooser)](https://github.com/google/flutter-desktop-embedding/tree/master/plugins)

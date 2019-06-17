@@ -13,10 +13,12 @@ import '../../emulator/memory/memory_addresses.dart';
 /// Address 0x100 until index 0x3FFF include the contents of the cartridge (depending on the cartridge size this memory bank can change totally)
 class MMU
 {
-  /// Cartridge memory (contains booth RAM and ROM memory)
+  /// Cartridge memory (contains booth RAM and ROM memory).
+  ///
+  /// Cartridge memory composes the lower 32kB of memory from (0x0000 to 0x8000).
   Cartridge cartridge;
 
-  /// On board game boy memory
+  /// On board game boy memory (after the cartridge memory).
   Memory memory;
 
   MMU(Cartridge cartridge)
@@ -26,16 +28,19 @@ class MMU
     this.memory = new Memory(MemoryAddresses.ADDRESS_SIZE - MemoryAddresses.CARTRIDGE_ROM_END);
   }
 
+
+
   /// Write a byte into memory
   void writeByte(int address, int value)
   {
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      //throw 'Cannot write data into ROM memory.';
-      return;
+      throw 'Cannot write data into ROM memory.';
+      //return;
     }
     else
     {
+
       this.memory.writeByte(address - MemoryAddresses.CARTRIDGE_ROM_END, value);
     }
   }
