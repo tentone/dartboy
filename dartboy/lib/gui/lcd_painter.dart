@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -11,37 +10,32 @@ class LCDPainter extends CustomPainter
 
   static const int LCD_WIDTH = 160;
   static const int LCD_HEIGHT = 144;
+
   static const double LCD_RATIO = LCD_WIDTH / LCD_HEIGHT;
+
+  int time = 0;
 
   @override
   void paint(Canvas canvas, Size size)
   {
-    //Paint paint = new Paint();
-    //paint.style = PaintingStyle.fill;
-    //paint.color = Colors.blue;
-
-    //Clear rect
-    Offset center = new Offset(size.width / 2, size.height / 2);
-    //canvas.drawRect(new Rect.fromCenter(center: center, width: LCD_WIDTH.toDouble(), height: LCD_HEIGHT.toDouble()), paint);
-
-    // Points test
-    Paint linePaint = new Paint();
-    linePaint.style = PaintingStyle.stroke;
-    linePaint.strokeWidth = 1.0;
-    linePaint.color = Color.fromRGBO(255, 0, 0, 1.0);
-
-    List<double> points = new List<double>();
+    time++;
 
     for(int x = 0; x < LCD_WIDTH; x++)
     {
       for(int y = 0; y < LCD_HEIGHT; y++)
       {
-        points.add(x.toDouble());
-        points.add(y.toDouble());
+        Paint color = new Paint();
+        color.style = PaintingStyle.stroke;
+        color.strokeWidth = 1.0;
+        color.color = Color.fromRGBO(((x + time).toDouble() / LCD_WIDTH.toDouble() * 255.0).toInt(), (y.toDouble() / LCD_HEIGHT.toDouble() * 255.0).toInt(), 0, 1.0);
+
+        List<double> points = new List<double>();
+        points.add(x.toDouble() - LCD_WIDTH / 2);
+        points.add(y.toDouble() + LCD_HEIGHT / 2);
+
+        canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), color);
       }
     }
-
-    canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), linePaint);
   }
 
   @override

@@ -12,7 +12,7 @@ class CPU
   /// Frequency frequency (hz)
   static const int FREQUENCY = 4194304;
 
-  /// Memory controll unit decides from where the addresses are read and written to
+  /// Memory control unit decides from where the addresses are read and written to
   MMU mmu;
 
   /// Internal CPU registers
