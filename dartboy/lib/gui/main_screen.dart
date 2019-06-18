@@ -11,9 +11,6 @@ class MainScreen extends StatefulWidget
 
   final String title;
 
-  /// Emulator instance
-  Emulator emulator = new Emulator();
-
   @override
   MainScreenState createState()
   {
@@ -23,6 +20,14 @@ class MainScreen extends StatefulWidget
 
 class MainScreenState extends State<MainScreen>
 {
+  /// Emulator instance
+  Emulator emulator;
+
+  MainScreenState()
+  {
+    this.emulator = new Emulator();
+  }
+
   @override
   Widget build(BuildContext context)
   {
@@ -108,19 +113,19 @@ class MainScreenState extends State<MainScreen>
                   [
                     new RaisedButton(onPressed: ()
                     {
-                      this.widget.emulator.run();
+                      this.emulator.run();
                     }, child: new Text("Run")),
                     new RaisedButton(onPressed: ()
                     {
-                      this.widget.emulator.pause();
+                      this.emulator.pause();
                     }, child: new Text("Pause")),
                     new RaisedButton(onPressed: ()
                     {
-                      this.widget.emulator.reset();
+                      this.emulator.reset();
                     }, child: new Text("Reset")),
                     new RaisedButton(onPressed: ()
                     {
-                      this.widget.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
+                      this.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
                     }, child: new Text("Load"))
                   ],
                 ))
