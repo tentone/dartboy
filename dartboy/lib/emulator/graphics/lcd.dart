@@ -85,8 +85,8 @@ class LCD
       Arrays.fill(gbcBackgroundPaletteMemory, (int) 0x1f);
 
       // Create palette structures
-      for (int i = 0; i < spritePalettes.length; i++) spritePalettes[i] = new GBCPalette(new int[4]);
-      for (int i = 0; i < bgPalettes.length; i++) bgPalettes[i] = new GBCPalette(new int[4]);
+      for (int i = 0; i < spritePalettes.length; i++){spritePalettes[i] = new GBCPalette(new int[4]);}
+      for (int i = 0; i < bgPalettes.length; i++){bgPalettes[i] = new GBCPalette(new int[4]);}
 
       // And "load" them from RAM
       loadPalettesFromMemory(gbcSpritePaletteMemory, spritePalettes);
@@ -201,17 +201,20 @@ class LCD
       /// The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the
       /// V-Blank period.
 
-      int LY = core.mmu.readRegisterByte[R_LY] & 0xFF;
+      int LY = core.mmu.readRegisterByte(MemoryRegisters.R_LY) & 0xFF;
 
       // draw the scanline
       bool displayEnabled = this.displayEnabled();
 
       // We may be running headlessly, so we must check before drawing
-      if (displayEnabled && core.display != null) draw(LY);
+      if (displayEnabled && core.display != null)
+      {
+        draw(LY);
+      }
 
       // Increment LY, and wrap at 154 lines
-      core.mmu.readRegisterByte[R_LY] = (int) (((LY + 1) % 154) & 0xff);
-
+      core.mmu.writeRegisterByte(MemoryRegisters.R_LY, (((LY + 1) % 154) & 0xff));
+      
       if (LY == 0)
       {
         if (lastSecondTime == -1)
@@ -259,7 +262,7 @@ class LCD
         /// This is determined with an LY == LYC comparison.
         ///
         /// @{see http://bgb.bircd.org/pandocs.htm#lcdstatusregister}
-        if ((lcdStat & LCD_STAT.COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
+        if ((lcdStat & MemoryRegisters.LCD_STAT_COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
         {
           int lyc = (core.mmu.readRegisterByte(MemoryRegisters.R_LYC) & 0xff);
 
@@ -267,14 +270,14 @@ class LCD
           if (lyc == LY)
           {
             core.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
-            core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) | LCD_STAT.COINCIDENCE_BIT);
+            core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) | MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
           } else
           {
-            core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) & ~LCD_STAT.COINCIDENCE_BIT);
+            core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) & ~MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
           }
         }
 
-        if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0)
+        if ((lcdStat & MemoryRegisters.LCD_STAT_HBLANK_MODE_BIT) != 0)
         {
           core.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
         }
@@ -322,7 +325,7 @@ class LCD
           core.setInterruptTriggered(MemoryRegisters.VBLANK_BIT);
 
           // Trigger LCDC if enabled
-          if ((lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
+          if ((lcdStat & MemoryRegisters.LCD_STAT_VBLANK_MODE_BIT) != 0)
           {
             core.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
           }
@@ -683,7 +686,7 @@ class LCD
   /// @return The enabled state.
   bool displayEnabled()
   {
-    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.CONTROL_OPERATION_BIT) != 0;
+    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_CONTROL_OPERATION_BIT) != 0;
   }
 
   /// Determines whether the background layer is enabled from the LCDC register.
@@ -691,7 +694,7 @@ class LCD
   /// @return The enabled state.
   bool backgroundEnabled()
   {
-    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.BGWINDOW_DISPLAY_BIT) != 0;
+    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_BGWINDOW_DISPLAY_BIT) != 0;
   }
 
   /// Determines the window tile map offset from the LCDC register.
@@ -699,7 +702,7 @@ class LCD
   /// @return The offset.
   int getWindowTileMapOffset()
   {
-    if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+    if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
     {
       return 0x1c00;
     }
@@ -711,7 +714,7 @@ class LCD
   /// @return The offset.
   int getBackgroundTileMapOffset()
   {
-    if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+    if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
     {
       return 0x1c00;
     }
@@ -724,7 +727,7 @@ class LCD
   /// @return The enabled state.
   bool isUsingTallSprites()
   {
-    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.SPRITE_SIZE_BIT) != 0;
+    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_SPRITE_SIZE_BIT) != 0;
   }
 
   /// Determines whether sprites are enabled from the LCDC register.
@@ -732,7 +735,7 @@ class LCD
   /// @return The enabled state.
   bool spritesEnabled()
   {
-    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.SPRITE_DISPLAY_BIT) != 0;
+    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_SPRITE_DISPLAY_BIT) != 0;
   }
 
   /// Determines whether the window is enabled from the LCDC register.
@@ -740,7 +743,7 @@ class LCD
   /// @return The enabled state.
   bool windowEnabled()
   {
-    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.WINDOW_DISPLAY_BIT) != 0;
+    return (core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_WINDOW_DISPLAY_BIT) != 0;
   }
   
   /// Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF.
@@ -750,7 +753,7 @@ class LCD
   /// The Tile Data Table address for the background can be selected via LCDC register.
   int getTileDataOffset()
   {
-    if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
+    if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
       return 0;
     return 0x0800;
   }
