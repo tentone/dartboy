@@ -1,5 +1,7 @@
 import '../cpu/cpu.dart';
 import '../memory/memory_registers.dart';
+import '../memory/memory_addresses.dart';
+import '../cartridge/cartridge.dart';
 import './palette.dart';
 
 /// LCD class handles all the screen drawing tasks.
@@ -77,7 +79,7 @@ class LCD
   /// Initializes all palette RAM to the default on Gameboy boot.
   void initializePalettes()
   {
-    if(core.cartridge.isColorGB)
+    if(this.core.mmu.cartridge.gameboyType == GameboyType.COLOR)
     {
       // On CGB all background RAM is initialized with 1Fh
       Arrays.fill(gbcBackgroundPaletteMemory, (int) 0x1f);
@@ -103,7 +105,7 @@ class LCD
       /// Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is
       /// reading from it. (That is when the STAT register indicates Mode 3).
       /// Note: Initially all background colors are initialized as white.
-      PaletteColors colors = PaletteColors.byHash[core.cartridge.checksum];
+      PaletteColors colors = PaletteColors.byHash[this.core.mmu.cartridge.checksum];
       bgPalettes[0] = new DMGPalette(this, colors.bg, R_BGP);
       spritePalettes[0] = new DMGPalette(this, colors.obj0, R_OBP0);
       spritePalettes[1] = new DMGPalette(this, colors.obj1, R_OBP1);
@@ -126,7 +128,6 @@ class LCD
       }
     }
   }
-
 
   /// Performs an update to a int of palette RAM.
   ///
@@ -161,7 +162,7 @@ class LCD
   /// @param data The data written.
   void setBackgroundPalette(int reg, int data)
   {
-    gbcBackgroundPaletteMemory[reg] = (int) data;
+    gbcBackgroundPaletteMemory[reg] = data;
     int palette = reg >> 3;
     updatePaletteint(gbcBackgroundPaletteMemory, bgPalettes[palette], palette, (reg >> 1) & 0x3);
   }
@@ -172,7 +173,7 @@ class LCD
   /// @param data The data written.
   void setSpritePalette(int reg, int data)
   {
-    gbcSpritePaletteMemory[reg] = (int) data;
+    gbcSpritePaletteMemory[reg] = data;
     int palette = reg >> 3;
     updatePaletteint(gbcSpritePaletteMemory, spritePalettes[palette], palette, (reg >> 1) & 0x3);
   }
@@ -203,7 +204,7 @@ class LCD
       int LY = core.mmu.readRegisterByte[R_LY] & 0xFF;
 
       // draw the scanline
-      bool displayEnabled = displayEnabled();
+      bool displayEnabled = this.displayEnabled();
 
       // We may be running headlessly, so we must check before drawing
       if (displayEnabled && core.display != null) draw(LY);
@@ -238,14 +239,14 @@ class LCD
         core.mmu.hdma.tick();
       }
 
-      core.mmu.readRegisterByte[R_LCD_STAT] &= ~0x03;
+      core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) & ~0x03);
 
       int mode = 0;
       if (isVBlank) mode = 0x01;
 
-      core.mmu.readRegisterByte[R_LCD_STAT] |= mode;
+      core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) | mode);
 
-      int lcdStat = core.mmu.readRegisterByte[R_LCD_STAT];
+      int lcdStat = core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT);
 
       if (displayEnabled && !isVBlank)
       {
@@ -260,21 +261,22 @@ class LCD
         /// @{see http://bgb.bircd.org/pandocs.htm#lcdstatusregister}
         if ((lcdStat & LCD_STAT.COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
         {
-          int lyc = (core.mmu.readRegisterByte[R_LYC] & 0xff);
+          int lyc = (core.mmu.readRegisterByte(MemoryRegisters.R_LYC) & 0xff);
+
           // Fire when LYC == LY
           if (lyc == LY)
           {
-            core.setInterruptTriggered(LCDC_BIT);
-            core.mmu.readRegisterByte[R_LCD_STAT] |= LCD_STAT.COINCIDENCE_BIT;
+            core.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
+            core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) | LCD_STAT.COINCIDENCE_BIT);
           } else
           {
-            core.mmu.readRegisterByte[R_LCD_STAT] &= ~LCD_STAT.COINCIDENCE_BIT;
+            core.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, core.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) & ~LCD_STAT.COINCIDENCE_BIT);
           }
         }
 
         if ((lcdStat & LCD_STAT.HBLANK_MODE_BIT) != 0)
         {
-          core.setInterruptTriggered(LCDC_BIT);
+          core.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
         }
       }
 
@@ -317,12 +319,12 @@ class LCD
         if (displayEnabled)
         {
           // Trigger VBlank
-          core.setInterruptTriggered(VBLANK_BIT);
+          core.setInterruptTriggered(MemoryRegisters.VBLANK_BIT);
 
           // Trigger LCDC if enabled
           if ((lcdStat & LCD_STAT.VBLANK_MODE_BIT) != 0)
           {
-            core.setInterruptTriggered(LCDC_BIT);
+            core.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
           }
         }
       }
@@ -379,83 +381,76 @@ class LCD
   /// @param scanline The current scanline.
   void drawBackgroundTiles(List<int> data, int scanline)
   {
-  // Local reference to save time
-  List<int> vram = core.mmu.vram;
+    // Local reference to save time
+    List<int> vram = core.mmu.vram;
 
-  int tileDataOffset = getTileDataOffset();
+    int tileDataOffset = getTileDataOffset();
 
-  // The background is scrollable
-  int scrollY = getScrollY();
-  int scrollX = getScrollX();
+    // The background is scrollable
+    int scrollY = getScrollY();
+    int scrollX = getScrollX();
 
-  int y = (scanline + getScrollY() % 8) / 8;
+    int y = (scanline + getScrollY() % 8) ~/ 8;
 
-  // Determine the offset into the VRAM tile bank
-  int offset = getBackgroundTileMapOffset();
+    // Determine the offset into the VRAM tile bank
+    int offset = getBackgroundTileMapOffset();
 
-  /// BG Map Tile Numbers
-  /// <pre>
-  ///      An area of VRAM known as Background Tile Map contains the numbers of tiles to
-  ///      be displayed. It is organized as 32 rows of 32 ints each. Each int contains a number
-  ///      of a tile to be displayed. Tile patterns are taken from the Tile Data Table located either
-  ///      at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with
-  ///      unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000). In the second case,
-  ///      patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
-  ///      The Tile Data Table address for the background can be selected via LCDC register.
-  /// </pre>
-  ///
-  /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
+    /// BG Map Tile Numbers
+    /// <pre>
+    ///      An area of VRAM known as Background Tile Map contains the numbers of tiles to
+    ///      be displayed. It is organized as 32 rows of 32 ints each. Each int contains a number
+    ///      of a tile to be displayed. Tile patterns are taken from the Tile Data Table located either
+    ///      at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with
+    ///      unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000). In the second case,
+    ///      patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
+    ///      The Tile Data Table address for the background can be selected via LCDC register.
+    /// </pre>
+    ///
+    /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
-  // 20 8x8 tiles fit in a 160px-wide screen
-  for (int x = 0; x < 21; x++)
-  {
-  int addressBase = offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32);
+    // 20 8x8 tiles fit in a 160px-wide screen
+    for (int x = 0; x < 21; x++)
+    {
+      int addressBase = (offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32)).toInt();
 
-  // add 256 to jump into second tile pattern table
-  int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
+      // add 256 to jump into second tile pattern table
+      int tile = tileDataOffset == 0 ? vram[addressBase] & 0xff : vram[addressBase] + 256;
 
-  // Tile attributes
-  int gbcVramBank = 0;
-  int gbcPalette = 0;
-  bool flipX = false;
-  bool flipY = false;
+      // Tile attributes
+      int gbcVramBank = 0;
+      int gbcPalette = 0;
 
+      bool flipX = false;
+      bool flipY = false;
 
-  /// BG Map Attributes (CGB Mode only)
-  /// <pre>
-  ///      In CGB Mode, an additional map of 32x32 ints is stored in VRAM Bank 1 (each int defines attributes for the corresponding tile-number map entry in VRAM Bank 0):
-  ///
-  ///      Bit 0-2  Background Palette number  (BGP0-7)
-  ///      Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
-  ///      Bit 4    Not used
-  ///      Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
-  ///      Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
-  ///      Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
-  /// </pre>
-  ///
-  /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
+      /// BG Map Attributes (CGB Mode only)
+      /// <pre>
+      ///      In CGB Mode, an additional map of 32x32 ints is stored in VRAM Bank 1 (each int defines attributes for the corresponding tile-number map entry in VRAM Bank 0):
+      ///
+      ///      Bit 0-2  Background Palette number  (BGP0-7)
+      ///      Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
+      ///      Bit 4    Not used
+      ///      Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
+      ///      Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
+      ///      Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
+      /// </pre>
+      ///
+      /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
-  if (core.cartridge.isColorGB)
-  {
-  int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
+      if (core.mmu.cartridge.gameboyType == GameboyType.COLOR)
+      {
+        int attribs = vram[MemoryAddresses.VRAM_PAGESIZE + addressBase];
 
-  if ((attribs & 0x8) != 0) gbcVramBank = 1;
-  flipX = (attribs & 0x20) != 0;
-  flipY = (attribs & 0x40) != 0;
-  gbcPalette = (attribs & 0x7);
-  }
+        if ((attribs & 0x8) != 0){gbcVramBank = 1;}
 
-  // Delegate tile drawing
-  drawTile(bgPalettes[gbcPalette],
-  data,
-  -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8,
-  tile,
-  scanline,
-  flipX, flipY,
-  gbcVramBank,
-  0,
-  false);
-  }
+        flipX = (attribs & 0x20) != 0;
+        flipY = (attribs & 0x40) != 0;
+        gbcPalette = (attribs & 0x7);
+      }
+
+      // Delegate tile drawing
+      drawTile(bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
+    }
   }
 
 
@@ -477,8 +472,8 @@ class LCD
 
   int tileMapOffset = getWindowTileMapOffset();
 
-  int y = (scanline - posY) / 8;
-  for (int x = getWindowPosX() / 8; x < 21; x++)
+  int y = (scanline - posY) ~/ 8;
+  for (int x = getWindowPosX() ~/ 8; x < 21; x++)
   {
   // 32 tiles a row
   int addressBase = tileMapOffset + (x + y * 32);
@@ -496,9 +491,9 @@ class LCD
   ///
   /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
-  if (core.cartridge.isColorGB)
+  if (core.mmu.cartridge.gameboyType == GameboyType.COLOR)
   {
-    int attribs = vram[Memory.VRAM_PAGESIZE + addressBase];
+    int attribs = vram[MemoryAddresses.VRAM_PAGESIZE + addressBase];
     if ((attribs & 0x8) != 0)
     {
       gbcVramBank = 1;
@@ -526,14 +521,12 @@ class LCD
   /// @param bank         The tile bank to use.
   /// @param basePriority The current priority for the given tile.
   /// @param sprite       Whether the tile beints to a sprite or not.
-
-  void drawTile(Palette palette, List<int> data, int x, int y, int tile, int scanline,
-  bool flipX, bool flipY, int bank, int basePriority, bool sprite)
+  void drawTile(Palette palette, List<int> data, int x, int y, int tile, int scanline, bool flipX, bool flipY, int bank, int basePriority, bool sprite)
   {
   // Store a local copy to save a lot of load opcodes.
   List<int> vram = core.mmu.vram;
   int line = scanline - y;
-  int addressBase = Memory.VRAM_PAGESIZE * bank + tile * 16;
+  int addressBase = MemoryAddresses.VRAM_PAGESIZE * bank + tile * 16;
 
   // 8 pixel width
   for (int px = 0; px < 8; px++)
@@ -590,98 +583,99 @@ class LCD
   ///
   /// @param data     The raster to write to.
   /// @param scanline The current scanline.
-
   void drawSprites(List<int> data, int scanline)
   {
-  // Hold local references to save a lot of load opcodes
-  List<int> oam = core.mmu.oam;
-  bool tall = isUsingTallSprites();
-  bool isColorGB = core.cartridge.isColorGB;
+    // Hold local references to save a lot of load opcodes
+    List<int> oam = core.mmu.oam;
+    bool tall = isUsingTallSprites();
+    bool isColorGB = core.mmu.cartridge.gameboyType == GameboyType.COLOR;
 
-  // Actual GameBoy hardware can only handle drawing 10 sprites per line
-  // our code doesn't actually have this limitation, but we artificially introduce it by keeping
-  // track of how many sprites are drawn per line
-  for (int i = 0; i < oam.length && spritesDrawnPerLine[scanline] < 10; i += 4)
-  {
+    // Actual GameBoy hardware can only handle drawing 10 sprites per line
+    // our code doesn't actually have this limitation, but we artificially introduce it by keeping
+    // track of how many sprites are drawn per line
+    for (int i = 0; i < oam.length && spritesDrawnPerLine[scanline] < 10; i += 4)
+    {
 
-  /// Sprite attributes reside in the Sprite Attribute Table (OAM - Object Attribute Memory) at $FE00-FE9F.
-  /// Each of the 40 entries consists of four ints with the following meanings:
-  ///
-  /// int0 - Y Position
-  /// <pre>
-  ///      Specifies the sprites vertical position on the screen (minus 16).
-  ///      An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
-  /// </pre>
-  ///
-  /// int1 - X Position
-  /// <pre>
-  ///      Specifies the sprites horizontal position on the screen (minus 8).
-  ///      An offscreen value (X=0 or X>=168) hides the sprite, but the sprite
-  ///      still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
-  /// </pre>
-  ///
-  /// int2 - Tile/Pattern Number
-  /// <pre>
-  ///      Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
-  ///      In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
-  ///      In 8x16 mode, the lower bit of the tile number is ignored. Ie. the upper 8x8 tile is "NN AND FEh", and
-  ///      the lower 8x8 tile is "NN OR 01h".
-  /// </pre>
-  ///
-  /// int3 - Attributes/Flags:
-  /// <pre>
-  ///      Bit7   OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
-  ///      (Used for both BG and Window. BG color 0 is always behind OBJ)
-  ///      Bit6   Y flip          (0=Normal, 1=Vertically mirrored)
-  ///      Bit5   X flip          (0=Normal, 1=Horizontally mirrored)
-  ///      Bit4   Palette number ///*Non CGB Mode Only** (0=OBP0, 1=OBP1)
-  ///      Bit3   Tile VRAM-Bank ///*CGB Mode Only**     (0=Bank 0, 1=Bank 1)
-  ///      Bit2-0 Palette number ///*CGB Mode Only**     (OBP0-7)
-  /// </pre>
-  ///
-  /// {@see http://bgb.bircd.org/pandocs.htm#vramspriteattributetableoam}
+    /// Sprite attributes reside in the Sprite Attribute Table (OAM - Object Attribute Memory) at $FE00-FE9F.
+    /// Each of the 40 entries consists of four ints with the following meanings:
+    ///
+    /// int0 - Y Position
+    /// <pre>
+    ///      Specifies the sprites vertical position on the screen (minus 16).
+    ///      An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
+    /// </pre>
+    ///
+    /// int1 - X Position
+    /// <pre>
+    ///      Specifies the sprites horizontal position on the screen (minus 8).
+    ///      An offscreen value (X=0 or X>=168) hides the sprite, but the sprite
+    ///      still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
+    /// </pre>
+    ///
+    /// int2 - Tile/Pattern Number
+    /// <pre>
+    ///      Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
+    ///      In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
+    ///      In 8x16 mode, the lower bit of the tile number is ignored. Ie. the upper 8x8 tile is "NN AND FEh", and
+    ///      the lower 8x8 tile is "NN OR 01h".
+    /// </pre>
+    ///
+    /// int3 - Attributes/Flags:
+    /// <pre>
+    ///      Bit7   OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
+    ///      (Used for both BG and Window. BG color 0 is always behind OBJ)
+    ///      Bit6   Y flip          (0=Normal, 1=Vertically mirrored)
+    ///      Bit5   X flip          (0=Normal, 1=Horizontally mirrored)
+    ///      Bit4   Palette number ///*Non CGB Mode Only** (0=OBP0, 1=OBP1)
+    ///      Bit3   Tile VRAM-Bank ///*CGB Mode Only**     (0=Bank 0, 1=Bank 1)
+    ///      Bit2-0 Palette number ///*CGB Mode Only**     (OBP0-7)
+    /// </pre>
+    ///
+    /// {@see http://bgb.bircd.org/pandocs.htm#vramspriteattributetableoam}
 
 
-  int y = oam[i] & 0xff;
+    int y = oam[i] & 0xff;
 
-  // Have we exited our bounds?
-  if (!tall && !(y - 16 <= scanline && scanline < y - 8))
-  continue;
+    // Have we exited our bounds?
+    if (!tall && !(y - 16 <= scanline && scanline < y - 8))
+    {
+      continue;
+    }
 
-  int attribs = oam[i + 3];
-  int vrambank = (attribs & 0b1000) != 0 && isColorGB ? 1 : 0;
-  int priority = (attribs & 0x80) != 0 ? P_2 : P_5;
+    int attribs = oam[i + 3];
+    int vrambank = (attribs & 0x8) != 0 && isColorGB ? 1 : 0;
+    int priority = (attribs & 0x80) != 0 ? P_2 : P_5;
 
-  int x = oam[i + 1] & 0xff;
-  int tile = oam[i + 2] & 0xff;
-  bool flipX = (attribs & 0x20) != 0;
-  bool flipY = (attribs & 0x40) != 0;
-  int obp = isColorGB ? (attribs & 0x7) : (attribs >> 4) & 0x1;
+    int x = oam[i + 1] & 0xff;
+    int tile = oam[i + 2] & 0xff;
+    bool flipX = (attribs & 0x20) != 0;
+    bool flipY = (attribs & 0x40) != 0;
+    int obp = isColorGB ? (attribs & 0x7) : (attribs >> 4) & 0x1;
 
-  Palette pal = spritePalettes[obp];
+    Palette pal = spritePalettes[obp];
 
-  // Handle drawing double sprites
-  if (tall)
-  {
-  // If we're using tall sprites we actually have to flip the order that we draw the top/bottom tiles
-  int hi = flipY ? (tile | 0x01) : (tile & 0xFE);
-  int lo = flipY ? (tile & 0xFE) : (tile | 0x01);
-  if (y - 16 <= scanline && scanline < y - 8)
-  {
-  drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
-  spritesDrawnPerLine[scanline]++;
-  }
-  if (y - 8 <= scanline && scanline < y)
-  {
-  drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
-  spritesDrawnPerLine[scanline]++;
-  }
-  } else
-  {
-  drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
-  spritesDrawnPerLine[scanline]++;
-  }
-  }
+    // Handle drawing double sprites
+    if (tall)
+    {
+    // If we're using tall sprites we actually have to flip the order that we draw the top/bottom tiles
+    int hi = flipY ? (tile | 0x01) : (tile & 0xFE);
+    int lo = flipY ? (tile & 0xFE) : (tile | 0x01);
+    if (y - 16 <= scanline && scanline < y - 8)
+    {
+    drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
+    spritesDrawnPerLine[scanline]++;
+    }
+    if (y - 8 <= scanline && scanline < y)
+    {
+    drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
+    spritesDrawnPerLine[scanline]++;
+    }
+    } else
+    {
+    drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
+    spritesDrawnPerLine[scanline]++;
+    }
+    }
   }
   
   /// Determines whether the display is enabled from the LCDC register.
@@ -706,7 +700,9 @@ class LCD
   int getWindowTileMapOffset()
   {
     if ((core.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & LCDC.WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+    {
       return 0x1c00;
+    }
     return 0x1800;
   }
 

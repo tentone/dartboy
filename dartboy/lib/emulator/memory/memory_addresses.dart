@@ -18,6 +18,15 @@ class MemoryAddresses
   /// Total memory addressable size
   static const ADDRESS_SIZE = 65536;
 
+  /// Size of a page of Video RAM, in bytes. 8kb.
+  static const int VRAM_PAGESIZE = 0x2000;
+
+  /// Size of a page of Work RAM, in bytes. 4kb.
+  static const int WRAM_PAGESIZE = 0x1000;
+
+  /// Size of a page of ROM, in bytes. 16kb.
+  static const int ROM_PAGESIZE = 0x4000;
+
   // 32KB Cartridge ROM
   static const CARTRIDGE_ROM_START = 0x0000;
   static const CARTRIDGE_ROM_SWITCHABLE_START = 0x4000;

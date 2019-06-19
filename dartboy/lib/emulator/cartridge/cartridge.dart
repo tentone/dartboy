@@ -41,6 +41,9 @@ class Cartridge extends Memory
   /// Each bank has 8KBytes in size.
   int ramBanks;
 
+  /// Cartridge checksum, used to check if the data of the game is good, and also used to select the better color palette in classic gb games.
+  int checksum;
+
   /// In CGB cartridges the upper bit is used to enable CGB functions. This is required, otherwise the CGB switches itself into Non-CGB-Mode.
   ///
   /// There are two different CGB modes 80h Game supports CGB functions, but works on old gameboys also, C0h Game works on CGB only.
@@ -63,6 +66,14 @@ class Cartridge extends Memory
     this.ramType = this.readByte(0x149);
     this.gameboyType = this.readByte(0x143) != 0 ? GameboyType.COLOR : GameboyType.CLASSIC;
     this.superGameboy = this.readByte(0x146) == 0x3;
+
+    // Calculate the special value used by the CGB boot ROM to colorize some monochrome games.
+    int chk = 0;
+    for(int i = 0; i < 16; ++i)
+    {
+      chk += this.data[0x134 + i];
+    }
+    this.checksum = chk & 0xFF;
 
     this.setBankSizeRAM();
     this.setBankSizeROM();

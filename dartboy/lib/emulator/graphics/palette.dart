@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import '../cpu/cpu.dart';
 import '../memory/memory_registers.dart';
 
+/// Palette is used to store the gameboy palette colors.
+///
+/// Each palette is composed of four colors, for classic gameboy gray scale colors are stored.
+///
+/// For gameboy color the palette stores RGB colors.
 abstract class Palette
 {
   /// Gets the RGBA color associated to a given index.
@@ -27,7 +32,6 @@ class GBPalette implements Palette
       throw new Exception("Colors must be of length 4.");
     }
 
-
     this.cpu = cpu;
     this.colors = colors;
     this.register = register;
@@ -36,7 +40,27 @@ class GBPalette implements Palette
   @override
   Color getColor(int number)
   {
-    return colors[(this.cpu.mmu.readRegisterByte(this.register) >> (number * 2)) & 0x3];
+    return this.colors[(this.cpu.mmu.readRegisterByte(this.register) >> (number * 2)) & 0x3];
+  }
+}
+
+class GBCPalette implements Palette
+{
+  List<Color> colors;
+
+  GBCPalette(List<Color> colors)
+  {
+    if(colors.length < 4)
+    {
+      throw new Exception("Colors must be of length 4.");
+    }
+
+    this.colors = colors;
   }
 
+  @override
+  Color getColor(int number)
+  {
+    return this.colors[number];
+  }
 }
