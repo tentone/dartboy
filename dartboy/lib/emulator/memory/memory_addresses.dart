@@ -35,6 +35,7 @@ class MemoryAddresses
   // Video RAM
   static const VIDEO_RAM_START = 0x8000;
   static const VIDEO_RAM_END = 0xA000;
+  static const VIDEO_RAM_SIZE = VIDEO_RAM_END - VIDEO_RAM_START;
 
   // 8KB Switchable RAM (Cartridge)
   static const SWITCHABLE_RAM_START = 0xA000;
@@ -51,6 +52,7 @@ class MemoryAddresses
   // Sprite attribute
   static const OAM_START = 0xFE00;
   static const OAM_END = 0xFEA0;
+  static const OAM_SIZE = OAM_END - OAM_START;
 
   // Empty zone A
   static const EMPTY_A_START = 0xFEA0;

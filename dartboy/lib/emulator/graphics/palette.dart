@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../cpu/cpu.dart';
 import '../memory/memory_registers.dart';
 
@@ -10,17 +8,19 @@ import '../memory/memory_registers.dart';
 /// For gameboy color the palette stores RGB colors.
 abstract class Palette
 {
+  List<int> colors;
+
   /// Gets the RGBA color associated to a given index.
-  Color getColor(int number);
+  int getColor(int number);
 }
 
 class GBPalette implements Palette
 {
   CPU cpu;
   int register;
-  List<Color> colors;
+  List<int> colors;
 
-  GBPalette(CPU cpu, List<Color> colors, int register)
+  GBPalette(CPU cpu, List<int> colors, int register)
   {
     if(register != MemoryRegisters.R_BGP && register != MemoryRegisters.R_OBP0 && register != MemoryRegisters.R_OBP1)
     {
@@ -38,7 +38,7 @@ class GBPalette implements Palette
   }
 
   @override
-  Color getColor(int number)
+  int getColor(int number)
   {
     return this.colors[(this.cpu.mmu.readRegisterByte(this.register) >> (number * 2)) & 0x3];
   }
@@ -46,9 +46,9 @@ class GBPalette implements Palette
 
 class GBCPalette implements Palette
 {
-  List<Color> colors;
+  List<int> colors;
 
-  GBCPalette(List<Color> colors)
+  GBCPalette(List<int> colors)
   {
     if(colors.length < 4)
     {
@@ -59,7 +59,7 @@ class GBCPalette implements Palette
   }
 
   @override
-  Color getColor(int number)
+  int getColor(int number)
   {
     return this.colors[number];
   }

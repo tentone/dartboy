@@ -129,10 +129,25 @@ class CPU
       lo &= 0xff;
     }
 
-    if(r == 0x0) {this.registers.b = hi; this.registers.c = lo;}
-    else if(r == 0x1) {this.registers.d = hi; this.registers.e = lo;}
-    else if(r == 0x2) {this.registers.h = hi; this.registers.l = lo;}
-    else if(r == 0x3) {this.sp = ((hi & 0xff) << 8) | lo & 0xff;}
+    if(r == 0x0)
+    {
+      this.registers.b = hi;
+      this.registers.c = lo;
+    }
+    else if(r == 0x1)
+    {
+      this.registers.d = hi;
+      this.registers.e = lo;
+    }
+    else if(r == 0x2)
+    {
+      this.registers.h = hi;
+      this.registers.l = lo;
+    }
+    else if(r == 0x3)
+    {
+      this.sp = ((hi & 0xff) << 8) | lo & 0xff;
+    }
   }
 
   ///Increase the clock cycles and trigger interrupts as needed.
@@ -150,7 +165,80 @@ class CPU
   /// @param clocks CPU cycles elapsed since the last call to this method
   void updateInterrupts(int clocks)
   {
+    /*
+        if (doubleSpeed)
+            delta /= 2;
+
+        // The DIV register increments at 16KHz, and resets to 0 after
+        divCycle += delta;
+
+        if (divCycle >= 256)
+        {
+            divCycle -= 256;
+            // This is... probably correct
+            mmu.registers[R.R_DIV]++;
+        }
+
+        // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
+        int tac = mmu.registers[R.R_TAC];
+        if ((tac & 0b100) != 0)
+        {
+            timerCycle += delta;
+
+            // The Timer has a settable frequency
+            int timerPeriod = 0;
+
+            /**
+             * Bit 2    - Timer Stop  (0=Stop, 1=Start)
+             * Bits 1-0 - Input Clock Select
+             * 00:   4096 Hz    (~4194 Hz SGB)
+             * 01: 262144 Hz  (~268400 Hz SGB)
+             * 10:  65536 Hz   (~67110 Hz SGB)
+             * 11:  16384 Hz   (~16780 Hz SGB)
+             */
+            switch (tac & 0b11)
+            {
+                case 0b00:
+                    timerPeriod = clockSpeed / 4096;
+                    break;
+                case 0b01:
+                    timerPeriod = clockSpeed / 262144;
+                    break;
+                case 0b10:
+                    timerPeriod = clockSpeed / 65536;
+                    break;
+                case 0b11:
+                    timerPeriod = clockSpeed / 16384;
+                    break;
+            }
+
+            while (timerCycle >= timerPeriod)
+            {
+                timerCycle -= timerPeriod;
+
+                // And it resets to a specific value
+                int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
+                if (tima > 0xff)
+                {
+                    tima = mmu.registers[R.R_TMA] & 0xff;
+                    setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
+                }
+                mmu.registers[R.R_TIMA] = (byte) tima;
+            }
+        }
+
+        sound.tick(delta);
+        lcd.tick(delta);
+     */
     //TODO <ADD CODE HERE>
+  }
+
+  /// Triggers a particular interrupt by writing the correct interrupt bit to the interrupt register.
+  ///
+  /// @param interrupt The interrupt bit.
+  void setInterruptTriggered(int interrupt)
+  {
+    this.mmu.writeRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS, this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) | interrupt);
   }
 
   /// Fires interrupts if interrupts are enabled.
@@ -261,7 +349,8 @@ class CPU
                 sound.updateClockSpeed(clockSpeed);
             }
             _last = System.nanoTime();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             // #error there is no reason for this to fail, but if it does
             //        all we can do is printing the stacktrace for debugging

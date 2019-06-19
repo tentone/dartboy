@@ -1,6 +1,7 @@
-import '../../emulator/cartridge/cartridge.dart';
-import '../../emulator/memory/memory.dart';
-import '../../emulator/memory/memory_addresses.dart';
+import '../cartridge/cartridge.dart';
+import '../memory/hdma.dart';
+import '../memory/memory.dart';
+import '../memory/memory_addresses.dart';
 
 /// The MMU (memory management unit) is used to access memory.
 ///
@@ -21,11 +22,24 @@ class MMU
   /// On board game boy memory (after the cartridge memory).
   Memory memory;
 
+  /// HDMA memory controller (only available on gameboy color games)
+  HDMA hdma;
+
   MMU(Cartridge cartridge)
   {
     this.cartridge = cartridge;
 
     this.memory = new Memory(MemoryAddresses.ADDRESS_SIZE - MemoryAddresses.CARTRIDGE_ROM_END);
+
+    this.hdma = null;
+
+    /*
+    // The CGB has 16k of wram
+    wram = new byte[WRAM_PAGESIZE * (core.cartridge.isColorGB ? 8 : 2)];
+
+    // and 8k of vram
+    vram = new byte[VRAM_PAGESIZE * (core.cartridge.isColorGB ? 2 : 1)];
+     */
   }
 
   /// Write a byte into memory address
@@ -33,8 +47,8 @@ class MMU
   {
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      //throw 'Cannot write data into ROM memory.';
-      return;
+      throw 'Cannot write data into ROM memory.';
+      //return;
     }
     else
     {
@@ -65,6 +79,58 @@ class MMU
 
       return this.memory.readByte(address - MemoryAddresses.CARTRIDGE_ROM_END);
     }
+  }
+
+  /// Read a value from the OAM sprite memory.
+  ///
+  /// The OAM start address is added to the address received as parameter.
+  int readOAM(int address)
+  {
+    if(address > MemoryAddresses.OAM_SIZE)
+    {
+      throw 'Trying to access invalid OAM address.';
+    }
+
+    return this.readByte(MemoryAddresses.OAM_START + address);
+  }
+
+  /// Write a value into the OAM sprite memory.
+  ///
+  /// The OAM start address is added to the address received as parameter.
+  void writeOAM(int address, int value)
+  {
+    if(address > MemoryAddresses.OAM_SIZE)
+    {
+      throw 'Trying to access invalid OAM address.';
+    }
+
+    this.writeByte(MemoryAddresses.OAM_START + address, value);
+  }
+
+  /// Read a value from the Video RAM.
+  ///
+  /// The video RAM start address is added to the address received as parameter.
+  int readVRAM(int address)
+  {
+    if(address > MemoryAddresses.VIDEO_RAM_SIZE)
+    {
+      throw 'Trying to access invalid VRAM address.';
+    }
+
+    return this.readByte(MemoryAddresses.VIDEO_RAM_START + address);
+  }
+
+  /// Write a value into the Video RAM.
+  ///
+  /// The video RAM start address is added to the address received as parameter.
+  void writeVRAM(int address, int value)
+  {
+    if(address > MemoryAddresses.VIDEO_RAM_SIZE)
+    {
+      throw 'Trying to access invalid VRAM address.';
+    }
+
+    this.writeByte(MemoryAddresses.VIDEO_RAM_START + address, value);
   }
 
   /// Read a register value, register values are mapped between FF00 to FFFF
