@@ -1,5 +1,4 @@
-import 'package:dartboy/emulator/cpu/registers.dart';
-
+import 'registers.dart';
 import 'cpu.dart';
 import 'tables.dart';
 

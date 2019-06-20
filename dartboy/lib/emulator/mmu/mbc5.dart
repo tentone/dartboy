@@ -1,4 +1,4 @@
-import 'package:dartboy/emulator/memory/cartridge.dart';
+import '../memory/cartridge.dart';
 import 'mmu.dart';
 
 class MBC5 extends MMU

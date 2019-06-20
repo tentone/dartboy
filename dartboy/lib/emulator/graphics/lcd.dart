@@ -1,7 +1,7 @@
 import '../cpu/cpu.dart';
 import '../memory/memory_registers.dart';
 import '../memory/memory_addresses.dart';
-import 'package:dartboy/emulator/memory/cartridge.dart';
+import '../memory/cartridge.dart';
 import './palette_colors.dart';
 import './palette.dart';
 

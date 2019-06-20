@@ -1,4 +1,4 @@
-import 'package:dartboy/emulator/memory/cartridge.dart';
+import '../memory/cartridge.dart';
 import '../memory/hdma.dart';
 import '../memory/memory.dart';
 import '../memory/memory_addresses.dart';

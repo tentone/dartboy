@@ -1,4 +1,3 @@
-
 /// Stored the address layout of the gameboy in constants.
 ///
 /// Interrupt Enable Register FF80 - FFFF
