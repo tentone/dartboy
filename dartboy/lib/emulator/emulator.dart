@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../gui/lcd/lcd_widget.dart';
 import './cpu/cpu.dart';
 import './memory/cartridge.dart';
 
@@ -45,6 +44,8 @@ class Emulator
   {
     if(this.state != EmulatorState.WAITING)
     {
+      //TODO <DEBUG PRINT>
+      print('Emulator should be reset to load ROM.');
       return;
     }
 
@@ -55,11 +56,12 @@ class Emulator
 
     this.cpu = new CPU(this.cartridge);
 
-    this.printCartridgeInfo();
-
     this.state = EmulatorState.READY;
+
+    this.printCartridgeInfo();
   }
 
+  /// Print some information about the ROM file loaded into the emulator.
   void printCartridgeInfo()
   {
     print('Catridge info');
@@ -82,23 +84,42 @@ class Emulator
   {
     if(this.state != EmulatorState.READY)
     {
+      //TODO <DEBUG PRINT>
+      print('Emulator not ready, cannot run.');
       return;
     }
 
     this.state = EmulatorState.RUNNING;
 
+    int step = 0;
     this.timer = new Timer.periodic(const Duration(microseconds: 1), (Timer t)
     {
+      step++;
+
       if(this.state != EmulatorState.RUNNING)
       {
+        //TODO <DEBUG PRINT>
+        print('Stopped emulation (Step: ' + step.toString() + ')');
+        this.timer.cancel();
         return;
       }
 
-      this.cpu.step();
-
-      if(this.onStep != null)
+      //Step CPU
+      try
       {
-        this.onStep();
+        this.cpu.step();
+
+        if(this.onStep != null)
+        {
+          this.onStep();
+        }
+      }
+      catch(e)
+      {
+        //TODO <DEBUG PRINT>
+        print('Error occured, emulation stoped. (Step: ' + step.toString() + ')');
+        print(e.toString());
+        this.timer.cancel();
       }
     });
   }
@@ -108,6 +129,8 @@ class Emulator
   {
     if(this.state != EmulatorState.RUNNING)
     {
+      //TODO <DEBUG PRINT>
+      print('Emulator not running cannot be paused');
       return;
     }
 

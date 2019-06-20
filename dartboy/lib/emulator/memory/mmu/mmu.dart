@@ -1,7 +1,7 @@
-import '../memory/cartridge.dart';
-import '../memory/hdma.dart';
-import '../memory/memory.dart';
-import '../memory/memory_addresses.dart';
+import '../cartridge.dart';
+import '../hdma.dart';
+import '../memory.dart';
+import '../memory_addresses.dart';
 
 /// The MMU (memory management unit) is used to access memory.
 ///
@@ -47,8 +47,7 @@ class MMU
   {
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      //throw 'Cannot write data into ROM memory.';
-      return;
+      throw new Exception('Cannot write data into ROM memory.');
     }
     else
     {
@@ -88,7 +87,7 @@ class MMU
   {
     if(address > MemoryAddresses.OAM_SIZE)
     {
-      throw 'Trying to access invalid OAM address.';
+      throw new Exception('Trying to access invalid OAM address.');
     }
 
     return this.readByte(MemoryAddresses.OAM_START + address);
@@ -101,7 +100,7 @@ class MMU
   {
     if(address > MemoryAddresses.OAM_SIZE)
     {
-      throw 'Trying to access invalid OAM address.';
+      throw new Exception('Trying to access invalid OAM address.');
     }
 
     this.writeByte(MemoryAddresses.OAM_START + address, value);
@@ -114,7 +113,7 @@ class MMU
   {
     if(address > MemoryAddresses.VIDEO_RAM_SIZE)
     {
-      throw 'Trying to access invalid VRAM address.';
+      throw new Exception('Trying to access invalid VRAM address.');
     }
 
     return this.readByte(MemoryAddresses.VIDEO_RAM_START + address);
@@ -127,7 +126,7 @@ class MMU
   {
     if(address > MemoryAddresses.VIDEO_RAM_SIZE)
     {
-      throw 'Trying to access invalid VRAM address.';
+      throw new Exception('Trying to access invalid VRAM address.');
     }
 
     this.writeByte(MemoryAddresses.VIDEO_RAM_START + address, value);

@@ -1,11 +1,9 @@
-import '../../gui/lcd/lcd_widget.dart';
 import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
-import '../mmu/mmu.dart';
+import '../memory/mmu/mmu.dart';
 import '../graphics/ppu.dart';
 import 'registers.dart';
 import 'instructions.dart';
-
 
 /// CPU class is responsible for the instruction execution, interrupts and timing of the system.
 ///

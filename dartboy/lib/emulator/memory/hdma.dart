@@ -1,4 +1,4 @@
-import '../mmu/mmu.dart';
+import './mmu/mmu.dart';
 
 /// Represents a H-Blank DMA transfer session.
 ///

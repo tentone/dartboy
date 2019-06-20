@@ -1,4 +1,4 @@
-import '../memory/cartridge.dart';
+import '../cartridge.dart';
 import 'mmu.dart';
 
 class MBC1 extends MMU

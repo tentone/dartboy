@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../emulator/emulator.dart';
-import './lcd/lcd_widget.dart';
+import 'package:dartboy/gui/lcd_widget.dart';
 
 class MainScreen extends StatefulWidget
 {

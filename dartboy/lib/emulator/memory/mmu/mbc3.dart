@@ -1,9 +1,9 @@
-import '../memory/cartridge.dart';
+import '../cartridge.dart';
 import 'mmu.dart';
 
-class MBC2 extends MMU
+class MBC3 extends MMU
 {
-  MBC2(Cartridge cartridge) : super(cartridge);
+  MBC3(Cartridge cartridge) : super(cartridge);
 
   @override
   int readByte(int address)

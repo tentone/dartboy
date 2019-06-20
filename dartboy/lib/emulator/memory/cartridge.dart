@@ -2,11 +2,11 @@ import 'dart:math';
 
 import '../memory/memory.dart';
 
-import '../mmu/mmu.dart';
-import '../mmu/mbc1.dart';
-import '../mmu/mbc2.dart';
-import '../mmu/mbc3.dart';
-import '../mmu/mbc5.dart';
+import './mmu/mmu.dart';
+import './mmu/mbc1.dart';
+import './mmu/mbc2.dart';
+import './mmu/mbc3.dart';
+import './mmu/mbc5.dart';
 
 /// Stores the cartridge information and data.
 ///
@@ -52,7 +52,7 @@ class Cartridge extends Memory
   /// SGB mode indicates if the game has super gameboy features
   bool superGameboy;
 
-  Cartridge() : super(0);
+  Cartridge() : super();
 
   /// Load cartridge byte data
   void load(List<int> data)
@@ -69,7 +69,7 @@ class Cartridge extends Memory
 
     // Calculate the special value used by the CGB boot ROM to colorize some monochrome games.
     int chk = 0;
-    for(int i = 0; i < 16; ++i)
+    for(int i = 0; i < 16; i++)
     {
       chk += this.data[0x134 + i];
     }

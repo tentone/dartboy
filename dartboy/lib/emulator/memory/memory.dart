@@ -9,10 +9,13 @@ class Memory
   /// Size of the memory in bytes
   int size;
 
-  Memory(int size)
+  Memory([int size])
   {
-    this.size = size;
-    this.initialize();
+    if(size != null)
+    {
+      this.size = size;
+      this.initialize();
+    }
   }
 
   /// Initialize the memory, create the data array with the defined size.
