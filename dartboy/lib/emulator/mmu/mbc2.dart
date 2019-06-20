@@ -1,4 +1,4 @@
-import '../../emulator/cartridge/cartridge.dart';
+import 'package:dartboy/emulator/memory/cartridge.dart';
 import 'mmu.dart';
 
 class MBC2 extends MMU

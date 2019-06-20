@@ -1,6 +1,7 @@
-import '../cartridge/cartridge.dart';
+import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
 import '../mmu/mmu.dart';
+import '../graphics/lcd.dart';
 import 'registers.dart';
 import 'instructions.dart';
 
@@ -18,6 +19,9 @@ class CPU
   /// Internal CPU registers
   Registers registers;
 
+  /// PPU handles the graphics display
+  LCD lcd;
+
   /// Whether the CPU is currently halted if so, it will still operate at 4MHz, but will not execute any instructions until an interrupt is cyclesExecutedThisSecond.
   /// This mode is used for power saving.
   bool halted;
@@ -33,6 +37,14 @@ class CPU
 
   /// The number of cycles executed in the last second.
   int cyclesExecutedThisSecond;
+
+  bool doubleSpeed = false;
+
+  /// The current cycle of the DIV register.
+  int divCycle = 0;
+
+  /// The current cycle of the TIMA register.
+  int timerCycle = 0;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   int _pc = 0;
@@ -55,6 +67,8 @@ class CPU
     this.registers = new Registers(this);
 
     this.mmu = new MMU(cartridge);
+
+    this.lcd = new LCD(this);
 
     this.reset();
   }
@@ -162,75 +176,78 @@ class CPU
   ///
   /// Trigger timer interrupts, LCD updates, and sound updates as needed.
   ///
-  /// @param clocks CPU cycles elapsed since the last call to this method
-  void updateInterrupts(int clocks)
+  /// @param delta CPU cycles elapsed since the last call to this method
+  void updateInterrupts(int delta)
   {
-    /*
-        if (doubleSpeed)
-            delta /= 2;
+    if(this.doubleSpeed)
+    {
+      delta ~/= 2;
+    }
 
-        // The DIV register increments at 16KHz, and resets to 0 after
-        divCycle += delta;
+    // The DIV register increments at 16KHz, and resets to 0 after
+    this.divCycle += delta;
 
-        if (divCycle >= 256)
+    if(this.divCycle >= 256)
+    {
+      this.divCycle -= 256;
+      this.mmu.writeRegisterByte(MemoryRegisters.R_DIV, this.mmu.readRegisterByte(MemoryRegisters.R_DIV) + 1);
+    }
+
+    // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
+    int tac = this.mmu.readRegisterByte(MemoryRegisters.R_TAC);
+
+    if((tac & 0x4) != 0)
+    {
+      this.timerCycle += delta;
+
+      // The Timer has a settable frequency
+      int timerPeriod = 0;
+
+      /**
+       * Bit 2    - Timer Stop  (0=Stop, 1=Start)
+       * Bits 1-0 - Input Clock Select
+       * 00:   4096 Hz    (~4194 Hz SGB)
+       * 01: 262144 Hz  (~268400 Hz SGB)
+       * 10:  65536 Hz   (~67110 Hz SGB)
+       * 11:  16384 Hz   (~16780 Hz SGB)
+       */
+      switch (tac & 0x3)
+      {
+        case 0x0:
+          timerPeriod = FREQUENCY ~/ 4096;
+          break;
+        case 0x1:
+          timerPeriod = FREQUENCY ~/ 262144;
+          break;
+        case 0x2:
+          timerPeriod = FREQUENCY ~/ 65536;
+          break;
+        case 0x3:
+          timerPeriod = FREQUENCY ~/ 16384;
+          break;
+      }
+
+      while(this.timerCycle >= timerPeriod)
+      {
+        this.timerCycle -= timerPeriod;
+
+        // And it resets to a specific value
+        int tima = (this.mmu.readRegisterByte(MemoryRegisters.R_TIMA) & 0xff) + 1;
+
+        if(tima > 0xff)
         {
-            divCycle -= 256;
-            // This is... probably correct
-            mmu.registers[R.R_DIV]++;
+          tima = this.mmu.readRegisterByte(MemoryRegisters.R_TMA) & 0xff;
+          setInterruptTriggered(MemoryRegisters.TIMER_OVERFLOW_BIT);
         }
 
-        // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
-        int tac = mmu.registers[R.R_TAC];
-        if ((tac & 0b100) != 0)
-        {
-            timerCycle += delta;
+        this.mmu.writeRegisterByte(MemoryRegisters.R_TIMA, tima & 0xff);
+      }
+    }
 
-            // The Timer has a settable frequency
-            int timerPeriod = 0;
-
-            /**
-             * Bit 2    - Timer Stop  (0=Stop, 1=Start)
-             * Bits 1-0 - Input Clock Select
-             * 00:   4096 Hz    (~4194 Hz SGB)
-             * 01: 262144 Hz  (~268400 Hz SGB)
-             * 10:  65536 Hz   (~67110 Hz SGB)
-             * 11:  16384 Hz   (~16780 Hz SGB)
-             */
-            switch (tac & 0b11)
-            {
-                case 0b00:
-                    timerPeriod = clockSpeed / 4096;
-                    break;
-                case 0b01:
-                    timerPeriod = clockSpeed / 262144;
-                    break;
-                case 0b10:
-                    timerPeriod = clockSpeed / 65536;
-                    break;
-                case 0b11:
-                    timerPeriod = clockSpeed / 16384;
-                    break;
-            }
-
-            while (timerCycle >= timerPeriod)
-            {
-                timerCycle -= timerPeriod;
-
-                // And it resets to a specific value
-                int tima = (mmu.registers[R.R_TIMA] & 0xff) + 1;
-                if (tima > 0xff)
-                {
-                    tima = mmu.registers[R.R_TMA] & 0xff;
-                    setInterruptTriggered(R.TIMER_OVERFLOW_BIT);
-                }
-                mmu.registers[R.R_TIMA] = (byte) tima;
-            }
-        }
-
-        sound.tick(delta);
-        lcd.tick(delta);
-     */
     //TODO <ADD CODE HERE>
+    //sound.tick(delta);
+
+    this.lcd.tick(delta);
   }
 
   /// Triggers a particular interrupt by writing the correct interrupt bit to the interrupt register.

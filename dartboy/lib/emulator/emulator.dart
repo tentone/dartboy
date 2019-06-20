@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'cpu/cpu.dart';
-import 'package:dartboy/emulator/cartridge/cartridge.dart';
+import 'package:dartboy/emulator/memory/cartridge.dart';
 
 enum EmulatorState
 {

@@ -1,7 +1,7 @@
 import '../cpu/cpu.dart';
 import '../memory/memory_registers.dart';
 import '../memory/memory_addresses.dart';
-import '../cartridge/cartridge.dart';
+import 'package:dartboy/emulator/memory/cartridge.dart';
 import './palette_colors.dart';
 import './palette.dart';
 
@@ -297,7 +297,9 @@ class LCD
       if (LY == 143)
       {
         // Draw image into the display
-        graphics.drawImage(screenBuffer, 0, 0, core.display.getWidth(), core.display.getHeight(), null);
+        // TODO <ADD CODE HERE>
+
+        //graphics.drawImage(screenBuffer, 0, 0, core.display.getWidth(), core.display.getHeight(), null);
 
         // Trigger interrupts if the display is enabled
         if (displayEnabled)
