@@ -1,3 +1,6 @@
+/// Instructions execution table used for faster execution of some instructions.
+///
+/// All possible values are pre calculated based on the instruction input.
 class Tables
 {
    /// for A in range(0x100):

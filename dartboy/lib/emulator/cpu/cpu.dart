@@ -2,7 +2,7 @@ import '../../gui/lcd/lcd_widget.dart';
 import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
 import '../mmu/mmu.dart';
-import '../graphics/lcd.dart';
+import '../graphics/ppu.dart';
 import 'registers.dart';
 import 'instructions.dart';
 
@@ -22,7 +22,7 @@ class CPU
   Registers registers;
 
   /// PPU handles the graphics display
-  LCD lcd;
+  PPU ppu;
 
   /// Whether the CPU is currently halted if so, it will still operate at 4MHz, but will not execute any instructions until an interrupt is cyclesExecutedThisSecond.
   /// This mode is used for power saving.
@@ -40,6 +40,7 @@ class CPU
   /// The number of cycles executed in the last second.
   int cyclesExecutedThisSecond;
 
+  /// Indicates if the emulator is running at double speed.
   bool doubleSpeed = false;
 
   /// The current cycle of the DIV register.
@@ -53,12 +54,12 @@ class CPU
 
   set pc(int value)
   {
-    _pc = value & 0xFFFF;
+    this._pc = value & 0xFFFF;
   }
 
   get pc
   {
-    return _pc & 0xFFFF;
+    return this._pc & 0xFFFF;
   }
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
@@ -66,12 +67,9 @@ class CPU
 
   CPU(Cartridge cartridge)
   {
-    this.registers = new Registers(this);
-
     this.mmu = new MMU(cartridge);
-
-    this.lcd = new LCD(this);
-
+    this.registers = new Registers(this);
+    this.ppu = new PPU(this);
     this.reset();
   }
 
@@ -198,6 +196,7 @@ class CPU
     // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
     int tac = this.mmu.readRegisterByte(MemoryRegisters.R_TAC);
 
+    // If timer 3 bit is set the timer should start
     if((tac & 0x4) != 0)
     {
       this.timerCycle += delta;
@@ -205,25 +204,21 @@ class CPU
       // The Timer has a settable frequency
       int timerPeriod = 0;
 
-      /**
-       * Bit 2    - Timer Stop  (0=Stop, 1=Start)
-       * Bits 1-0 - Input Clock Select
-       * 00:   4096 Hz    (~4194 Hz SGB)
-       * 01: 262144 Hz  (~268400 Hz SGB)
-       * 10:  65536 Hz   (~67110 Hz SGB)
-       * 11:  16384 Hz   (~16780 Hz SGB)
-       */
       switch (tac & 0x3)
       {
+        // 4096 Hz
         case 0x0:
           timerPeriod = FREQUENCY ~/ 4096;
           break;
+        // 262144 Hz
         case 0x1:
           timerPeriod = FREQUENCY ~/ 262144;
           break;
+        // 65536 Hz
         case 0x2:
           timerPeriod = FREQUENCY ~/ 65536;
           break;
+        // 16384 Hz
         case 0x3:
           timerPeriod = FREQUENCY ~/ 16384;
           break;
@@ -246,10 +241,7 @@ class CPU
       }
     }
 
-    //TODO <ADD CODE HERE>
-    //sound.tick(delta);
-
-    this.lcd.tick(delta);
+    this.ppu.tick(delta);
   }
 
   /// Triggers a particular interrupt by writing the correct interrupt bit to the interrupt register.

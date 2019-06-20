@@ -42,7 +42,7 @@ class LCDPainter extends CustomPainter
   @override
   void paint(Canvas canvas, Size size)
   {
-    if(MainScreen.emulator.cpu == null || MainScreen.emulator.cpu.lcd == null)
+    if(MainScreen.emulator.cpu == null || MainScreen.emulator.cpu.ppu == null)
     {
       return;
     }
@@ -54,7 +54,7 @@ class LCDPainter extends CustomPainter
         Paint color = new Paint();
         color.style = PaintingStyle.stroke;
         color.strokeWidth = 1.0;
-        color.color = new Color(0xFF000000 | MainScreen.emulator.cpu.lcd.screenBuffer[x + y * LCD_WIDTH]);
+        color.color = new Color(0xFF000000 | MainScreen.emulator.cpu.ppu.screenBuffer[x + y * LCD_WIDTH]);
 
         List<double> points = new List<double>();
         points.add(x.toDouble() - LCD_WIDTH / 2);
