@@ -1,9 +1,11 @@
+import '../../gui/lcd/lcd_widget.dart';
 import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
 import '../mmu/mmu.dart';
 import '../graphics/lcd.dart';
 import 'registers.dart';
 import 'instructions.dart';
+
 
 /// CPU class is responsible for the instruction execution, interrupts and timing of the system.
 ///
@@ -21,6 +23,9 @@ class CPU
 
   /// PPU handles the graphics display
   LCD lcd;
+
+  /// LCD widget is where the content of the LCD is drawn.
+  LCDWidget lcdWidget;
 
   /// Whether the CPU is currently halted if so, it will still operate at 4MHz, but will not execute any instructions until an interrupt is cyclesExecutedThisSecond.
   /// This mode is used for power saving.
@@ -62,13 +67,15 @@ class CPU
   /// 16 bit Stack Pointer, the memory address of the top of the stack
   int sp = 0;
 
-  CPU(Cartridge cartridge)
+  CPU(Cartridge cartridge, LCDWidget lcdWidget)
   {
     this.registers = new Registers(this);
 
     this.mmu = new MMU(cartridge);
 
     this.lcd = new LCD(this);
+
+    this.lcdWidget = lcdWidget;
 
     this.reset();
   }

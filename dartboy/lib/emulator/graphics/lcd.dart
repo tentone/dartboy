@@ -298,8 +298,9 @@ class LCD
       {
         // Draw image into the display
         // TODO <ADD CODE HERE>
-
         //graphics.drawImage(screenBuffer, 0, 0, core.display.getWidth(), core.display.getHeight(), null);
+        //this.core.lcdWidget.
+
 
         // Trigger interrupts if the display is enabled
         if (displayEnabled)
@@ -420,7 +421,7 @@ class LCD
       ///
       /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
-      if (core.mmu.cartridge.gameboyType == GameboyType.COLOR)
+      if (this.core.mmu.cartridge.gameboyType == GameboyType.COLOR)
       {
         int attribs = this.core.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
 
@@ -435,7 +436,7 @@ class LCD
       }
 
       // Delegate tile drawing
-      drawTile(bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
+      drawTile(this.bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
     }
   }
 
@@ -473,7 +474,7 @@ class LCD
       /// Same rules apply here as for background tiles.
       ///
       /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
-      if (core.mmu.cartridge.gameboyType == GameboyType.COLOR)
+      if (this.core.mmu.cartridge.gameboyType == GameboyType.COLOR)
       {
         int attribs = this.core.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
 
@@ -486,7 +487,7 @@ class LCD
         gbcPalette = (attribs & 0x07);
       }
 
-      drawTile(bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, P_6, false);
+      drawTile(this.bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, P_6, false);
     }
   }
 

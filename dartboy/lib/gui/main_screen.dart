@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../emulator/emulator.dart';
-import './lcd/lcd_painter.dart';
+import './lcd/lcd_widget.dart';
 
 class MainScreen extends StatefulWidget
 {
@@ -46,12 +46,7 @@ class MainScreenState extends State<MainScreen>
           children: <Widget>
           [
             // LCD
-            new Expanded(child: new CustomPaint
-            (
-              isComplex: true,
-              willChange: true,
-              painter: new LCDPainter(),
-            )),
+            new Expanded(child: this.emulator.lcdWidget),
             new Expanded(child: new Column
             (
               mainAxisAlignment: MainAxisAlignment.center,
