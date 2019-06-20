@@ -11,6 +11,9 @@ class MainScreen extends StatefulWidget
 
   final String title;
 
+  /// Emulator instance
+  static Emulator emulator = new Emulator();
+
   @override
   MainScreenState createState()
   {
@@ -20,14 +23,6 @@ class MainScreen extends StatefulWidget
 
 class MainScreenState extends State<MainScreen>
 {
-  /// Emulator instance
-  Emulator emulator;
-
-  MainScreenState()
-  {
-    this.emulator = new Emulator();
-  }
-
   @override
   Widget build(BuildContext context)
   {
@@ -46,7 +41,7 @@ class MainScreenState extends State<MainScreen>
           children: <Widget>
           [
             // LCD
-            new Expanded(child: this.emulator.lcdWidget),
+            new Expanded(child: new LCDWidget()),
             new Expanded(child: new Column
             (
               mainAxisAlignment: MainAxisAlignment.center,
@@ -108,19 +103,19 @@ class MainScreenState extends State<MainScreen>
                   [
                     new RaisedButton(onPressed: ()
                     {
-                      this.emulator.run();
+                      MainScreen.emulator.run();
                     }, child: new Text("Run")),
                     new RaisedButton(onPressed: ()
                     {
-                      this.emulator.pause();
+                      MainScreen.emulator.pause();
                     }, child: new Text("Pause")),
                     new RaisedButton(onPressed: ()
                     {
-                      this.emulator.reset();
+                      MainScreen.emulator.reset();
                     }, child: new Text("Reset")),
                     new RaisedButton(onPressed: ()
                     {
-                      this.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
+                      MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
                     }, child: new Text("Load"))
                   ],
                 ))

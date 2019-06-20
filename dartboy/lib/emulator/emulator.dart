@@ -25,9 +25,6 @@ class Emulator
   /// Game cartridge
   Cartridge cartridge;
 
-  /// LCD widget is where the content of the LCD is drawn.
-  LCDWidget lcdWidget;
-
   /// Callback function called on the end of each emulator step.
   Function onStep;
 
@@ -39,7 +36,6 @@ class Emulator
     this.cpu = null;
     this.cartridge = null;
 
-    this.lcdWidget = new LCDWidget(null);
     this.state = EmulatorState.WAITING;
     this.onStep = onStep;
   }
@@ -57,8 +53,7 @@ class Emulator
     this.cartridge = new Cartridge();
     this.cartridge.load(data);
 
-    this.cpu = new CPU(this.cartridge, this.lcdWidget);
-    this.lcdWidget.cpu = this.cpu;
+    this.cpu = new CPU(this.cartridge);
 
     this.printCartridgeInfo();
 

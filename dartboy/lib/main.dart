@@ -8,10 +8,10 @@ import 'gui/main_screen.dart';
 
 void main()
 {
-  runApp(DartBoyApp());
+  runApp(DartBoy());
 }
 
-class DartBoyApp extends StatelessWidget
+class DartBoy extends StatelessWidget
 {
   /// Override the target platform is running on desktop.
   void overrideTargetPlatformForDesktop()

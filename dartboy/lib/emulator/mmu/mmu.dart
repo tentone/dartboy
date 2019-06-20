@@ -47,8 +47,8 @@ class MMU
   {
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      throw 'Cannot write data into ROM memory.';
-      //return;
+      //throw 'Cannot write data into ROM memory.';
+      return;
     }
     else
     {
