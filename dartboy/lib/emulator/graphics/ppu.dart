@@ -29,9 +29,7 @@ class LCD
 
   /// A buffer to hold the current rendered frame that can be directly copied to the canvas on the widget.
   ///
-  /// Each position stores RGB encoded color value.
-  ///
-  /// The data is stored by rows.
+  /// Each position stores RGB encoded color value. The data is stored by rows.
   List<int> screenBuffer = new List<int>(W * H);
 
   /// Background palettes. On CGB, 0-7 are used. On GB, only 0 is used.
