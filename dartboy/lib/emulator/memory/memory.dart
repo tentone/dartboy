@@ -195,7 +195,7 @@ class Memory
             if(this.hdma != null)
             {
               //TODO <DEBUG PRINT>
-              //print("!!! Terminated HDMA from %04X-%04X, %02X remaining\n", source, dest, length);
+              //print("Terminated HDMA from " + source.toString() + "-" + dest.toString() + ", " + length.toString() + " remaining.");
             }
 
             // General DMA
@@ -211,7 +211,7 @@ class Memory
         {
           if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
           {
-            this.vramPageStart = VRAM_PAGESIZE * (value & 0x3);
+            this.vramPageStart = Memory.VRAM_PAGESIZE * (value & 0x3);
           }
           break;
         }
@@ -219,7 +219,7 @@ class Memory
         {
           if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
           {
-            this.wramPageStart = WRAM_PAGESIZE * max(1, value & 0x7);
+            this.wramPageStart = Memory.WRAM_PAGESIZE * max(1, value & 0x7);
           }
           break;
         }
@@ -229,6 +229,7 @@ class Memory
           //this.cpu.sound.channel1.restart();
           value &= 0x7f;
         }
+        this.registers[address] = value & 0xFF;
         break;
       case MemoryRegisters.R_NR10:
       case MemoryRegisters.R_NR11:
@@ -243,6 +244,7 @@ class Memory
           //this.cpu.sound.channel2.restart();
           value &= 0x7F;
         }
+        this.registers[address] = value & 0xFF;
         break;
       case MemoryRegisters.R_NR21:
       case MemoryRegisters.R_NR22:
@@ -256,6 +258,7 @@ class Memory
           //this.cpu.sound.channel3.restart();
           value &= 0x7F;
         }
+        this.registers[address] = value & 0xFF;
         break;
       case MemoryRegisters.R_NR30:
       case MemoryRegisters.R_NR31:
@@ -270,11 +273,12 @@ class Memory
           //this.cpu.sound.channel4.restart();
           value &= 0x7F;
         }
+        this.registers[address] = value & 0xFF;
         break;
       case MemoryRegisters.R_NR41:
       case MemoryRegisters.R_NR42:
       case MemoryRegisters.R_NR43:
-      this.registers[address] = value & 0xFF;
+        this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel4.update();
         break;
       case MemoryRegisters.R_DMA:
