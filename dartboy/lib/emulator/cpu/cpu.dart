@@ -354,12 +354,14 @@ class CPU
       this.halted = false;
     }
 
-    int op = this.mmu.readByte(this.pc++);
+    int op = this.mmu.readByte(this.pc);
 
     if(op == null)
     {
-      throw new Exception('Read null op code. (PC: ' + this.pc.toRadixString(8) + ')');
+      throw new Exception('Read null op code. (PC: 0x' + this.pc.toRadixString(16) + ')');
     }
+
+    this.pc++;
 
     switch (op)
     {

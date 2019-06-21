@@ -182,12 +182,6 @@ class Cartridge
   {
     return this.data[address] & 0xFF;
   }
-
-  /// Read 16 bits from the cartridge
-  int readWord(int address)
-  {
-    return ((this.data[address] << 8) | this.data[address + 1]) & 0xFFFF;
-  }
 }
 
 /// Enum to indicate the gameboy type present in the cartridge.
