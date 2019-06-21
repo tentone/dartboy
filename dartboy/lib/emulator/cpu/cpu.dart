@@ -65,9 +65,10 @@ class CPU
 
   CPU(Cartridge cartridge)
   {
-    this.mmu = new MMU(cartridge);
+    this.mmu = cartridge.createController(this);
     this.registers = new Registers(this);
     this.ppu = new PPU(this);
+
     this.reset();
   }
 

@@ -2,6 +2,7 @@ import '../cartridge.dart';
 import '../hdma.dart';
 import '../memory.dart';
 import '../memory_addresses.dart';
+import '../../cpu/cpu.dart';
 
 /// The MMU (memory management unit) is used to access memory.
 ///
@@ -14,6 +15,9 @@ import '../memory_addresses.dart';
 /// Address 0x100 until index 0x3FFF include the contents of the cartridge (depending on the cartridge size this memory bank can change totally)
 class MMU
 {
+  /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
+  CPU cpu;
+
   /// Cartridge memory (contains booth RAM and ROM memory).
   ///
   /// Cartridge memory composes the lower 32kB of memory from (0x0000 to 0x8000).
@@ -29,12 +33,11 @@ class MMU
   /// Used for direct memory copy operations.
   HDMA hdma;
 
-  MMU(Cartridge cartridge)
+  MMU(CPU cpu, Cartridge cartridge)
   {
+    this.cpu = cpu;
     this.cartridge = cartridge;
-
-    this.memory = new Memory(MemoryAddresses.ADDRESS_SIZE - MemoryAddresses.CARTRIDGE_ROM_END);
-
+    this.memory = new Memory(cpu);
     this.hdma = null;
   }
 

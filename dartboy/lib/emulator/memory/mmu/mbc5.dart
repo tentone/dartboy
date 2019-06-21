@@ -1,9 +1,10 @@
+import '../../cpu/cpu.dart';
 import '../cartridge.dart';
 import 'mmu.dart';
 
 class MBC5 extends MMU
 {
-  MBC5(Cartridge cartridge) : super(cartridge);
+  MBC5(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
 
   @override
   int readByte(int address)
