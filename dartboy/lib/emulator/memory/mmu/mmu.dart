@@ -20,9 +20,13 @@ class MMU
   Cartridge cartridge;
 
   /// On board game boy memory (after the cartridge memory).
+  ///
+  /// Also contains the video memory, registers, etc.
   Memory memory;
 
-  /// HDMA memory controller (only available on gameboy color games)
+  /// HDMA memory controller (only available on gameboy color games).
+  ///
+  /// Used for direct memory copy operations.
   HDMA hdma;
 
   MMU(Cartridge cartridge)
@@ -32,14 +36,6 @@ class MMU
     this.memory = new Memory(MemoryAddresses.ADDRESS_SIZE - MemoryAddresses.CARTRIDGE_ROM_END);
 
     this.hdma = null;
-
-    /*
-    // The CGB has 16k of wram
-    wram = new byte[WRAM_PAGESIZE * (core.cartridge.isColorGB ? 8 : 2)];
-
-    // and 8k of vram
-    vram = new byte[VRAM_PAGESIZE * (core.cartridge.isColorGB ? 2 : 1)];
-     */
   }
 
   /// Write a byte into memory address

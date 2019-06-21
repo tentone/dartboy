@@ -6,9 +6,9 @@ import 'cpu.dart';
 ///
 class Registers
 {
-  /// The DMG has 4 flag registers, zero, subtract, half-carry and carry.
-  /// Half-carry is only ever used for the DAA instruction. Half-carry is usually carry over lower nibble, and carry is over bit 7.
+  // The DMG has 4 flag registers, zero, subtract, half-carry and carry.
   static const int F_ZERO = 0x80;
+  // Half-carry is only ever used for the DAA instruction. Half-carry is usually carry over lower nibble, and carry is over bit 7.
   static const int F_SUBTRACT = 0x40;
   static const int F_HALF_CARRY = 0x20;
   static const int F_CARRY = 0x10;

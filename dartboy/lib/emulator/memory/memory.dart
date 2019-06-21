@@ -1,8 +1,20 @@
-/// Generic memory container used to represent memory spaces in the gameboy.
+
+/// Generic memory container used to represent memory spaces in the gameboy system.
+///
+/// Contains all the memory spaces of the gameboy except for the cartridge data.
 ///
 /// Can be used to represent booth ROM or RAM memory and provides Byte based access.
 class Memory
 {
+  /// Size of a page of Video RAM, in bytes. 8kb.
+  static const int VRAM_PAGESIZE = 0x2000;
+
+  /// Size of a page of Work RAM, in bytes. 4kb.
+  static const int WRAM_PAGESIZE = 0x1000;
+
+  /// Size of a page of ROM, in bytes. 16kb.
+  static const int ROM_PAGESIZE = 0x4000;
+
   /// The rest of the the data stored in the system after the cartridge.
   List<int> data;
 
