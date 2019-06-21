@@ -5,6 +5,7 @@ class Memory
 {
   /// The rest of the the data stored in the system after the cartridge.
   List<int> data;
+  //Uint8List
 
   /// Size of the memory in bytes
   int size;
@@ -34,7 +35,7 @@ class Memory
   /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
   int readByte(int address)
   {
-    return this.data[address] & 0xFF;
+    return this.data[address];
   }
 
   /// Write a byte of data into memory.

@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../emulator/emulator.dart';
-import 'package:dartboy/gui/lcd_widget.dart';
+import './lcd.dart';
+import './button.dart';
 
 class MainScreen extends StatefulWidget
 {
@@ -60,16 +61,16 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){print("UP");}, child: new Text("Up")),
+                        new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Up"),
                         new Row
                         (
                           children: <Widget>
                           [
-                            new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Left")),
-                            new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Right"))
+                            new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Left"),
+                            new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Right")
                           ]
                         ),
-                        new RaisedButton(color: Colors.blueAccent, shape: shape, onPressed: (){}, child: new Text("Down"))
+                        new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Down"),
                       ],
                     ),
                     // AB

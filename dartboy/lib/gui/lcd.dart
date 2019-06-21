@@ -8,7 +8,7 @@ import './main_screen.dart';
 
 class LCDWidget extends StatefulWidget
 {
-  LCDWidget();
+  LCDWidget({Key key}) : super(key: key);
 
   @override
   State<LCDWidget> createState()
