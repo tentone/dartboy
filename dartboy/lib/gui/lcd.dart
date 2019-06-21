@@ -52,12 +52,12 @@ class LCDPainter extends CustomPainter
         Paint color = new Paint();
         color.style = PaintingStyle.stroke;
         color.strokeWidth = 1.0;
-        //color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.screenBuffer[x + y * LCD_WIDTH]);
-        color.color = ColorConverter.toColor(0xFF00FF);
+        //color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.screenBuffer[x + y * PPU.LCD_WIDTH]);
+        color.color = ColorConverter.toColor((x & 0xFF) << 8 | (y & 0xFF));
 
         List<double> points = new List<double>();
-        points.add(x.toDouble() - PPU.LCD_WIDTH / 2);
-        points.add(y.toDouble() + PPU.LCD_HEIGHT / 2);
+        points.add(x.toDouble() - PPU.LCD_WIDTH / 2.0);
+        points.add(y.toDouble() + PPU.LCD_HEIGHT / 2.0);
 
         canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), color);
       }

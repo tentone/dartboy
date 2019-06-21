@@ -1,6 +1,5 @@
 import '../cartridge.dart';
 import '../memory.dart';
-import '../memory_addresses.dart';
 import '../../cpu/cpu.dart';
 
 /// The MMU (memory management unit) is used to access memory.
@@ -78,6 +77,11 @@ class MMU extends Memory
   /// Meaning of the values is stored in the MemoryRegisters class
   int readRegisterByte(int address)
   {
+    if(address > this.registers.length)
+    {
+      throw new Exception('Trying to access invalid register address.');
+    }
+
     return this.registers[address];
   }
 
@@ -86,6 +90,11 @@ class MMU extends Memory
   /// Meaning of the values is stored in the MemoryRegisters class
   void writeRegisterByte(int address, int value)
   {
+    if(address > this.registers.length)
+    {
+      throw new Exception('Trying to access invalid register address.');
+    }
+
     value &= 0xFF;
     this.registers[address] = value;
   }

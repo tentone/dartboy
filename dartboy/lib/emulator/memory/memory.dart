@@ -58,30 +58,34 @@ class Memory
   Memory(CPU cpu)
   {
     this.cpu = cpu;
-
+    this.hdma = null;
     this.initialize();
   }
 
   /// Initialize the memory, create the data array with the defined size.
   void initialize()
   {
+    this.vramPageStart = 0;
+    this.wramPageStart = Memory.WRAM_PAGESIZE;
+    this.romPageStart = Memory.ROM_PAGESIZE;
+
     this.registers = new List<int>(0x100);
     this.registers.fillRange(0, this.registers.length, 0);
 
     this.oam = new List<int>(0xA0);
     this.oam.fillRange(0, this.oam.length, 0);
 
-    this.wram = new List<int>(WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
+    this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
     this.wram.fillRange(0, this.wram.length, 0);
 
-    this.vram = new List<int>(VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
+    this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
     this.vram.fillRange(0, this.vram.length, 0);
   }
 
   /// Write a byte into memory address
   void writeByte(int address, int value)
   {
-    value &= 0xff;
+    value &= 0xFF;
     address &= 0xFFFF;
 
     int block = address & 0xF000;
@@ -180,9 +184,11 @@ class Memory
             break;
           }
 
+          // Get the configuration of the HDMA transfer
           int length = ((value & 0x7f) + 1) * 0x10;
           int source = ((this.registers[0x51] & 0xff) << 8) | (this.registers[0x52] & 0xF0);
           int dest = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
+
           if ((value & 0x80) != 0)
           {
             // H-Blank DMA
@@ -361,7 +367,7 @@ class Memory
       }
       else if(address >= MemoryAddresses.IO_START)
       {
-        this.readIO(address - MemoryAddresses.IO_START);
+        return this.readIO(address - MemoryAddresses.IO_START);
       }
     }
 
@@ -373,11 +379,7 @@ class Memory
   {
     if(address == 0x4d)
     {
-      if(this.cpu.doubleSpeed)
-      {
-        return 0x80;
-      }
-      return 0x0;
+      return this.cpu.doubleSpeed ? 0x80 : 0x0;
     }
 
     return this.registers[address];

@@ -12,13 +12,13 @@ class HDMA
   int source;
 
   /// The destination address.
-  int dest;
+  int destination;
 
   /// The length of the transfer.
   int length;
 
   /// The current offset into the source/dest buffers.
-  int ptr;
+  int position;
 
   /// Creates a new HDMA instance.
   ///
@@ -29,7 +29,7 @@ class HDMA
   {
     this.memory = memory;
     this.source = source;
-    this.dest = dest;
+    this.destination = dest;
     this.length = length;
   }
 
@@ -46,12 +46,12 @@ class HDMA
   /// In that case reading from FF55 may return any value for the lower 7 bits, but Bit 7 will be read as "1".
   void tick()
   {
-    for (int i = this.ptr; i < this.ptr + 0x10; i++)
+    for (int i = this.position; i < this.position + 0x10; i++)
     {
-      this.memory.vram[this.memory.vramPageStart + this.dest + i] = this.memory.readByte(source + i);
+      this.memory.vram[this.memory.vramPageStart + this.destination + i] = this.memory.readByte(source + i);
     }
 
-    this.ptr += 0x10;
+    this.position += 0x10;
     this.length -= 0x10;
 
     if (this.length == 0)
@@ -60,7 +60,7 @@ class HDMA
       this.memory.registers[0x55] = 0xff;
 
       //TODO <DEBUG PRINT>
-      print("Finished HDMA from " + this.source.toString() + " to " + this.dest.toString());
+      print("Finished HDMA from " + this.source.toString() + " to " + this.destination.toString());
     }
     else
     {

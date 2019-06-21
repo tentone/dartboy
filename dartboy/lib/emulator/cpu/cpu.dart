@@ -58,7 +58,7 @@ class CPU
     this._pc = value & 0xFFFF;
   }
 
-  get pc
+  int get pc
   {
     return this._pc & 0xFFFF;
   }
@@ -358,7 +358,7 @@ class CPU
 
     if(op == null)
     {
-      throw new Exception('DartBoy: Read null op. PC: ' + this.pc.toString());
+      throw new Exception('Read null op code. (PC: ' + this.pc.toRadixString(8) + ')');
     }
 
     switch (op)
