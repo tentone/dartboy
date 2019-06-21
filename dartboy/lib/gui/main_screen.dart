@@ -27,10 +27,6 @@ class MainScreenState extends State<MainScreen>
   @override
   Widget build(BuildContext context)
   {
-    RoundedRectangleBorder shape = new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0));
-
-    CircleBorder circleShape = new CircleBorder();
-
     return new Scaffold
     (
       body: new Container
@@ -67,6 +63,7 @@ class MainScreenState extends State<MainScreen>
                           children: <Widget>
                           [
                             new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Left"),
+                            new Container(width: 50, height: 50),
                             new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Right")
                           ]
                         ),
@@ -78,8 +75,8 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new RaisedButton(color: Colors.red, shape: circleShape, onPressed: (){}, child: new Text("A")),
-                        new RaisedButton(color: Colors.green, shape: circleShape, onPressed: (){}, child: new Text("B"))
+                        new Button(color: Colors.red, onPressed: (){}, onReleased: (){}, label: "A"),
+                        new Button(color: Colors.green, onPressed: (){}, onReleased: (){}, label: "B"),
                       ],
                     ),
                   ],
@@ -91,8 +88,9 @@ class MainScreenState extends State<MainScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>
                   [
-                    new RaisedButton(color: Colors.orange, shape: shape, onPressed: (){}, child: new Text("Start")),
-                    new RaisedButton(color: Colors.yellowAccent, shape: shape, onPressed: (){}, child: new Text("Select"))
+                    new Button(color: Colors.orange, onPressed: (){}, onReleased: (){}, label: "Start"),
+                    new Container(width: 20),
+                    new Button(color: Colors.yellowAccent, onPressed: (){}, onReleased: (){}, label: "Select"),
                   ],
                 ),
                 // Button (Start + Pause + Load)

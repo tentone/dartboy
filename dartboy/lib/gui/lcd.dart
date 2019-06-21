@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../emulator/graphics/ppu.dart';
+import '../utils/color_converter.dart';
 import './main_screen.dart';
 
 class LCDWidget extends StatefulWidget
@@ -35,30 +37,27 @@ class LCDPainter extends CustomPainter
 {
   LCDPainter();
 
-  static const int LCD_WIDTH = 160;
-  static const int LCD_HEIGHT = 144;
-  static const double LCD_RATIO = LCD_WIDTH / LCD_HEIGHT;
-
   @override
   void paint(Canvas canvas, Size size)
   {
-    if(MainScreen.emulator == null || MainScreen.emulator.cpu == null || MainScreen.emulator.cpu.ppu == null)
+    if(MainScreen.emulator == null || MainScreen.emulator.cpu == null)
     {
       return;
     }
 
-    for(int x = 0; x < LCD_WIDTH; x++)
+    for(int x = 0; x < PPU.LCD_WIDTH; x++)
     {
-      for(int y = 0; y < LCD_HEIGHT; y++)
+      for(int y = 0; y < PPU.LCD_HEIGHT; y++)
       {
         Paint color = new Paint();
         color.style = PaintingStyle.stroke;
         color.strokeWidth = 1.0;
-        color.color = new Color(0xFF000000 | (x + (y << 8))); //new Color(0xFF000000 | MainScreen.emulator.cpu.ppu.screenBuffer[x + y * LCD_WIDTH]);
+        //color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.screenBuffer[x + y * LCD_WIDTH]);
+        color.color = ColorConverter.toColor(0xFF00FF);
 
         List<double> points = new List<double>();
-        points.add(x.toDouble() - LCD_WIDTH / 2);
-        points.add(y.toDouble() + LCD_HEIGHT / 2);
+        points.add(x.toDouble() - PPU.LCD_WIDTH / 2);
+        points.add(y.toDouble() + PPU.LCD_HEIGHT / 2);
 
         canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), color);
       }

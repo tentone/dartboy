@@ -1,6 +1,5 @@
 import 'registers.dart';
 import 'cpu.dart';
-import 'tables.dart';
 
 /// Class to handle instruction implementation, instructions run on top of the CPU object.
 ///
@@ -924,7 +923,7 @@ class Instructions
     int reg = (op >> 3) & 0x7;
     int a = cpu.registers.getRegister(reg) & 0xff;
 
-    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | Tables.DEC[a];
+    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | InstructionTables.DEC[a];
 
     a = (a - 1) & 0xff;
 
@@ -936,7 +935,7 @@ class Instructions
     int reg = (op >> 3) & 0x7;
     int a = cpu.registers.getRegister(reg) & 0xff;
 
-    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | Tables.INC[a];
+    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | InstructionTables.INC[a];
 
     a = (a + 1) & 0xff;
 
@@ -995,4 +994,40 @@ class Instructions
     cpu.pushWordSP(val);
     cpu.clocks += 4;
   }
+}
+
+/// Instructions execution table used for faster execution of some instructions.
+///
+/// All possible values are pre calculated based on the instruction input.
+class InstructionTables
+{
+  /// for A in range(0x100):
+  ///     F = F_N
+  ///     if ((A & 0xf) - 1 < 0): F |= F_H
+  ///     if A - 1 == 0: F |= F_Z
+  ///     DEC[A] = F
+  static const List<int> DEC = [96, 192, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64,
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96,
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+  64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64,
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64,
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+  64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64,
+  64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64,
+  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
+  64, 64, 96, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64];
+
+  /// for A in range(0x100):
+  ///     F = 0
+  ///     if ((((A & 0xf) + 1) & 0xF0) != 0): F |= F_H
+  ///     if (A + 1 > 0xff): F |= F_Z
+  ///     INC[A] = F
+  static const List<int> INC = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160];
 }

@@ -40,6 +40,7 @@ int main(int argc, char **argv)
 	}
 
 	std::string data_directory = base_directory + "\\data";
+
 	std::string assets_path = data_directory + "\\flutter_assets";
 	std::string icu_data_path = data_directory + "\\icudtl.dat";
 

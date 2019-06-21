@@ -5,7 +5,6 @@ class Memory
 {
   /// The rest of the the data stored in the system after the cartridge.
   List<int> data;
-  //Uint8List
 
   /// Size of the memory in bytes
   int size;

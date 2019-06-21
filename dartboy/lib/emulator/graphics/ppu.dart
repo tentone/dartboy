@@ -10,8 +10,9 @@ import './palette.dart';
 /// Is responsible for managing the sprites and background layers.
 class PPU
 {
-  static const int W = 160;
-  static const int H = 144;
+  static const int LCD_WIDTH = 160;
+  static const int LCD_HEIGHT = 144;
+  static const double LCD_RATIO = LCD_WIDTH / LCD_HEIGHT;
 
   /// Draw layer priority constants.
   ///
@@ -30,7 +31,7 @@ class PPU
   /// A buffer to hold the current rendered frame that can be directly copied to the canvas on the widget.
   ///
   /// Each position stores RGB encoded color value. The data is stored by rows.
-  List<int> screenBuffer = new List<int>(W * H);
+  List<int> screenBuffer = new List<int>(LCD_WIDTH * LCD_HEIGHT);
 
   /// Background palettes. On CGB, 0-7 are used. On GB, only 0 is used.
   List<Palette> bgPalettes = new List<Palette>(8);
@@ -214,14 +215,13 @@ class PPU
       {
         if (this.lastSecondTime == -1)
         {
-
           this.lastSecondTime = DateTime.now().millisecondsSinceEpoch;
           this.lastCoreCycle = this.cpu.clocks;
         }
 
         this.currentVBlankCount++;
 
-        if (currentVBlankCount == 60)
+        if(currentVBlankCount == 60)
         {
           //print("Took " + ((DateTime.now().millisecondsSinceEpoch - lastSecondTime) / 1000.0) + " seconds for 60 frames - " + (core.clocks - lastCoreCycle) / 60 + " clks/frames");
           this.lastCoreCycle = this.cpu.clocks;
@@ -352,7 +352,7 @@ class PPU
     }
 
     // If the window appears in this scanline, draw it
-    if (windowEnabled() && scanline >= getWindowPosY() && getWindowPosX() < W && getWindowPosY() >= 0)
+    if (windowEnabled() && scanline >= getWindowPosY() && getWindowPosX() < LCD_WIDTH && getWindowPosY() >= 0)
     {
       drawWindow(this.screenBuffer, scanline);
     }
@@ -515,13 +515,13 @@ class PPU
       int dx = x + px;
 
       // If we're out of bounds, continue iteration
-      if (dx < 0 || dx >= W || scanline >= H)
+      if (dx < 0 || dx >= LCD_WIDTH || scanline >= LCD_HEIGHT)
       {
         continue;
       }
 
       // Check if our current priority should overwrite the current priority
-      int index = dx + scanline * W;
+      int index = dx + scanline * LCD_WIDTH;
       if (basePriority != 0 && basePriority < (data[index] & 0xFF000000))
       {
         continue;

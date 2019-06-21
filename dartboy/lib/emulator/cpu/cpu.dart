@@ -336,9 +336,9 @@ class CPU
       this.fireInterrupts();
     }
 
-    /*if (System.nanoTime() - last > 1_000_000_000)
+    /*if (DateTime.now().millisecondsSinceEpoch - last > 1000)
     {
-        System.err.println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * cyclesExecutedThisSecond / clockSpeed));
+        println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * cyclesExecutedThisSecond / clockSpeed));
         last = System.nanoTime();
         cyclesExecutedThisSecond = 0;
     }*/
@@ -351,19 +351,17 @@ class CPU
         {
             if (emulateSpeed)
             {
-                LockSupport.parkNanos(1_000_000_000L * t / clockSpeed + _last - System.nanoTime());
+                LockSupport.parkNanos(1000 * t / clockSpeed + _last - DateTime.now().millisecondsSinceEpoch);
             } else
             {
-                clockSpeed = (int) (1_000_000_000L * t / (System.nanoTime() - _last));
+                clockSpeed = (1000 * t / (SDateTime.now().millisecondsSinceEpoch - _last)).toInt();
                 sound.updateClockSpeed(clockSpeed);
             }
-            _last = System.nanoTime();
+            _last = DateTime.now().millisecondsSinceEpoch;
         }
-        catch (Exception e)
+        catch(e)
         {
-            // #error there is no reason for this to fail, but if it does
-            //        all we can do is printing the stacktrace for debugging
-            e.printStackTrace();
+          throw new Exception('Time update failed');
         }
         executeLock.acquireUninterruptibly();
         cyclesSinceLastSleep -= t;
@@ -478,7 +476,6 @@ class CPU
           Instructions.STOP(this);
           break;
       case 0xf9:
-          this.sp = this.registers.hl;
           this.setRegisterPairSP(Registers.ADDR_SP, this.registers.hl);
           break;
       case 0xc5: // BC
@@ -719,7 +716,6 @@ class CPU
             break;
           default:
             throw new Exception('Unsupported operations, clocks: ' + this.clocks.toString() + ", op: " + op.toRadixString(16));
-            break;
         }
     }
   }

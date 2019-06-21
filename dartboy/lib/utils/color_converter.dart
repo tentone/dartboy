@@ -10,6 +10,6 @@ class ColorConverter
 
   static Color toColor(int rgb)
   {
-    return new Color(rgb);
+    return new Color(0xFF000000 | rgb);
   }
 }

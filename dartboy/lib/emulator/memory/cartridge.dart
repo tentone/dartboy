@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import '../memory/memory.dart';
-
 import './mmu/mmu.dart';
 import './mmu/mbc1.dart';
 import './mmu/mbc2.dart';
@@ -11,8 +9,14 @@ import './mmu/mbc5.dart';
 /// Stores the cartridge information and data.
 ///
 /// Also manages the cartridge type and is responsible for the memory bank switching.
-class Cartridge extends Memory
+class Cartridge
 {
+  /// Data stored in the cartridge (directly loaded from a ROM file).
+  List<int> data;
+
+  /// Size of the memory in bytes
+  int size;
+
   /// Cartridge name read from the
   String name;
 
@@ -52,7 +56,7 @@ class Cartridge extends Memory
   /// SGB mode indicates if the game has super gameboy features
   bool superGameboy;
 
-  Cartridge() : super();
+  Cartridge();
 
   /// Load cartridge byte data
   void load(List<int> data)
