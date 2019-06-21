@@ -355,7 +355,7 @@ class CPU
     }
 
     int op = this.mmu.readByte(this.pc);
-
+    
     if(op == null)
     {
       throw new Exception('Read null op code. (PC: 0x' + this.pc.toRadixString(16) + ')');
