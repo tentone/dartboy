@@ -21,9 +21,6 @@ class Emulator
   /// CPU object
   CPU cpu;
 
-  /// Game cartridge
-  Cartridge cartridge;
-
   /// Callback function called on the end of each emulator step.
   Function onStep;
 
@@ -33,7 +30,6 @@ class Emulator
   Emulator({Function onStep})
   {
     this.cpu = null;
-    this.cartridge = null;
 
     this.state = EmulatorState.WAITING;
     this.onStep = onStep;
@@ -51,10 +47,10 @@ class Emulator
 
     List<int> data = file.readAsBytesSync();
 
-    this.cartridge = new Cartridge();
-    this.cartridge.load(data);
+    Cartridge cartridge = new Cartridge();
+    cartridge.load(data);
 
-    this.cpu = new CPU(this.cartridge);
+    this.cpu = new CPU(cartridge);
 
     this.state = EmulatorState.READY;
 
@@ -65,17 +61,16 @@ class Emulator
   void printCartridgeInfo()
   {
     print('Catridge info');
-    print('Type: ' + this.cpu.mmu.cartridge.type.toString());
-    print('Name: ' + this.cpu.mmu.cartridge.name);
-    print('GB: ' + this.cpu.mmu.cartridge.gameboyType.toString());
-    print('SGB: ' + this.cpu.mmu.cartridge.superGameboy.toString());
+    print('Type: ' + this.cpu.cartridge.type.toString());
+    print('Name: ' + this.cpu.cartridge.name);
+    print('GB: ' + this.cpu.cartridge.gameboyType.toString());
+    print('SGB: ' + this.cpu.cartridge.superGameboy.toString());
   }
 
   /// Reset the emulator, stop running the code and unload the cartridge
   void reset()
   {
     this.cpu = null;
-    this.cartridge = null;
     this.state = EmulatorState.WAITING;
   }
 

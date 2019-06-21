@@ -1,4 +1,5 @@
 import 'cpu.dart';
+import '../memory/cartridge.dart';
 
 /// CPU registers, each register has 8 bits
 ///
@@ -108,7 +109,7 @@ class Registers
   /// (Check page 17 and 18 of the GB CPU manual)
   void reset()
   {
-    this.a = 0x01;
+    this.a = this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 0x11 : 0x01;
     this.f = 0xB0;
     this.b = 0x00;
     this.c = 0x13;

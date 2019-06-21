@@ -13,6 +13,9 @@ class CPU
   /// Frequency frequency (hz)
   static const int FREQUENCY = 4194304;
 
+  /// Game cartridge memory data composes the lower 32kB of memory from (0x0000 to 0x8000).
+  Cartridge cartridge;
+
   /// Memory control unit decides from where the addresses are read and written to
   MMU mmu;
 
@@ -65,7 +68,8 @@ class CPU
 
   CPU(Cartridge cartridge)
   {
-    this.mmu = cartridge.createController(this);
+    this.cartridge = cartridge;
+    this.mmu = this.cartridge.createController(this);
     this.registers = new Registers(this);
     this.ppu = new PPU(this);
 
@@ -167,7 +171,6 @@ class CPU
   void tick(int clocks)
   {
     this.clocks += clocks;
-
     this.updateInterrupts(clocks);
   }
 
@@ -336,37 +339,6 @@ class CPU
     {
       this.fireInterrupts();
     }
-
-    /*if (DateTime.now().millisecondsSinceEpoch - last > 1000)
-    {
-        println(last + " -- " + clockSpeed + " Hz -- " + (1.0 * cyclesExecutedThisSecond / clockSpeed));
-        last = System.nanoTime();
-        cyclesExecutedThisSecond = 0;
-    }*/
-
-    /*int t = 100000;
-    if (cyclesSinceLastSleep >= t)
-    {
-        executeLock.release();
-        try
-        {
-            if (emulateSpeed)
-            {
-                LockSupport.parkNanos(1000 * t / clockSpeed + _last - DateTime.now().millisecondsSinceEpoch);
-            } else
-            {
-                clockSpeed = (1000 * t / (SDateTime.now().millisecondsSinceEpoch - _last)).toInt();
-                sound.updateClockSpeed(clockSpeed);
-            }
-            _last = DateTime.now().millisecondsSinceEpoch;
-        }
-        catch(e)
-        {
-          throw new Exception('Time update failed');
-        }
-        executeLock.acquireUninterruptibly();
-        cyclesSinceLastSleep -= t;
-    }*/
   }
 
   /// Decode the instruction, execute it, update the CPU timer variables, check for interrupts.

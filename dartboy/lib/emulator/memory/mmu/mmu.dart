@@ -1,5 +1,4 @@
 import '../cartridge.dart';
-import '../hdma.dart';
 import '../memory.dart';
 import '../memory_addresses.dart';
 import '../../cpu/cpu.dart';
@@ -13,70 +12,11 @@ import '../../cpu/cpu.dart';
 /// From address 0x0000 to index 0x00FF is the bootstrap code.
 ///
 /// Address 0x100 until index 0x3FFF include the contents of the cartridge (depending on the cartridge size this memory bank can change totally)
-class MMU
+class MMU extends Memory
 {
-  /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
-  CPU cpu;
-
-  /// Cartridge memory (contains booth RAM and ROM memory).
-  ///
-  /// Cartridge memory composes the lower 32kB of memory from (0x0000 to 0x8000).
-  Cartridge cartridge;
-
-  /// On board game boy memory (after the cartridge memory).
-  ///
-  /// Also contains the video memory, registers, etc.
-  Memory memory;
-
-  /// HDMA memory controller (only available on gameboy color games).
-  ///
-  /// Used for direct memory copy operations.
-  HDMA hdma;
-
-  MMU(CPU cpu, Cartridge cartridge)
+  MMU(CPU cpu, Cartridge cartridge) : super(cpu)
   {
     this.cpu = cpu;
-    this.cartridge = cartridge;
-    this.memory = new Memory(cpu);
-    this.hdma = null;
-  }
-
-  /// Write a byte into memory address
-  void writeByte(int address, int value)
-  {
-    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
-    {
-      throw new Exception('Cannot write data into ROM memory.');
-    }
-    else
-    {
-      // Echo of RAM A
-      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
-      {
-        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
-      }
-
-      this.memory.writeByte(address - MemoryAddresses.CARTRIDGE_ROM_END, value);
-    }
-  }
-
-  /// Read a byte from memory address
-  int readByte(int address)
-  {
-    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
-    {
-      return this.cartridge.readByte(address);
-    }
-    else
-    {
-      // Echo of RAM A
-      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
-      {
-        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
-      }
-
-      return this.memory.readByte(address - MemoryAddresses.CARTRIDGE_ROM_END);
-    }
   }
 
   /// Read a value from the OAM sprite memory.
@@ -89,7 +29,7 @@ class MMU
       throw new Exception('Trying to access invalid OAM address.');
     }
 
-    return this.readByte(MemoryAddresses.OAM_START + address);
+    return this.oam[address]; //this.readByte(MemoryAddresses.OAM_START + address);
   }
 
   /// Write a value into the OAM sprite memory.
@@ -102,7 +42,8 @@ class MMU
       throw new Exception('Trying to access invalid OAM address.');
     }
 
-    this.writeByte(MemoryAddresses.OAM_START + address, value);
+    value &= 0xFF;
+    this.oam[address] = value;
   }
 
   /// Read a value from the Video RAM.
@@ -115,7 +56,7 @@ class MMU
       throw new Exception('Trying to access invalid VRAM address.');
     }
 
-    return this.readByte(MemoryAddresses.VIDEO_RAM_START + address);
+    return this.vram[address];
   }
 
   /// Write a value into the Video RAM.
@@ -128,7 +69,8 @@ class MMU
       throw new Exception('Trying to access invalid VRAM address.');
     }
 
-    this.writeByte(MemoryAddresses.VIDEO_RAM_START + address, value);
+    value &= 0xFF;
+    this.vram[address] = value;
   }
 
   /// Read a register value, register values are mapped between FF00 to FFFF
@@ -136,7 +78,7 @@ class MMU
   /// Meaning of the values is stored in the MemoryRegisters class
   int readRegisterByte(int address)
   {
-    return this.readByte(0xFF00 + address);
+    return this.registers[address];
   }
 
   /// Read a register value, register values are mapped between FF00 to FFFF
@@ -144,7 +86,8 @@ class MMU
   /// Meaning of the values is stored in the MemoryRegisters class
   void writeRegisterByte(int address, int value)
   {
-    this.writeByte(0xFF00 + address, value);
+    value &= 0xFF;
+    this.registers[address] = value;
   }
 
   /// Reset the memory to default boot values.
@@ -173,7 +116,7 @@ class MMU
     this.writeByte(0xFF23, 0xBF);
     this.writeByte(0xFF24, 0x77);
     this.writeByte(0xFF25, 0xF3);
-    this.writeByte(0xFF26, this.cartridge.superGameboy ? 0xF0 : 0xF1);
+    this.writeByte(0xFF26, this.cpu.cartridge.superGameboy ? 0xF0 : 0xF1);
     this.writeByte(0xFF40, 0x91);
     this.writeByte(0xFF42, 0x00);
     this.writeByte(0xFF43, 0x00);

@@ -10,9 +10,11 @@ import './palette.dart';
 /// Is responsible for managing the sprites and background layers.
 class PPU
 {
+  /// Width in pixels of the physical gameboy LCD.
   static const int LCD_WIDTH = 160;
+
+  /// Height in pixels of the physical gameboy LCD.
   static const int LCD_HEIGHT = 144;
-  static const double LCD_RATIO = LCD_WIDTH / LCD_HEIGHT;
 
   /// Draw layer priority constants.
   ///
@@ -70,7 +72,7 @@ class PPU
   /// Initializes all palette RAM to the default on Gameboy boot.
   void initializePalettes()
   {
-    if(this.cpu.mmu.cartridge.gameboyType == GameboyType.COLOR)
+    if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
     {
       this.gbcBackgroundPaletteMemory.fillRange(0, this.gbcBackgroundPaletteMemory.length, 0x1f);
 
@@ -102,7 +104,7 @@ class PPU
       /// Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is
       /// reading from it. (That is when the STAT register indicates Mode 3).
       /// Note: Initially all background colors are initialized as white.
-      PaletteColors colors = PaletteColors.getByHash(this.cpu.mmu.cartridge.checksum);
+      PaletteColors colors = PaletteColors.getByHash(this.cpu.cartridge.checksum);
 
       this.bgPalettes[0] = new GBPalette(this.cpu, colors.bg, MemoryRegisters.R_BGP);
       this.spritePalettes[0] = new GBPalette(this.cpu, colors.obj0, MemoryRegisters.R_OBP0);
@@ -419,7 +421,7 @@ class PPU
       ///
       /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
-      if (this.cpu.mmu.cartridge.gameboyType == GameboyType.COLOR)
+      if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
       {
         int attribs = this.cpu.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
 
@@ -472,7 +474,7 @@ class PPU
       /// Same rules apply here as for background tiles.
       ///
       /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
-      if (this.cpu.mmu.cartridge.gameboyType == GameboyType.COLOR)
+      if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
       {
         int attribs = this.cpu.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
 
@@ -563,7 +565,7 @@ class PPU
   {
     // Hold local references to save a lot of load opcodes
     bool tall = isUsingTallSprites();
-    bool isColorGB = this.cpu.mmu.cartridge.gameboyType == GameboyType.COLOR;
+    bool isColorGB = this.cpu.cartridge.gameboyType == GameboyType.COLOR;
 
     // Actual GameBoy hardware can only handle drawing 10 sprites per line
     for(int i = 0; i < MemoryAddresses.OAM_SIZE && this.spritesDrawnPerLine[scanline] < 10; i += 4)

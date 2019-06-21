@@ -1,4 +1,7 @@
 import '../cpu/cpu.dart';
+import './cartridge.dart';
+import './hdma.dart';
+import './memory_addresses.dart';
 
 /// Generic memory container used to represent memory spaces in the gameboy system.
 ///
@@ -41,6 +44,13 @@ class Memory
   /// The current page of ROM, always multiples of Memory.ROM_PAGESIZE.
   int romPageStart = ROM_PAGESIZE;
 
+  /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
+  CPU cpu;
+
+  /// HDMA memory controller (only available on gameboy color games).
+  ///
+  /// Used for direct memory copy operations.
+  HDMA hdma;
 
   Memory(CPU cpu)
   {
@@ -58,36 +68,51 @@ class Memory
     this.oam = new List<int>(0xA0);
     this.oam.fillRange(0, this.oam.length, 0);
 
-    this.wram = new List<int>(WRAM_PAGESIZE * (this.cpu.cartridge.isColorGB ? 8 : 2));
+    this.wram = new List<int>(WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
     this.wram.fillRange(0, this.wram.length, 0);
 
-    this.vram = new List<int>(VRAM_PAGESIZE * (this.cpu.cartridge.isColorGB ? 2 : 1));
+    this.vram = new List<int>(VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
     this.vram.fillRange(0, this.vram.length, 0);
   }
 
-  /// Read a single byte from memory
+  /// Write a byte into memory address
+  void writeByte(int address, int value)
+  {
+    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
+    {
+      throw new Exception('Cannot write data into ROM memory.');
+    }
+    else
+    {
+      // Echo of RAM A
+      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+      {
+        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
+      }
+
+      //super.writeByte(address - MemoryAddresses.CARTRIDGE_ROM_END, value);
+    }
+  }
+
+  /// Read a byte from memory address
   ///
   /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
   int readByte(int address)
   {
-    return this.data[address];
-  }
-
-  /// Write a byte of data into memory.
-  void writeByte(int address, int value)
-  {
-    this.data[address] = value & 0xFF;
-  }
-
-  /// Write a list of bytes into memory.
-  ///
-  /// Starting from the address incrementing a byte each time
-  void writeBytes(int address, List<int> values)
-  {
-    for(int i = 0; i < values.length; i++)
+    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      this.writeByte(address, values[i]);
-      address++;
+      return this.cpu.cartridge.readByte(address);
+    }
+    else
+    {
+      // Echo of RAM A
+      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+      {
+        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
+      }
+
+      //return super.readByte(address - MemoryAddresses.CARTRIDGE_ROM_END);
     }
   }
+
 }
