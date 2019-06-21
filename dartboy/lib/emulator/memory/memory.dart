@@ -70,25 +70,24 @@ class Memory
     this.romPageStart = Memory.ROM_PAGESIZE;
 
     this.registers = new List<int>(0x100);
-    this.registers.fillRange(0, this.registers.length, 0);
-
     this.oam = new List<int>(0xA0);
-    this.oam.fillRange(0, this.oam.length, 0);
-
     this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
-    this.wram.fillRange(0, this.wram.length, 0);
-
     this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
-    this.vram.fillRange(0, this.vram.length, 0);
-
     this.reset();
   }
 
   /// Reset the memory to default boot values.
   ///
+  /// Also sets all bytes in the memory space to 0 value.
+  ///
   /// (Check page 17 and 18 of the GB CPU manual)
   void reset()
   {
+    this.registers.fillRange(0, this.registers.length, 0);
+    this.oam.fillRange(0, this.oam.length, 0);
+    this.wram.fillRange(0, this.wram.length, 0);
+    this.vram.fillRange(0, this.vram.length, 0);
+
     this.writeByte(0xFF04, 0xAB);
     this.writeByte(0xFF05, 0x00);
     this.writeByte(0xFF06, 0x00);
