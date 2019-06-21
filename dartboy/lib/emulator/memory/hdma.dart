@@ -1,4 +1,4 @@
-import './mmu/mmu.dart';
+import './memory.dart';
 
 /// Represents a H-Blank DMA transfer session.
 ///
@@ -6,7 +6,7 @@ import './mmu/mmu.dart';
 class HDMA
 {
   /// Memory of the HDMA
-  MMU memory;
+  Memory memory;
 
   /// The source address.
   int source;
@@ -25,7 +25,7 @@ class HDMA
   /// @param source The source address to copy from.
   /// @param dest The destination address to copy to.
   /// @param length How many bytes to copy.
-  HDMA(MMU memory, int source, int dest, int length)
+  HDMA(Memory memory, int source, int dest, int length)
   {
     this.memory = memory;
     this.source = source;

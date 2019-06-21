@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import '../cpu/cpu.dart';
 import './cartridge.dart';
 import './hdma.dart';
 import './memory_addresses.dart';
+import './memory_registers.dart';
 
 /// Generic memory container used to represent memory spaces in the gameboy system.
 ///
@@ -126,7 +129,184 @@ class Memory
   /// Write data into the IO section of memory space.
   void writeIO(int address, int value)
   {
+    switch (address)
+    {
+      case 0x4d:
+        this.cpu.doubleSpeed = (value & 0x01) != 0;
+        break;
+      case 0x69:
+        {
+          if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
+          {
+            break;
+          }
 
+          int ff68 = this.registers[0x68];
+          int currentRegister = ff68 & 0x3f;
+
+          this.cpu.ppu.setBackgroundPalette(currentRegister, value);
+
+          if ((ff68 & 0x80) != 0)
+          {
+            currentRegister++;
+            currentRegister %= 0x40;
+            this.registers[0x68] = (0x80 | currentRegister) & 0xFF;
+          }
+          break;
+        }
+      case 0x6b:
+        {
+          if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
+          {
+            break;
+          }
+
+          int ff6a = this.registers[0x6a];
+          int currentRegister = ff6a & 0x3f;
+          this.cpu.ppu.setSpritePalette(currentRegister, value);
+
+          if ((ff6a & 0x80) != 0)
+          {
+            currentRegister++;
+            currentRegister %= 0x40;
+            this.registers[0x6a] = (0x80 | currentRegister) & 0xFF;
+          }
+          break;
+        }
+      case 0x55: // HDMA start
+        {
+          if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
+          {
+            break;
+          }
+
+          int length = ((value & 0x7f) + 1) * 0x10;
+          int source = ((this.registers[0x51] & 0xff) << 8) | (this.registers[0x52] & 0xF0);
+          int dest = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
+          if ((value & 0x80) != 0)
+          {
+            // H-Blank DMA
+            this.hdma = new HDMA(this, source, dest, length);
+            this.registers[0x55] = (length ~/ 0x10 - 1) & 0xFF;
+            break;
+          }
+          else
+          {
+            if(this.hdma != null)
+            {
+              //TODO <DEBUG PRINT>
+              //print("!!! Terminated HDMA from %04X-%04X, %02X remaining\n", source, dest, length);
+            }
+
+            // General DMA
+            for (int i = 0; i < length; i++)
+            {
+              this.vram[this.vramPageStart + dest + i] = readByte(source + i) & 0xFF;
+            }
+            this.registers[0x55] = 0xFF;
+          }
+          break;
+        }
+      case MemoryRegisters.R_VRAM_BANK:
+        {
+          if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
+          {
+            this.vramPageStart = VRAM_PAGESIZE * (value & 0x3);
+          }
+          break;
+        }
+      case MemoryRegisters.R_WRAM_BANK:
+        {
+          if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
+          {
+            this.wramPageStart = WRAM_PAGESIZE * max(1, value & 0x7);
+          }
+          break;
+        }
+      case MemoryRegisters.R_NR14:
+        if ((this.registers[MemoryRegisters.R_NR14] & 0x80) != 0)
+        {
+          //this.cpu.sound.channel1.restart();
+          value &= 0x7f;
+        }
+        break;
+      case MemoryRegisters.R_NR10:
+      case MemoryRegisters.R_NR11:
+      case MemoryRegisters.R_NR12:
+      case MemoryRegisters.R_NR13:
+        this.registers[address] = value & 0xFF;
+        //this.cpu.sound.channel1.update();
+        break;
+      case MemoryRegisters.R_NR24:
+        if ((value & 0x80) != 0)
+        {
+          //this.cpu.sound.channel2.restart();
+          value &= 0x7F;
+        }
+        break;
+      case MemoryRegisters.R_NR21:
+      case MemoryRegisters.R_NR22:
+      case MemoryRegisters.R_NR23:
+        this.registers[address] = value & 0xFF;
+        //this.cpu.sound.channel2.update();
+        break;
+      case MemoryRegisters.R_NR34:
+        if ((value & 0x80) != 0)
+        {
+          //this.cpu.sound.channel3.restart();
+          value &= 0x7F;
+        }
+        break;
+      case MemoryRegisters.R_NR30:
+      case MemoryRegisters.R_NR31:
+      case MemoryRegisters.R_NR32:
+      case MemoryRegisters.R_NR33:
+        this.registers[address] = value & 0xFF;
+        //this.cpu.sound.channel3.update();
+        break;
+      case MemoryRegisters.R_NR44:
+        if ((value & 0x80) != 0)
+        {
+          //this.cpu.sound.channel4.restart();
+          value &= 0x7F;
+        }
+        break;
+      case MemoryRegisters.R_NR41:
+      case MemoryRegisters.R_NR42:
+      case MemoryRegisters.R_NR43:
+      this.registers[address] = value & 0xFF;
+        //this.cpu.sound.channel4.update();
+        break;
+      case MemoryRegisters.R_DMA:
+        {
+          int addressBase = value * 0x100;
+
+          for (int i = 0; i < 0xA0; i++)
+          {
+            this.writeByte(0xFE00 + i, this.readByte(addressBase + i));
+          }
+          break;
+        }
+      case MemoryRegisters.R_DIV:
+        value = 0;
+        break;
+      case MemoryRegisters.R_TAC:
+        if (((registers[MemoryRegisters.R_TAC] ^ value) & 0x03) != 0)
+        {
+          this.cpu.timerCycle = 0;
+          this.registers[MemoryRegisters.R_TIMA] = this.registers[MemoryRegisters.R_TMA];
+        }
+        break;
+      case MemoryRegisters.R_LCD_STAT:
+        break;
+      default:
+        if (0x30 <= address && address < 0x40)
+        {
+          //this.cpu.sound.channel3.updateSample(address - 0x30, (byte) value);
+        }
+    }
+
+    this.registers[address] = value & 0xFF;
   }
 
   /// Read a byte from memory address
@@ -161,28 +341,41 @@ class Memory
     {
       return this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START];
     }
-    else if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
+    else if(block == 0xE000 || block == 0xF000)
     {
-      return 0xFF;
-    }
-    else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
-    {
-      return this.readByte(address - MemoryAddresses.RAM_A_ECHO_START);
-    }
-    else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
-    {
-      return this.oam[address - MemoryAddresses.OAM_START];
-    }
-    else if(address >= MemoryAddresses.IO_START)
-    {
-      this.readIO(address - MemoryAddresses.IO_START);
+      if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
+      {
+        return 0xFF;
+      }
+      else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+      {
+        return this.readByte(address - MemoryAddresses.RAM_A_ECHO_START);
+      }
+      else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
+      {
+        return this.oam[address - MemoryAddresses.OAM_START];
+      }
+      else if(address >= MemoryAddresses.IO_START)
+      {
+        this.readIO(address - MemoryAddresses.IO_START);
+      }
     }
 
     return 0xFF;
   }
 
+  // Read IO address
   int readIO(int address)
   {
-    return 0;
+    if(address == 0x4d)
+    {
+      if(this.cpu.doubleSpeed)
+      {
+        return 0x80;
+      }
+      return 0x0;
+    }
+
+    return this.registers[address];
   }
 }
