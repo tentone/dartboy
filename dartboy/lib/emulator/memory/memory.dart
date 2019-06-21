@@ -78,20 +78,55 @@ class Memory
   /// Write a byte into memory address
   void writeByte(int address, int value)
   {
+    value &= 0xff;
+    address &= 0xFFFF;
+
+    int block = address & 0xF000;
+
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      throw new Exception('Cannot write data into ROM memory.');
+      //throw new Exception('Cannot write data into cartridge ROM memory.');
+      return;
     }
-    else
+    else if(address >= MemoryAddresses.VIDEO_RAM_START && address < MemoryAddresses.VIDEO_RAM_END)
     {
-      // Echo of RAM A
-      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
-      {
-        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
-      }
-
-      //super.writeByte(address - MemoryAddresses.CARTRIDGE_ROM_END, value);
+      this.vram[this.vramPageStart + address - MemoryAddresses.VIDEO_RAM_START] = value;
     }
+    else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
+    {
+      //throw new Exception('Cannot write data into cartridge RAM memory.');
+      return;
+    }
+    else if(block == MemoryAddresses.RAM_A_START)
+    {
+      this.wram[address - MemoryAddresses.RAM_A_START] = value;
+    }
+    else if(block == MemoryAddresses.RAM_A_SWITCHABLE_START)
+    {
+      this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START] = value;
+    }
+    else if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      return;
+    }
+    else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+    {
+      this.writeByte(address - MemoryAddresses.RAM_A_ECHO_START, value);
+    }
+    else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      this.oam[address - MemoryAddresses.OAM_START] = value;
+    }
+    else if(address >= MemoryAddresses.IO_START)
+    {
+      this.writeIO(address - MemoryAddresses.IO_START, value);
+    }
+  }
+
+  /// Write data into the IO section of memory space.
+  void writeIO(int address, int value)
+  {
+
   }
 
   /// Read a byte from memory address
@@ -99,20 +134,55 @@ class Memory
   /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
   int readByte(int address)
   {
-    if(address < MemoryAddresses.CARTRIDGE_ROM_END)
-    {
-      return this.cpu.cartridge.readByte(address);
-    }
-    else
-    {
-      // Echo of RAM A
-      if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
-      {
-        address = address - (MemoryAddresses.RAM_A_ECHO_START - MemoryAddresses.RAM_A_START);
-      }
+    address &= 0xFFFF;
+    int block = address & 0xF000;
 
-      //return super.readByte(address - MemoryAddresses.CARTRIDGE_ROM_END);
+    if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
+    {
+      return this.cpu.cartridge.data[address];
     }
+    if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < MemoryAddresses.CARTRIDGE_ROM_END)
+    {
+      return this.cpu.cartridge.data[this.romPageStart + address - MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START];
+    }
+    else if(address >= MemoryAddresses.VIDEO_RAM_START && address < MemoryAddresses.VIDEO_RAM_END)
+    {
+      return this.vram[this.vramPageStart + address - MemoryAddresses.VIDEO_RAM_START];
+    }
+    else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
+    {
+      return 0;
+    }
+    else if(block == MemoryAddresses.RAM_A_START)
+    {
+      return this.wram[address - MemoryAddresses.RAM_A_START];
+    }
+    else if(block == MemoryAddresses.RAM_A_SWITCHABLE_START)
+    {
+      return this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START];
+    }
+    else if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      return 0xFF;
+    }
+    else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+    {
+      return this.readByte(address - MemoryAddresses.RAM_A_ECHO_START);
+    }
+    else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      return this.oam[address - MemoryAddresses.OAM_START];
+    }
+    else if(address >= MemoryAddresses.IO_START)
+    {
+      this.readIO(address - MemoryAddresses.IO_START);
+    }
+
+    return 0xFF;
   }
 
+  int readIO(int address)
+  {
+    return 0;
+  }
 }

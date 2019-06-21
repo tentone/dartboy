@@ -24,7 +24,7 @@ class MMU extends Memory
   /// The OAM start address is added to the address received as parameter.
   int readOAM(int address)
   {
-    if(address > MemoryAddresses.OAM_SIZE)
+    if(address > this.oam.length)
     {
       throw new Exception('Trying to access invalid OAM address.');
     }
@@ -37,7 +37,7 @@ class MMU extends Memory
   /// The OAM start address is added to the address received as parameter.
   void writeOAM(int address, int value)
   {
-    if(address > MemoryAddresses.OAM_SIZE)
+    if(address > this.oam.length)
     {
       throw new Exception('Trying to access invalid OAM address.');
     }
@@ -51,7 +51,7 @@ class MMU extends Memory
   /// The video RAM start address is added to the address received as parameter.
   int readVRAM(int address)
   {
-    if(address > MemoryAddresses.VIDEO_RAM_SIZE)
+    if(address > this.vram.length)
     {
       throw new Exception('Trying to access invalid VRAM address.');
     }
@@ -64,7 +64,7 @@ class MMU extends Memory
   /// The video RAM start address is added to the address received as parameter.
   void writeVRAM(int address, int value)
   {
-    if(address > MemoryAddresses.VIDEO_RAM_SIZE)
+    if(address > this.vram.length)
     {
       throw new Exception('Trying to access invalid VRAM address.');
     }

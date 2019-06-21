@@ -568,7 +568,7 @@ class PPU
     bool isColorGB = this.cpu.cartridge.gameboyType == GameboyType.COLOR;
 
     // Actual GameBoy hardware can only handle drawing 10 sprites per line
-    for(int i = 0; i < MemoryAddresses.OAM_SIZE && this.spritesDrawnPerLine[scanline] < 10; i += 4)
+    for(int i = 0; i < this.cpu.mmu.oam.length && this.spritesDrawnPerLine[scanline] < 10; i += 4)
     {
       /// Sprite attributes reside in the Sprite Attribute Table (OAM - Object Attribute Memory) at $FE00-FE9F.
       /// Each of the 40 entries consists of four ints with the following meanings:
