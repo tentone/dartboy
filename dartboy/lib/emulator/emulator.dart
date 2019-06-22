@@ -109,11 +109,12 @@ class Emulator
           this.onStep();
         }
       }
-      catch(e)
+      catch(e, stacktrace)
       {
         //TODO <DEBUG PRINT>
         print('Error occured, emulation stoped. (Step: ' + step.toString() + ')');
         print(e.toString());
+        print(stacktrace.toString());
         this.timer.cancel();
       }
     });

@@ -72,6 +72,10 @@ class PPU
   /// Initializes all palette RAM to the default on Gameboy boot.
   void initializePalettes()
   {
+    this.screenBuffer.fillRange(0, this.screenBuffer.length, 0);
+    this.gbcSpritePaletteMemory.fillRange(0, this.gbcSpritePaletteMemory.length, 0);
+    this.spritesDrawnPerLine.fillRange(0, this.spritesDrawnPerLine.length, 0);
+
     if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
     {
       this.gbcBackgroundPaletteMemory.fillRange(0, this.gbcBackgroundPaletteMemory.length, 0x1f);
@@ -79,12 +83,16 @@ class PPU
       // Create palette structures
       for (int i = 0; i < this.spritePalettes.length; i++)
       {
-        this.spritePalettes[i] = new GBCPalette(new List<int>(4));
+        List<int> colors = new List<int>(4);
+        colors.fillRange(0, 4, 0);
+        this.spritePalettes[i] = new GBCPalette(colors);
       }
 
       for (int i = 0; i < this.bgPalettes.length; i++)
       {
-        this.bgPalettes[i] = new GBCPalette(new List<int>(4));
+        List<int> colors = new List<int>(4);
+        colors.fillRange(0, 4, 0);
+        this.bgPalettes[i] = new GBCPalette(colors);
       }
 
       // And "load" them from RAM
@@ -96,17 +104,17 @@ class PPU
       /// FF69 - BCPD/BGPD - CGB Mode Only - Background Palette Data
       /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
       /// Each color is defined by two ints (Bit 0-7 in first int).
-      ///
       /// Bit 0-4   Red Intensity   (00-1F)
       /// Bit 5-9   Green Intensity (00-1F)
       /// Bit 10-14 Blue Intensity  (00-1F)
       ///
-      /// Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is
-      /// reading from it. (That is when the STAT register indicates Mode 3).
+      /// Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is reading from it. (That is when the STAT register indicates Mode 3).
+      ///
       /// Note: Initially all background colors are initialized as white.
       PaletteColors colors = PaletteColors.getByHash(this.cpu.cartridge.checksum);
 
       this.bgPalettes[0] = new GBPalette(this.cpu, colors.bg, MemoryRegisters.R_BGP);
+
       this.spritePalettes[0] = new GBPalette(this.cpu, colors.obj0, MemoryRegisters.R_OBP0);
       this.spritePalettes[1] = new GBPalette(this.cpu, colors.obj1, MemoryRegisters.R_OBP1);
     }
@@ -115,7 +123,7 @@ class PPU
   /// Reloads all Gameboy Color palettes.
   ///
   /// @param from Palette RAM to load from.
-  /// @param to   Reference to an array of Palettes to populate.
+  /// @param to Reference to an array of Palettes to populate.
   void loadPalettesFromMemory(List<int> from, List<Palette> to)
   {
     // 8 palettes
@@ -132,16 +140,16 @@ class PPU
   /// Performs an update to a int of palette RAM.
   ///
   /// @param from The palette RAM to read from.
-  /// @param to   Reference to an array of Palettes to update.
-  /// @param i    The palette index being updated.
-  /// @param j    The int index of the palette being updated.
+  /// @param to Reference to an array of Palettes to update.
+  /// @param i The palette index being updated.
+  /// @param j The int index of the palette being updated.
   void updatePalette(List<int> from, Palette to, int i, int j)
   {
     /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
     /// Each color is defined by two ints (Bit 0-7 in first int).
     ///
-    /// Bit 0-4   Red Intensity   (00-1F)
-    /// Bit 5-9   Green Intensity (00-1F)
+    /// Bit 0-4 Red Intensity   (00-1F)
+    /// Bit 5-9 Green Intensity (00-1F)
     /// Bit 10-14 Blue Intensity  (00-1F)
     
     // Read an RGB value from RAM
@@ -184,18 +192,16 @@ class PPU
 
   /// Tick the LCD.
   ///
-  /// #method
-  ///
   /// @param cycles The number of CPU cycles elapsed since the last call to tick.
   void tick(int cycles)
   {
     // Accumulate to an internal counter
-    lcdCycles += cycles;
+    this.lcdCycles += cycles;
 
     // 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second = ~456 cycles / line
-    if (lcdCycles >= 456)
+    if (this.lcdCycles >= 456)
     {
-      lcdCycles -= 456;
+      this.lcdCycles -= 456;
 
       /// The LY indicates the vertical line to which the present data is transferred to the LCD Driver.
       /// The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the V-Blank period.
@@ -306,12 +312,12 @@ class PPU
         if (displayEnabled)
         {
           // Trigger VBlank
-          cpu.setInterruptTriggered(MemoryRegisters.VBLANK_BIT);
+          this.cpu.setInterruptTriggered(MemoryRegisters.VBLANK_BIT);
 
           // Trigger LCDC if enabled
           if ((lcdStat & MemoryRegisters.LCD_STAT_VBLANK_MODE_BIT) != 0)
           {
-            cpu.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
+            this.cpu.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
           }
         }
       }
@@ -380,15 +386,12 @@ class PPU
     int offset = getBackgroundTileMapOffset();
 
     /// BG Map Tile Numbers
-    /// <pre>
-    ///      An area of VRAM known as Background Tile Map contains the numbers of tiles to
-    ///      be displayed. It is organized as 32 rows of 32 ints each. Each int contains a number
-    ///      of a tile to be displayed. Tile patterns are taken from the Tile Data Table located either
-    ///      at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with
-    ///      unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000). In the second case,
-    ///      patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
-    ///      The Tile Data Table address for the background can be selected via LCDC register.
-    /// </pre>
+    /// 
+    /// An area of VRAM known as Background Tile Map contains the numbers of tiles to be displayed.
+    /// It is organized as 32 rows of 32 ints each. Each int contains a number of a tile to be displayed.
+    /// Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000).
+    /// In the second case, patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
+    /// The Tile Data Table address for the background can be selected via LCDC register.
     ///
     /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
@@ -408,16 +411,14 @@ class PPU
       bool flipY = false;
 
       /// BG Map Attributes (CGB Mode only)
-      /// <pre>
-      ///      In CGB Mode, an additional map of 32x32 ints is stored in VRAM Bank 1 (each int defines attributes for the corresponding tile-number map entry in VRAM Bank 0):
       ///
-      ///      Bit 0-2  Background Palette number  (BGP0-7)
-      ///      Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
-      ///      Bit 4    Not used
-      ///      Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
-      ///      Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
-      ///      Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
-      /// </pre>
+      /// In CGB Mode, an additional map of 32x32 ints is stored in VRAM Bank 1 (each int defines attributes for the corresponding tile-number map entry in VRAM Bank 0):
+      /// Bit 0-2  Background Palette number  (BGP0-7)
+      /// Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
+      /// Bit 4    Not used
+      /// Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
+      /// Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
+      /// Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
       ///
       /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
 
@@ -443,9 +444,8 @@ class PPU
 
   /// Attempt to draw window tiles.
   ///
-  /// @param data     The raster to write to.
+  /// @param data The raster to write to.
   /// @param scanline The current scanline.
-
   void drawWindow(List<int> data, int scanline)
   {
     int tileDataOffset = getTileDataOffset();
@@ -517,13 +517,13 @@ class PPU
       int dx = x + px;
 
       // If we're out of bounds, continue iteration
-      if (dx < 0 || dx >= LCD_WIDTH || scanline >= LCD_HEIGHT)
+      if (dx < 0 || dx >= PPU.LCD_WIDTH || scanline >= PPU.LCD_HEIGHT)
       {
         continue;
       }
 
       // Check if our current priority should overwrite the current priority
-      int index = dx + scanline * LCD_WIDTH;
+      int index = dx + scanline * PPU.LCD_WIDTH;
       if (basePriority != 0 && basePriority < (data[index] & 0xFF000000))
       {
         continue;
@@ -575,34 +575,34 @@ class PPU
       ///
       /// int0 - Y Position
       /// <pre>
-      ///      Specifies the sprites vertical position on the screen (minus 16).
-      ///      An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
+      /// Specifies the sprites vertical position on the screen (minus 16).
+      /// An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
       /// </pre>
       ///
       /// int1 - X Position
       /// <pre>
-      ///      Specifies the sprites horizontal position on the screen (minus 8).
-      ///      An offscreen value (X=0 or X>=168) hides the sprite, but the sprite
-      ///      still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
+      /// Specifies the sprites horizontal position on the screen (minus 8).
+      /// An offscreen value (X=0 or X>=168) hides the sprite, but the sprite
+      /// still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
       /// </pre>
       ///
       /// int2 - Tile/Pattern Number
       /// <pre>
-      ///      Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
-      ///      In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
-      ///      In 8x16 mode, the lower bit of the tile number is ignored. Ie. the upper 8x8 tile is "NN AND FEh", and
-      ///      the lower 8x8 tile is "NN OR 01h".
+      /// Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
+      /// In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
+      /// In 8x16 mode, the lower bit of the tile number is ignored. Ie. the upper 8x8 tile is "NN AND FEh", and
+      /// the lower 8x8 tile is "NN OR 01h".
       /// </pre>
       ///
       /// int3 - Attributes/Flags:
       /// <pre>
-      ///      Bit7   OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
-      ///      (Used for both BG and Window. BG color 0 is always behind OBJ)
-      ///      Bit6   Y flip          (0=Normal, 1=Vertically mirrored)
-      ///      Bit5   X flip          (0=Normal, 1=Horizontally mirrored)
-      ///      Bit4   Palette number ///*Non CGB Mode Only** (0=OBP0, 1=OBP1)
-      ///      Bit3   Tile VRAM-Bank ///*CGB Mode Only**     (0=Bank 0, 1=Bank 1)
-      ///      Bit2-0 Palette number ///*CGB Mode Only**     (OBP0-7)
+      /// Bit7   OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
+      /// (Used for both BG and Window. BG color 0 is always behind OBJ)
+      /// Bit6   Y flip          (0=Normal, 1=Vertically mirrored)
+      /// Bit5   X flip          (0=Normal, 1=Horizontally mirrored)
+      /// Bit4   Palette number ///*Non CGB Mode Only** (0=OBP0, 1=OBP1)
+      /// Bit3   Tile VRAM-Bank ///*CGB Mode Only**     (0=Bank 0, 1=Bank 1)
+      /// Bit2-0 Palette number ///*CGB Mode Only**     (OBP0-7)
       /// </pre>
       ///
       /// {@see http://bgb.bircd.org/pandocs.htm#vramspriteattributetableoam}

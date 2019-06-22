@@ -114,7 +114,7 @@ class MainScreenState extends State<MainScreen>
                     }, child: new Text("Reset")),
                     new RaisedButton(onPressed: ()
                     {
-                      MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
+                      MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
                     }, child: new Text("Load"))
                   ],
                 ))

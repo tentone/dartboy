@@ -367,11 +367,13 @@ class Memory
     address &= 0xFFFF;
     int block = address & 0xF000;
 
-    print('Read byte from memory 0x' + address.toRadixString(16));
+    //TODO <DEBUG PRINT>
+    //print('Read byte from memory 0x' + address.toRadixString(16));
 
     if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
     {
-      print('Read byte from ROM');
+      //TODO <DEBUG PRINT>
+      //print('Read byte from ROM');
       return this.cpu.cartridge.data[address];
     }
     if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < MemoryAddresses.CARTRIDGE_ROM_END)

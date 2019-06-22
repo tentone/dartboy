@@ -25,7 +25,7 @@ class MMU extends Memory
       throw new Exception('Trying to access invalid OAM address.');
     }
 
-    return this.oam[address]; //this.readByte(MemoryAddresses.OAM_START + address);
+    return this.oam[address];
   }
 
   /// Write a value into the OAM sprite memory.

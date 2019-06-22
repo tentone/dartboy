@@ -117,6 +117,8 @@ class Cartridge
       print('Created MBC5 unit.');
       return new MBC5(cpu, this);
     }
+
+    return null;
   }
 
   /// Checks if the cartridge has battery.
