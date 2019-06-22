@@ -574,36 +574,27 @@ class PPU
       /// Each of the 40 entries consists of four ints with the following meanings:
       ///
       /// int0 - Y Position
-      /// <pre>
       /// Specifies the sprites vertical position on the screen (minus 16).
       /// An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
-      /// </pre>
       ///
       /// int1 - X Position
-      /// <pre>
       /// Specifies the sprites horizontal position on the screen (minus 8).
-      /// An offscreen value (X=0 or X>=168) hides the sprite, but the sprite
-      /// still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
-      /// </pre>
+      /// An offscreen value (X=0 or X>=168) hides the sprite, but the sprite still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
       ///
       /// int2 - Tile/Pattern Number
-      /// <pre>
       /// Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
       /// In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
       /// In 8x16 mode, the lower bit of the tile number is ignored. Ie. the upper 8x8 tile is "NN AND FEh", and
       /// the lower 8x8 tile is "NN OR 01h".
-      /// </pre>
       ///
       /// int3 - Attributes/Flags:
-      /// <pre>
       /// Bit7   OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
       /// (Used for both BG and Window. BG color 0 is always behind OBJ)
-      /// Bit6   Y flip          (0=Normal, 1=Vertically mirrored)
-      /// Bit5   X flip          (0=Normal, 1=Horizontally mirrored)
+      /// Bit6   Y flip (0=Normal, 1=Vertically mirrored)
+      /// Bit5   X flip (0=Normal, 1=Horizontally mirrored)
       /// Bit4   Palette number ///*Non CGB Mode Only** (0=OBP0, 1=OBP1)
       /// Bit3   Tile VRAM-Bank ///*CGB Mode Only**     (0=Bank 0, 1=Bank 1)
       /// Bit2-0 Palette number ///*CGB Mode Only**     (OBP0-7)
-      /// </pre>
       ///
       /// {@see http://bgb.bircd.org/pandocs.htm#vramspriteattributetableoam}
 

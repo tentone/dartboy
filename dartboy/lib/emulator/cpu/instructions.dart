@@ -173,12 +173,11 @@ class Instructions
     int hl = cpu.registers.hl;
     cpu.mmu.writeByte(hl, cpu.registers.a);
     cpu.registers.hl = (hl - 1) & 0xFFFF;
-
   }
 
   static void STOP(CPU cpu)
   {
-    return NOP(cpu);
+    NOP(cpu);
   }
 
   static void LD_r_r(CPU cpu, int op)
