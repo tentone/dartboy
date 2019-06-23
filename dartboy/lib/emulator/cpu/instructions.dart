@@ -556,9 +556,9 @@ class Instructions
   {
     cpu.interruptsEnabled = true;
 
-    // Note that during the execution of this instruction and the following instruction, maskable interrupts are disabled.
+    // Note that during the execution of this instruction and the following instruction.
+    // maskable interrupts are disabled.
     cpu.tick(4);
-
     cpu.execute();
   }
 

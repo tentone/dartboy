@@ -126,6 +126,9 @@ class Memory
     value &= 0xFF;
     address &= 0xFFFF;
 
+    //TODO <DEBUG PRINT>
+    //print('Write byte 0x' + value.toRadixString(16) + ' from memory 0x' + address.toRadixString(16));
+
     // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
@@ -150,7 +153,7 @@ class Memory
     }
     else if(address >= MemoryAddresses.RAM_A_SWITCHABLE_START && address < MemoryAddresses.RAM_A_END)
     {
-      this.wram[address - MemoryAddresses.RAM_A_START + this.wramPageStart] = value;
+      this.wram[address - MemoryAddresses.RAM_A_SWITCHABLE_START + this.wramPageStart] = value;
     }
     // RAM echo
     else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
@@ -180,7 +183,6 @@ class Memory
   int readByte(int address)
   {
     address &= 0xFFFF;
-    int block = address & 0xF000;
 
     //TODO <DEBUG PRINT>
     //print('Read byte from memory 0x' + address.toRadixString(16));
@@ -188,8 +190,6 @@ class Memory
     // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
     {
-      //TODO <DEBUG PRINT>
-      //print('Read byte from ROM');
       return this.cpu.cartridge.data[address];
     }
     if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < MemoryAddresses.CARTRIDGE_ROM_END)
@@ -204,7 +204,7 @@ class Memory
     // Cartridge RAM
     else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
     {
-      return 0;
+      return 0x0;
     }
     // RAM A
     else if(address >= MemoryAddresses.RAM_A_START && address < MemoryAddresses.RAM_A_SWITCHABLE_START)
@@ -213,7 +213,7 @@ class Memory
     }
     else if(address >= MemoryAddresses.RAM_A_SWITCHABLE_START && address < MemoryAddresses.RAM_A_END)
     {
-      return this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START];
+      return this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_SWITCHABLE_START];
     }
     // RAM echo
     else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
@@ -235,7 +235,6 @@ class Memory
     {
       return this.readIO(address - MemoryAddresses.IO_START);
     }
-
 
     return 0xFF;
   }

@@ -42,13 +42,13 @@ class CPU
   int cyclesExecutedThisSecond;
 
   /// Indicates if the emulator is running at double speed.
-  bool doubleSpeed = false;
+  bool doubleSpeed;
 
   /// The current cycle of the DIV register.
-  int divCycle = 0;
+  int divCycle;
 
   /// The current cycle of the TIMA register.
-  int timerCycle = 0;
+  int timerCycle;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   int _pc = 0;
@@ -76,6 +76,27 @@ class CPU
     this.reset();
   }
 
+  /// Reset the CPU, also resets the MMU, registers and PPU.
+  void reset()
+  {
+    this.registers.reset();
+    this.mmu.reset();
+    this.ppu.reset();
+
+    this.doubleSpeed = false;
+    this.divCycle = 0;
+    this.timerCycle = 0;
+    this.sp = 0xFFFE;
+    this.pc = 0x100;
+
+    this.halted = false;
+    this.interruptsEnabled = false;
+
+    this.clocks = 0;
+    this.cyclesSinceLastSleep = 0;
+    this.cyclesExecutedThisSecond = 0;
+  }
+
   /// Read the next program byte and update the PC value
   int nextUBytePC()
   {
@@ -88,13 +109,14 @@ class CPU
     return this.getByte(this.pc++);
   }
 
-  /// Read and filter value from memory
+  /// Read a unsiged byte value from memory.
   int getUByte(int address)
   {
-    return this.getByte(address) & 0xff;
+    this.tick(4);
+    return this.mmu.readByte(address) & 0xff;
   }
 
-  /// Read a byte from memory (takes 4 clocks)
+  /// Read a byte from memory and update the clock count.
   int getByte(int address)
   {
     this.tick(4);
@@ -314,22 +336,6 @@ class CPU
     }
   }
 
-  void reset()
-  {
-    this.registers.reset();
-    this.mmu.reset();
-
-    this.sp = 0xFFFE;
-    this.pc = 0x100;
-
-    this.halted = false;
-    this.interruptsEnabled = false;
-
-    this.clocks = 0;
-    this.cyclesSinceLastSleep = 0;
-    this.cyclesExecutedThisSecond = 0;
-  }
-
   /// Next step in the CPU processing, should be called at a fixed rate.
   void step()
   {
@@ -354,14 +360,12 @@ class CPU
       this.halted = false;
     }
 
-    int op = this.mmu.readByte(this.pc);
+    int op = this.nextUBytePC();
     
     if(op == null)
     {
       throw new Exception('Read null op code. (PC: 0x' + this.pc.toRadixString(16) + ')');
     }
-
-    this.pc++;
 
     switch (op)
     {
@@ -690,7 +694,7 @@ class CPU
             Instructions.LD_r_r(this, op);
             break;
           default:
-            throw new Exception('Unsupported operations, clocks: ' + this.clocks.toString() + ", op: " + op.toRadixString(16));
+            throw new Exception('Unsupported operation, clocks: ' + this.clocks.toString() + ", op: 0x" + op.toRadixString(16));
         }
     }
   }

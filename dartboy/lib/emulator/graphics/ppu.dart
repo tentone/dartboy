@@ -70,10 +70,19 @@ class PPU
   }
 
   /// Initializes all palette RAM to the default on Gameboy boot.
-  void initializePalettes()
+  void reset()
   {
+    this.bgPalettes = new List<Palette>(8);
+    this.spritePalettes = new List<Palette>(8);
+    this.gbcBackgroundPaletteMemory = new List<int>(0x40);
+
+    this.screenBuffer = new List<int>(PPU.LCD_WIDTH * PPU.LCD_HEIGHT);
     this.screenBuffer.fillRange(0, this.screenBuffer.length, 0);
+
+    this.gbcSpritePaletteMemory = new List<int>(0x40);
     this.gbcSpritePaletteMemory.fillRange(0, this.gbcSpritePaletteMemory.length, 0);
+
+    this.spritesDrawnPerLine = new List<int>(PPU.LCD_HEIGHT);
     this.spritesDrawnPerLine.fillRange(0, this.spritesDrawnPerLine.length, 0);
 
     if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
