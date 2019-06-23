@@ -64,7 +64,7 @@ class MemoryAddresses
   static const EMPTY_B_START = 0xFF4C;
   static const EMPTY_B_END = 0xFF80;
 
-  // Internal RAM B
+  // Internal RAM B (Registers)
   static const RAM_B_START = 0xFF80;
   static const RAM_B_END = 0xFFFF;
 

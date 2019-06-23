@@ -33,19 +33,22 @@ class Memory
   List<int> vram;
 
   /// Work RAM, mapped from $C000-$CFFF and $D000-$DFFF.
+  ///
   /// On the GBC, this bank is switchable 1-7 by writing to $FF07.
   List<int> wram;
 
   /// The current page of Video RAM, always multiples of Memory.VRAM_PAGESIZE.
+  ///
   /// On non-GBC, this is always 0.
-  int vramPageStart = 0;
+  int vramPageStart;
 
   /// The current page of Work RAM, always multiples of Memory.WRAM_PAGESIZE.
+  ///
   /// On non-GBC, this is always Memory.VRAM_PAGESIZE.
-  int wramPageStart = WRAM_PAGESIZE;
+  int wramPageStart;
 
   /// The current page of ROM, always multiples of Memory.ROM_PAGESIZE.
-  int romPageStart = ROM_PAGESIZE;
+  int romPageStart;
 
   /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
   CPU cpu;
@@ -59,11 +62,15 @@ class Memory
   {
     this.cpu = cpu;
     this.hdma = null;
-    this.initialize();
+    this.reset();
   }
 
   /// Initialize the memory, create the data array with the defined size.
-  void initialize()
+  ///
+  /// Reset the memory to default boot values, Also sets all bytes in the memory space to 0 value.
+  ///
+  /// (Check page 17 and 18 of the GB CPU manual)
+  void reset()
   {
     this.vramPageStart = 0;
     this.wramPageStart = Memory.WRAM_PAGESIZE;
@@ -73,16 +80,7 @@ class Memory
     this.oam = new List<int>(0xA0);
     this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
     this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
-    this.reset();
-  }
 
-  /// Reset the memory to default boot values.
-  ///
-  /// Also sets all bytes in the memory space to 0 value.
-  ///
-  /// (Check page 17 and 18 of the GB CPU manual)
-  void reset()
-  {
     this.registers.fillRange(0, this.registers.length, 0);
     this.oam.fillRange(0, this.oam.length, 0);
     this.wram.fillRange(0, this.wram.length, 0);
@@ -128,46 +126,118 @@ class Memory
     value &= 0xFF;
     address &= 0xFFFF;
 
-    int block = address & 0xF000;
-
+    // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
       //throw new Exception('Cannot write data into cartridge ROM memory.');
       return;
     }
+    // VRAM
     else if(address >= MemoryAddresses.VIDEO_RAM_START && address < MemoryAddresses.VIDEO_RAM_END)
     {
       this.vram[this.vramPageStart + address - MemoryAddresses.VIDEO_RAM_START] = value;
     }
+    // Cartridge RAM
     else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
     {
       //throw new Exception('Cannot write data into cartridge RAM memory.');
       return;
     }
-    else if(block == MemoryAddresses.RAM_A_START)
+    // RAM A
+    else if(address >= MemoryAddresses.RAM_A_START && address < MemoryAddresses.RAM_A_SWITCHABLE_START)
     {
       this.wram[address - MemoryAddresses.RAM_A_START] = value;
     }
-    else if(block == MemoryAddresses.RAM_A_SWITCHABLE_START)
+    else if(address >= MemoryAddresses.RAM_A_SWITCHABLE_START && address < MemoryAddresses.RAM_A_END)
     {
-      this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START] = value;
+      this.wram[address - MemoryAddresses.RAM_A_START + this.wramPageStart] = value;
     }
-    else if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
-    {
-      return;
-    }
+    // RAM echo
     else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
     {
       this.writeByte(address - MemoryAddresses.RAM_A_ECHO_START, value);
     }
+    // Empty
+    else if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      return;
+    }
+    // OAM
     else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
     {
       this.oam[address - MemoryAddresses.OAM_START] = value;
     }
+    // IO
     else if(address >= MemoryAddresses.IO_START)
     {
       this.writeIO(address - MemoryAddresses.IO_START, value);
     }
+  }
+
+  /// Read a byte from memory address
+  ///
+  /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
+  int readByte(int address)
+  {
+    address &= 0xFFFF;
+    int block = address & 0xF000;
+
+    //TODO <DEBUG PRINT>
+    //print('Read byte from memory 0x' + address.toRadixString(16));
+
+    // ROM
+    if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
+    {
+      //TODO <DEBUG PRINT>
+      //print('Read byte from ROM');
+      return this.cpu.cartridge.data[address];
+    }
+    if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < MemoryAddresses.CARTRIDGE_ROM_END)
+    {
+      return this.cpu.cartridge.data[this.romPageStart + address - MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START];
+    }
+    // VRAM
+    else if(address >= MemoryAddresses.VIDEO_RAM_START && address < MemoryAddresses.VIDEO_RAM_END)
+    {
+      return this.vram[this.vramPageStart + address - MemoryAddresses.VIDEO_RAM_START];
+    }
+    // Cartridge RAM
+    else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
+    {
+      return 0;
+    }
+    // RAM A
+    else if(address >= MemoryAddresses.RAM_A_START && address < MemoryAddresses.RAM_A_SWITCHABLE_START)
+    {
+      return this.wram[address - MemoryAddresses.RAM_A_START];
+    }
+    else if(address >= MemoryAddresses.RAM_A_SWITCHABLE_START && address < MemoryAddresses.RAM_A_END)
+    {
+      return this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START];
+    }
+    // RAM echo
+    else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
+    {
+      return this.readByte(address - MemoryAddresses.RAM_A_ECHO_START);
+    }
+    // Empty A
+    else if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      return 0xFF;
+    }
+    // OAM
+    else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
+    {
+      return this.oam[address - MemoryAddresses.OAM_START];
+    }
+    // IO
+    else if(address >= MemoryAddresses.IO_START)
+    {
+      return this.readIO(address - MemoryAddresses.IO_START);
+    }
+
+
+    return 0xFF;
   }
 
   /// Write data into the IO section of memory space.
@@ -341,7 +411,7 @@ class Memory
         value = 0;
         break;
       case MemoryRegisters.R_TAC:
-        if (((registers[MemoryRegisters.R_TAC] ^ value) & 0x03) != 0)
+        if (((this.registers[MemoryRegisters.R_TAC] ^ value) & 0x03) != 0)
         {
           this.cpu.timerCycle = 0;
           this.registers[MemoryRegisters.R_TIMA] = this.registers[MemoryRegisters.R_TMA];
@@ -357,66 +427,6 @@ class Memory
     }
 
     this.registers[address] = value & 0xFF;
-  }
-
-  /// Read a byte from memory address
-  ///
-  /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
-  int readByte(int address)
-  {
-    address &= 0xFFFF;
-    int block = address & 0xF000;
-
-    //TODO <DEBUG PRINT>
-    //print('Read byte from memory 0x' + address.toRadixString(16));
-
-    if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
-    {
-      //TODO <DEBUG PRINT>
-      //print('Read byte from ROM');
-      return this.cpu.cartridge.data[address];
-    }
-    if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < MemoryAddresses.CARTRIDGE_ROM_END)
-    {
-      return this.cpu.cartridge.data[this.romPageStart + address - MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START];
-    }
-    else if(address >= MemoryAddresses.VIDEO_RAM_START && address < MemoryAddresses.VIDEO_RAM_END)
-    {
-      return this.vram[this.vramPageStart + address - MemoryAddresses.VIDEO_RAM_START];
-    }
-    else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
-    {
-      return 0;
-    }
-    else if(block == MemoryAddresses.RAM_A_START)
-    {
-      return this.wram[address - MemoryAddresses.RAM_A_START];
-    }
-    else if(block == MemoryAddresses.RAM_A_SWITCHABLE_START)
-    {
-      return this.wram[this.wramPageStart + address - MemoryAddresses.RAM_A_START];
-    }
-    else if(block == 0xE000 || block == 0xF000)
-    {
-      if(address >= MemoryAddresses.EMPTY_A_START && address < MemoryAddresses.EMPTY_A_END)
-      {
-        return 0xFF;
-      }
-      else if(address >= MemoryAddresses.RAM_A_ECHO_START && address < MemoryAddresses.RAM_A_ECHO_END)
-      {
-        return this.readByte(address - MemoryAddresses.RAM_A_ECHO_START);
-      }
-      else if(address >= MemoryAddresses.OAM_START && address < MemoryAddresses.EMPTY_A_END)
-      {
-        return this.oam[address - MemoryAddresses.OAM_START];
-      }
-      else if(address >= MemoryAddresses.IO_START)
-      {
-        return this.readIO(address - MemoryAddresses.IO_START);
-      }
-    }
-
-    return 0xFF;
   }
 
   // Read IO address
