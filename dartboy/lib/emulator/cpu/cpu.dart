@@ -50,6 +50,9 @@ class CPU
   /// The current cycle of the TIMA register.
   int timerCycle;
 
+  /// Debug infromation about the instructions executed on the CPU.
+  List<String> debugStack;
+
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   int _pc = 0;
 
@@ -64,7 +67,17 @@ class CPU
   }
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int sp = 0;
+  int _sp = 0;
+
+  set sp(int value)
+  {
+    this._sp = value & 0xFFFF;
+  }
+
+  int get sp
+  {
+    return this._sp & 0xFFFF;
+  }
 
   CPU(Cartridge cartridge)
   {
@@ -79,6 +92,8 @@ class CPU
   /// Reset the CPU, also resets the MMU, registers and PPU.
   void reset()
   {
+    this.debugStack = new List<String>();
+
     this.registers.reset();
     this.mmu.reset();
     this.ppu.reset();
@@ -190,10 +205,13 @@ class CPU
   }
 
   ///Increase the clock cycles and trigger interrupts as needed.
-  void tick(int clocks)
+  void tick(int delta)
   {
-    this.clocks += clocks;
-    this.updateInterrupts(clocks);
+    this.clocks += delta;
+    this.cyclesSinceLastSleep += delta;
+    this.cyclesExecutedThisSecond += delta;
+
+    this.updateInterrupts(delta);
   }
 
   /// Update interrupt counter, check for interruptions waiting.
@@ -364,7 +382,7 @@ class CPU
     
     if(op == null)
     {
-      throw new Exception('Read null op code. (PC: 0x' + this.pc.toRadixString(16) + ')');
+      throw new Exception('Read null op code. (' + debugState() + ')');
     }
 
     switch (op)
@@ -694,9 +712,31 @@ class CPU
             Instructions.LD_r_r(this, op);
             break;
           default:
-            throw new Exception('Unsupported operation, clocks: ' + this.clocks.toString() + ", op: 0x" + op.toRadixString(16));
+            throw new Exception('Unsupported operation, (OP: 0x' + op.toRadixString(16) + debugState() + ')');
         }
     }
   }
 
+  String debugState()
+  {
+    String data = '\nRegisters:\n';
+    data += 'AF: 0x' + this.registers.af.toRadixString(16) + '\n';
+    data += 'BC: 0x' + this.registers.bc.toRadixString(16) + '\n';
+    data += 'DE: 0x' + this.registers.de.toRadixString(16) + '\n';
+    data += 'HL: 0x' + this.registers.hl.toRadixString(16) + '\n';
+
+    data += '\nCPU:\n';
+    data += 'PC: 0x' + this.pc.toRadixString(16) + '\n';
+    data += 'SP: 0x' + this.sp.toRadixString(16) + '\n';
+    data += 'Clocks: ' + this.clocks.toString() + '\n';
+
+    data += '\nDebug Stack:\n';
+
+    for(int i = 0; i < this.debugStack.length; i++)
+    {
+      data += this.debugStack[i] + '\n';
+    }
+
+    return data;
+  }
 }

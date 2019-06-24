@@ -23,10 +23,37 @@ class Registers
   /// CPU registers store temporally the result of the instructions.
   ///
   /// F is the flag register.
-  int a, f;
-  int b, c;
-  int d, e;
-  int h, l;
+  int _a, _f;
+
+  set f(int value){this._f = value & 0xFF;}
+  int get f {return this._f & 0xFF;}
+
+  set a(int value) {this._a = value & 0xFF;}
+  int get a {return this._a & 0xFF;}
+
+  int _b, _c;
+
+  set b(int value) {this._b = value & 0xFF;}
+  int get b {return this._b & 0xFF;}
+
+  set c(int value) {this._c = value & 0xFF;}
+  int get c {return this._c & 0xFF;}
+
+  int _d, _e;
+
+  set d(int value) {this._d = value & 0xFF;}
+  int get d {return this._d & 0xFF;}
+
+  set e(int value) {this._e = value & 0xFF;}
+  int get e {return this._e & 0xFF;}
+
+  int _h, _l;
+
+  set h(int value) {this._h = value & 0xFF;}
+  int get h {return this._h & 0xFF;}
+
+  set l(int value) {this._l = value & 0xFF;}
+  int get l {return this._l & 0xFF;}
 
   /// Pointer to the CPU object
   CPU cpu;
@@ -146,7 +173,7 @@ class Registers
   }
 
   /// 16 bit mixed af register
-  get af
+  int get af
   {
     return ((this.a & 0xFF) << 8) | (this.f & 0xFF);
   }
@@ -158,7 +185,7 @@ class Registers
   }
 
   /// 16 bit mixed bc register
-  get bc
+  int get bc
   {
     return ((this.b & 0xFF) << 8) | (this.c & 0xFF);
   }
@@ -170,7 +197,7 @@ class Registers
   }
 
   /// 16 bit mixed de register
-  get de
+  int get de
   {
     return ((this.d & 0xFF) << 8) | (this.e & 0xFF);
   }
@@ -182,7 +209,7 @@ class Registers
   }
 
   /// 16 bit mixed hl register
-  get hl
+  int get hl
   {
     return ((this.h & 0xFF) << 8) | (this.l & 0xFF);
   }
