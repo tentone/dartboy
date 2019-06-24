@@ -1,3 +1,4 @@
+import '../../utils/byte_utils.dart';
 import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
 import '../memory/mmu/mmu.dart';
@@ -137,7 +138,7 @@ class CPU
   {
     this.tick(4);
 
-    return this.mmu.readByte(address);
+    return ByteUtils.toSignedByte(this.mmu.readByte(address));
   }
 
   /// Write a byte into memory (takes 4 clocks)
