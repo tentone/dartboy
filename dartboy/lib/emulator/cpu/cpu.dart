@@ -128,6 +128,7 @@ class CPU
   int getUByte(int address)
   {
     this.tick(4);
+
     return this.mmu.readByte(address) & 0xff;
   }
 
@@ -135,6 +136,7 @@ class CPU
   int getByte(int address)
   {
     this.tick(4);
+
     return this.mmu.readByte(address);
   }
 
