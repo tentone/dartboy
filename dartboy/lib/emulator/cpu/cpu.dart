@@ -385,7 +385,7 @@ class CPU
     
     if(op == null)
     {
-      throw new Exception('Read null op code. (' + debugState() + ')');
+      throw new Exception('Read null op code. (' + debugInformation() + ')');
     }
 
     switch (op)
@@ -715,12 +715,15 @@ class CPU
             Instructions.LD_r_r(this, op);
             break;
           default:
-            throw new Exception('Unsupported operation, (OP: 0x' + op.toRadixString(16) + debugState() + ')');
+            throw new Exception('Unsupported operation, (OP: 0x' + op.toRadixString(16) + ')');
         }
     }
   }
 
-  String debugState()
+  /// Returns a string with debug information on the current status of the CPU.
+  ///
+  /// Returns the current values of all registers, and a history of the instructions executed by the CPU.
+  String debugInformation()
   {
     String data = '\nRegisters:\n';
     data += 'AF: 0x' + this.registers.af.toRadixString(16) + '\n';
