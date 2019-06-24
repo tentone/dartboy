@@ -54,7 +54,7 @@ class Instructions
     {
       cpu.pushWordSP(cpu.pc);
       cpu.pc = jmp;
-      cpu.clocks += 4;
+      cpu.tick(4);
     }
   }
 
@@ -65,7 +65,7 @@ class Instructions
     int jmp = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
     cpu.pushWordSP(cpu.pc);
     cpu.pc = jmp;
-    cpu.clocks += 4;
+    cpu.tick(4);
   }
 
   static void LD_dd_nn(CPU cpu, int op)
@@ -142,7 +142,7 @@ class Instructions
     nsp &= 0xffff;
 
     cpu.sp = nsp;
-    cpu.clocks += 4;
+    cpu.tick(4);
 }
 
   static void SCF(CPU cpu)
@@ -626,7 +626,7 @@ class Instructions
 
     cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
     cpu.sp += 2;
-    cpu.clocks += 4;
+    cpu.tick(4);
 }
 
   static void XOR_n(CPU cpu)
@@ -679,7 +679,7 @@ class Instructions
 
     cpu.pushWordSP(cpu.pc);
     cpu.pc = op & 0x38;
-    cpu.clocks += 4;
+    cpu.tick(4);
 }
 
   static void RET_c(CPU cpu, int op)
@@ -692,7 +692,7 @@ class Instructions
       cpu.sp += 2;
     }
 
-    cpu.clocks += 4;
+    cpu.tick(4);
 }
 
   static void HALT(CPU cpu)
@@ -718,7 +718,7 @@ class Instructions
     if(cpu.registers.getFlag((op >> 3) & 0x7))
     {
       cpu.pc += e;
-      cpu.clocks += 4;
+      cpu.tick(4);
     }
   }
 
@@ -731,7 +731,7 @@ class Instructions
     if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
       cpu.pc = npc;
-      cpu.clocks += 4;
+      cpu.tick(4);
     }
   }
 
@@ -800,7 +800,7 @@ class Instructions
 
     int e = cpu.nextBytePC();
     cpu.pc += e;
-    cpu.clocks += 4;
+    cpu.tick(4);
 }
 
   static void OR(CPU cpu, int n)
@@ -1128,7 +1128,7 @@ class Instructions
     addDebugStack('JP_nn', cpu);
 
     cpu.pc = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
-    cpu.clocks += 4;
+    cpu.tick(4);
   }
 
   static void RETI(CPU cpu)
@@ -1138,7 +1138,7 @@ class Instructions
     cpu.interruptsEnabled = true;
     cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
     cpu.sp += 2;
-    cpu.clocks += 4;
+    cpu.tick(4);
   }
 
   static void LD_a16_SP(CPU cpu)
@@ -1164,7 +1164,7 @@ class Instructions
 
     int val = cpu.registers.getRegisterPair((op >> 4) & 0x3);
     cpu.pushWordSP(val);
-    cpu.clocks += 4;
+    cpu.tick(4);
   }
 }
 
