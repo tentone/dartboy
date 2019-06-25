@@ -3,7 +3,6 @@ import 'dart:io';
 
 import './cpu/cpu.dart';
 import './memory/cartridge.dart';
-import './memory/memory_registers.dart';
 
 enum EmulatorState
 {
@@ -25,9 +24,6 @@ class Emulator
 
   /// Callback function called on the end of each emulator step.
   Function onStep;
-
-  /// Timer used to step the CPU.
-  Timer timer;
 
   Emulator({Function onStep})
   {
@@ -93,45 +89,44 @@ class Emulator
   {
     if(this.state != EmulatorState.READY)
     {
-      //TODO <DEBUG PRINT>
       print('Emulator not ready, cannot run.');
       return;
     }
 
     this.state = EmulatorState.RUNNING;
 
-    int step = 0;
-    this.timer = new Timer.periodic(const Duration(microseconds: 1), (Timer t)
+    Function loop = () async
     {
-      step++;
-
-      if(this.state != EmulatorState.RUNNING)
+      while(true)
       {
-        //TODO <DEBUG PRINT>
-        print('Stopped emulation (Step: ' + step.toString() + ')');
-        this.timer.cancel();
-        return;
-      }
-
-      //Step CPU
-      try
-      {
-        this.cpu.step();
-
-        if(this.onStep != null)
+        if(this.state != EmulatorState.RUNNING)
         {
-          this.onStep();
+          print('Stopped emulation.');
+          return;
         }
+
+        //Step CPU
+        try
+        {
+          this.cpu.step();
+
+          if(this.onStep != null)
+          {
+            this.onStep();
+          }
+        }
+        catch(e, stacktrace)
+        {
+          print('Error occured, emulation stoped.');
+          print(e.toString());
+          print(stacktrace.toString());
+          return;
+        }
+
+        await Future.delayed(const Duration(microseconds: 1));
       }
-      catch(e, stacktrace)
-      {
-        //TODO <DEBUG PRINT>
-        print('Error occured, emulation stoped. (Step: ' + step.toString() + ')');
-        print(e.toString());
-        print(stacktrace.toString());
-        this.timer.cancel();
-      }
-    });
+    };
+    loop();
   }
 
   /// Pause the emulation
@@ -144,7 +139,6 @@ class Emulator
       return;
     }
 
-    this.timer.cancel();
     this.state = EmulatorState.READY;
   }
 }

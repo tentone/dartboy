@@ -6,4 +6,6 @@ import 'mmu.dart';
 class MBC1 extends MMU
 {
   MBC1(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+
+
 }

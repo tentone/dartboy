@@ -447,7 +447,7 @@ class Memory
       int reg = this.registers[MemoryRegisters.R_JOYPAD];
       reg |= 0x0F;
 
-      if(reg & 0x10 != 0)
+      if(reg & 0x10 == 0)
       {
         if (this.cpu.buttons[Gamepad.RIGHT]){reg &= ~0x1;}
         if (this.cpu.buttons[Gamepad.LEFT]){reg &= ~0x2;}
@@ -455,15 +455,13 @@ class Memory
         if (this.cpu.buttons[Gamepad.DOWN]){reg &= ~0x8;}
       }
 
-      if(reg & 0x20 != 0)
+      if(reg & 0x20 == 0)
       {
         if (this.cpu.buttons[Gamepad.A]){reg &= ~0x1;}
         if (this.cpu.buttons[Gamepad.B]){reg &= ~0x2;}
         if (this.cpu.buttons[Gamepad.SELECT]){reg &= ~0x4;}
         if (this.cpu.buttons[Gamepad.START]){reg &= ~0x8;}
       }
-
-      print('Read gamepad 0b' + reg.toRadixString(2));
 
       return reg;
     }
