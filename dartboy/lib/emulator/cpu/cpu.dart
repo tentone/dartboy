@@ -54,6 +54,9 @@ class CPU
   /// Debug infromation about the instructions executed on the CPU.
   List<String> debugStack;
 
+  /// Buttons of the gameboy the index stored in the Gamepad class corresponds to the position here
+  List<bool> buttons;
+
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   int _pc = 0;
 
@@ -94,6 +97,9 @@ class CPU
   void reset()
   {
     this.debugStack = new List<String>();
+
+    this.buttons = new List<bool>(8);
+    this.buttons.fillRange(0, 8, false);
 
     this.registers.reset();
     this.mmu.reset();

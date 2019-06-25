@@ -1,11 +1,14 @@
 class MemoryRegisters
 {
-  static const int R_DIV = 0x04;
+  static const int R_DOUBLE_SPEED = 0x4d;
+  static const int R_HDMA_START = 0x55;
+
   static const int R_JOYPAD = 0x00;
   static const int R_SERIAL = 0x02;
-  static const int R_TAC = 0x07;
+  static const int R_DIV = 0x04;
   static const int R_TIMA = 0x05;
   static const int R_TMA = 0x06;
+  static const int R_TAC = 0x07;
   static const int R_NR10 = 0x10;
   static const int R_NR11 = 0x11;
   static const int R_NR12 = 0x12;

@@ -40,13 +40,13 @@ class Emulator
   /// Press a gamepad button down (update memory register).
   void buttonDown(int button)
   {
-    this.cpu.mmu.registers[MemoryRegisters.R_JOYPAD] |= (button & 0xFF);
+    this.cpu.buttons[button] = true;
   }
 
   /// Release a gamepad button (update memory register).
   void buttonUp(int button)
   {
-    this.cpu.mmu.registers[MemoryRegisters.R_JOYPAD] &= (~button & 0xFF);
+    this.cpu.buttons[button] = false;
   }
 
   /// Load a ROM from a file and create the HW components for the emulator.

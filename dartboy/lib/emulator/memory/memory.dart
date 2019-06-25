@@ -6,6 +6,7 @@ import './cartridge.dart';
 import './hdma.dart';
 import './memory_addresses.dart';
 import './memory_registers.dart';
+import './gamepad.dart';
 
 /// Generic memory container used to represent memory spaces in the gameboy system.
 ///
@@ -86,6 +87,11 @@ class Memory
     this.oam.fillRange(0, this.oam.length, 0);
     this.wram.fillRange(0, this.wram.length, 0);
     this.vram.fillRange(0, this.vram.length, 0);
+
+    for(int i = 0; i < 0x100; i++)
+    {
+      this.writeIO(i, 0);
+    }
 
     this.writeByte(0xFF04, 0xAB);
     this.writeByte(0xFF05, 0x00);
@@ -245,7 +251,7 @@ class Memory
   {
     switch (address)
     {
-      case 0x4d:
+      case MemoryRegisters.R_DOUBLE_SPEED:
         this.cpu.doubleSpeed = (value & 0x01) != 0;
         break;
       case 0x69:
@@ -287,7 +293,7 @@ class Memory
           }
           break;
         }
-      case 0x55: // HDMA start
+      case MemoryRegisters.R_HDMA_START: // HDMA start
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
           {
@@ -429,12 +435,41 @@ class Memory
     this.registers[address] = value & 0xFF;
   }
 
-  // Read IO address
+  /// Read IO address
   int readIO(int address)
   {
-    if(address == 0x4d)
+    if(address == MemoryRegisters.R_DOUBLE_SPEED)
     {
       return this.cpu.doubleSpeed ? 0x80 : 0x0;
+    }
+    else if(address == MemoryRegisters.R_JOYPAD)
+    {
+      int reg = this.registers[MemoryRegisters.R_JOYPAD];
+      reg |= 0x0F;
+
+      if(reg & 0x10 != 0)
+      {
+        if (this.cpu.buttons[Gamepad.RIGHT]){reg &= ~0x1;}
+        if (this.cpu.buttons[Gamepad.LEFT]){reg &= ~0x2;}
+        if (this.cpu.buttons[Gamepad.UP]){reg &= ~0x4;}
+        if (this.cpu.buttons[Gamepad.DOWN]){reg &= ~0x8;}
+      }
+
+      if(reg & 0x20 != 0)
+      {
+        if (this.cpu.buttons[Gamepad.A]){reg &= ~0x1;}
+        if (this.cpu.buttons[Gamepad.B]){reg &= ~0x2;}
+        if (this.cpu.buttons[Gamepad.SELECT]){reg &= ~0x4;}
+        if (this.cpu.buttons[Gamepad.START]){reg &= ~0x8;}
+      }
+
+      print('Read gamepad 0b' + reg.toRadixString(2));
+
+      return reg;
+    }
+    else if(address == MemoryRegisters.R_NR52)
+    {
+      //TODO <ADD CODE HERE>
     }
 
     return this.registers[address];
