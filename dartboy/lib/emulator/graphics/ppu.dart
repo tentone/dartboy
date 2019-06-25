@@ -27,6 +27,9 @@ class PPU
   static const int P_5 = 5 << 24;
   static const int P_6 = 6 << 24;
 
+  /// Indicates if the screen buffer should be cleared on the start of a new frame
+  static const bool CLEAR_SCREEN_BUFFER = false;
+
   /// The Emulator on which to operate.
   CPU cpu;
 
@@ -311,12 +314,6 @@ class PPU
       // use 143 here as we've just finished processing line 143 and will start 144
       if (LY == 143)
       {
-        // Draw image into the display
-        // TODO <ADD CODE HERE>
-        //graphics.drawImage(screenBuffer, 0, 0, core.display.getWidth(), core.display.getHeight(), null);
-        //this.core.lcdWidget.
-
-
         // Trigger interrupts if the display is enabled
         if (displayEnabled)
         {
@@ -348,12 +345,9 @@ class PPU
     this.spritesDrawnPerLine[scanline] = 0;
 
     // If we've reached the start of a frame, clear the current buffer
-    if (scanline == 0)
+    if(scanline == 0 && PPU.CLEAR_SCREEN_BUFFER)
     {
-      for(var i = 0; i < this.screenBuffer.length; i++)
-      {
-        this.screenBuffer[i] = 0;
-      }
+      this.screenBuffer.fillRange(0, this.screenBuffer.length, 0);
     }
 
     // Draw the background if it's enabled

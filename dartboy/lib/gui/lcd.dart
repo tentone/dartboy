@@ -33,8 +33,12 @@ class LCDState extends State<LCDWidget> with SingleTickerProviderStateMixin
   }
 }
 
+/// LCD painter is used to copy the LCD data from the gameboy PPU to the screen.
 class LCDPainter extends CustomPainter
 {
+  /// Indicates if the LCD is drawing new content
+  bool drawing = false;
+
   LCDPainter();
 
   @override
@@ -45,6 +49,8 @@ class LCDPainter extends CustomPainter
       return;
     }
 
+    this.drawing = true;
+
     for(int x = 0; x < PPU.LCD_WIDTH; x++)
     {
       for(int y = 0; y < PPU.LCD_HEIGHT; y++)
@@ -53,7 +59,6 @@ class LCDPainter extends CustomPainter
         color.style = PaintingStyle.stroke;
         color.strokeWidth = 1.0;
         color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.screenBuffer[x + y * PPU.LCD_WIDTH]);
-        //color.color = ColorConverter.toColor((x & 0xFF) << 8 | (y & 0xFF));
 
         List<double> points = new List<double>();
         points.add(x.toDouble() - PPU.LCD_WIDTH / 2.0);
@@ -62,11 +67,13 @@ class LCDPainter extends CustomPainter
         canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), color);
       }
     }
+
+    this.drawing = false;
   }
 
   @override
   bool shouldRepaint(LCDPainter oldDelegate)
   {
-    return true;
+    return !this.drawing;
   }
 }
