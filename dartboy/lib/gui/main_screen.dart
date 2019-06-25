@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../emulator/memory/gamepad.dart';
 import '../emulator/emulator.dart';
 import './lcd.dart';
 import './button.dart';
@@ -57,17 +58,17 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Up"),
+                        new Button(color: Colors.blueAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.UP);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.UP);}, label: "Up"),
                         new Row
                         (
                           children: <Widget>
                           [
-                            new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Left"),
+                            new Button(color: Colors.blueAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.LEFT);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.LEFT);}, label: "Left"),
                             new Container(width: 50, height: 50),
-                            new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Right")
+                            new Button(color: Colors.blueAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.RIGHT);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.RIGHT);}, label: "Right")
                           ]
                         ),
-                        new Button(color: Colors.blueAccent, onPressed: (){}, onReleased: (){}, label: "Down"),
+                        new Button(color: Colors.blueAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.DOWN);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.DOWN);}, label: "Down"),
                       ],
                     ),
                     // AB
@@ -75,8 +76,8 @@ class MainScreenState extends State<MainScreen>
                     (
                       children: <Widget>
                       [
-                        new Button(color: Colors.red, onPressed: (){}, onReleased: (){}, label: "A"),
-                        new Button(color: Colors.green, onPressed: (){}, onReleased: (){}, label: "B"),
+                        new Button(color: Colors.red, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.A);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.A);}, label: "A"),
+                        new Button(color: Colors.green, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.B);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.B);}, label: "B"),
                       ],
                     ),
                   ],
@@ -88,9 +89,9 @@ class MainScreenState extends State<MainScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>
                   [
-                    new Button(color: Colors.orange, onPressed: (){}, onReleased: (){}, label: "Start"),
+                    new Button(color: Colors.orange, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.START);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.START);}, label: "Start"),
                     new Container(width: 20),
-                    new Button(color: Colors.yellowAccent, onPressed: (){}, onReleased: (){}, label: "Select"),
+                    new Button(color: Colors.yellowAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.SELECT);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.SELECT);}, label: "Select"),
                   ],
                 ),
                 // Button (Start + Pause + Load)

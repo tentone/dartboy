@@ -3,6 +3,7 @@ import 'dart:io';
 
 import './cpu/cpu.dart';
 import './memory/cartridge.dart';
+import './memory/memory_registers.dart';
 
 enum EmulatorState
 {
@@ -10,6 +11,7 @@ enum EmulatorState
   READY,
   RUNNING
 }
+
 /// Main emulator object used to directly interact with the system.
 ///
 /// GUI communicates with this object, it is responsible for providing image, handling key input and user interaction.
@@ -33,6 +35,18 @@ class Emulator
 
     this.state = EmulatorState.WAITING;
     this.onStep = onStep;
+  }
+
+  /// Press a gamepad button down (update memory register).
+  void buttonDown(int button)
+  {
+    this.cpu.mmu.registers[MemoryRegisters.R_JOYPAD] |= (button & 0xFF);
+  }
+
+  /// Release a gamepad button (update memory register).
+  void buttonUp(int button)
+  {
+    this.cpu.mmu.registers[MemoryRegisters.R_JOYPAD] &= (~button & 0xFF);
   }
 
   /// Load a ROM from a file and create the HW components for the emulator.
