@@ -36,3 +36,5 @@ wgbc/\.vs/
 *.wav
 
 dartboy/roms/pokemon\.gbc
+
+dartboy/windows/roms/pokemon\.gb

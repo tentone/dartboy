@@ -69,7 +69,7 @@ class MMU extends Memory
     this.vram[address] = value;
   }
 
-  /// Read a register value, register values are mapped between FF00 to FFFF
+  /// Read a register value, register values are mapped between 0xFF00 to 0xFFFF
   ///
   /// Meaning of the values is stored in the MemoryRegisters class
   int readRegisterByte(int address)
@@ -82,7 +82,7 @@ class MMU extends Memory
     return this.registers[address];
   }
 
-  /// Read a register value, register values are mapped between FF00 to FFFF
+  /// Read a register value, register values are mapped between 0xFF00 to 0xFFFF
   ///
   /// Meaning of the values is stored in the MemoryRegisters class
   void writeRegisterByte(int address, int value)

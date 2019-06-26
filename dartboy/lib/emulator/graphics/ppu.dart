@@ -16,6 +16,9 @@ class PPU
   /// Height in pixels of the physical gameboy LCD.
   static const int LCD_HEIGHT = 144;
 
+  /// Indicates if the screen buffer should be cleared on the start of a new frame
+  static const bool CLEAR_SCREEN_BUFFER = true;
+
   /// Draw layer priority constants.
   ///
   /// We can only draw over pixels with equal or greater priority.
@@ -26,9 +29,6 @@ class PPU
   static const int P_4 = 4 << 24;
   static const int P_5 = 5 << 24;
   static const int P_6 = 6 << 24;
-
-  /// Indicates if the screen buffer should be cleared on the start of a new frame
-  static const bool CLEAR_SCREEN_BUFFER = false;
 
   /// The Emulator on which to operate.
   CPU cpu;

@@ -325,6 +325,7 @@ class Memory
             {
               this.vram[this.vramPageStart + dest + i] = readByte(source + i) & 0xFF;
             }
+
             this.registers[0x55] = 0xFF;
           }
           break;

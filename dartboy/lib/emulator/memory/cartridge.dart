@@ -116,7 +116,7 @@ class Cartridge
     return null;
   }
 
-  /// Checks if the cartridge has battery.
+  /// Checks if the cartridge has a internal battery to keep the RAM state.
   bool hasBattery()
   {
     return this.type == CartridgeType.ROM_RAM_BATT || this.type == CartridgeType.ROM_MMM01_SRAM_BATT || this.type == CartridgeType.MBC1_RAM_BATT || this.type == CartridgeType.MBC3_TIMER_BATT || this.type == CartridgeType.MBC3_TIMER_RAM_BATT || this.type == CartridgeType.MBC3_RAM_BATT || this.type == CartridgeType.MBC5_RAM_BATT || this.type == CartridgeType.MBC5_RUMBLE_SRAM_BATT;
