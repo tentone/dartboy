@@ -22,15 +22,11 @@ class Emulator
   /// CPU object
   CPU cpu;
 
-  /// Callback function called on the end of each emulator step.
-  Function onStep;
-
-  Emulator({Function onStep})
+  Emulator()
   {
     this.cpu = null;
 
     this.state = EmulatorState.WAITING;
-    this.onStep = onStep;
   }
 
   /// Press a gamepad button down (update memory register).
@@ -95,6 +91,15 @@ class Emulator
 
     this.state = EmulatorState.RUNNING;
 
+    int frequency = CPU.FREQUENCY ~/ 4;
+    double periodCPU = 1e6 / frequency;
+
+    int fps = 30;
+    double periodFPS = 1e6 / fps;
+
+    int cycles = periodFPS ~/ periodCPU;
+    Duration period = new Duration(microseconds:periodFPS.toInt());
+
     Function loop = () async
     {
       while(true)
@@ -105,14 +110,11 @@ class Emulator
           return;
         }
 
-        //Step CPU
         try
         {
-          this.cpu.step();
-
-          if(this.onStep != null)
+          for(var i = 0; i < cycles; i++)
           {
-            this.onStep();
+            this.cpu.step();
           }
         }
         catch(e, stacktrace)
@@ -123,9 +125,10 @@ class Emulator
           return;
         }
 
-        await Future.delayed(const Duration(microseconds: 1));
+        await Future.delayed(period);
       }
     };
+
     loop();
   }
 

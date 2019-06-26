@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+
 import 'package:flutter/material.dart';
 
 import '../emulator/memory/gamepad.dart';
@@ -115,7 +117,18 @@ class MainScreenState extends State<MainScreen>
                     }, child: new Text("Reset")),
                     new RaisedButton(onPressed: ()
                     {
-                      MainScreen.emulator.loadROM(new File('./roms/pokemon.gb'));
+                      if(Platform.isAndroid || Platform.isIOS)
+                      {
+                        FilePicker.getFile(fileExtension: 'gb').then((File file)
+                        {
+                          MainScreen.emulator.loadROM(file);
+                        });
+                      }
+                      else
+                      {
+                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
+                      }
+
                     }, child: new Text("Load"))
                   ],
                 ))
