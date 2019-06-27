@@ -165,7 +165,6 @@ class Instructions
     //addDebugStack('LD_A_n', cpu);
 
     cpu.registers.a = cpu.getUByte(cpu.registers.hl & 0xffff);
-
     cpu.registers.hl = (cpu.registers.hl - 1) & 0xFFFF;
   }
 
@@ -277,24 +276,24 @@ class Instructions
   {
     //addDebugStack('CBPrefix', cpu);
 
-    int cbop = cpu.getUByte(cpu.pc++);
-    int r = cbop & 0x7;
-    int d = cpu.registers.getRegister(r) & 0xff;
+    int op = cpu.getUByte(cpu.pc++);
+    int reg = op & 0x7;
+    int data = cpu.registers.getRegister(reg) & 0xff;
 
-    switch(cbop & 0xC0)
+    switch(op & 0xC0)
     {
       case 0x80:
         {
           // RES b, r
           // 1 0 b b b r r r
-          cpu.registers.setRegister(r, d & ~(0x1 << (cbop >> 3 & 0x7)));
+          cpu.registers.setRegister(reg, data & ~(0x1 << (op >> 3 & 0x7)));
           return;
         }
       case 0xc0:
         {
           // SET b, r
           // 1 1 b b b r r r
-          cpu.registers.setRegister(r, d | (0x1 << (cbop >> 3 & 0x7)));
+          cpu.registers.setRegister(reg, data | (0x1 << (op >> 3 & 0x7)));
           return;
         }
       case 0x40:
@@ -303,62 +302,62 @@ class Instructions
           // 0 1 b b b r r r
           cpu.registers.f &= Registers.F_CARRY;
           cpu.registers.f |= Registers.F_HALF_CARRY;
-          if((d & (0x1 << (cbop >> 3 & 0x7))) == 0) cpu.registers.f |= Registers.F_ZERO;
+          if((data & (0x1 << (op >> 3 & 0x7))) == 0) cpu.registers.f |= Registers.F_ZERO;
           return;
         }
       case 0x0:
         {
-          switch(cbop & 0xf8)
+          switch(op & 0xf8)
           {
             case 0x00: // RLcpu.registers.c m
               {
                 cpu.registers.f = 0;
-                if((d & 0x80) != 0)
+                if((data & 0x80) != 0)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
-                d <<= 1;
+                data <<= 1;
 
                 // we're shifting circular left, add back bit 7
                 if((cpu.registers.f & Registers.F_CARRY) != 0)
                 {
-                  d |= 0x01;
+                  data |= 0x01;
                 }
 
-                d &= 0xff;
+                data &= 0xff;
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             case 0x08: // RRcpu.registers.c m
               {
                 cpu.registers.f = 0;
-                if((d & 0x1) != 0)
+                if((data & 0x1) != 0)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
 
-                d >>= 1;
+                data >>= 1;
 
                 // we're shifting circular right, add back bit 7
                 if((cpu.registers.f & Registers.F_CARRY) != 0)
                 {
-                  d |= 0x80;
+                  data |= 0x80;
                 }
 
-                d &= 0xff;
+                data &= 0xff;
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             case 0x10: // Rcpu.registers.l m
@@ -367,25 +366,25 @@ class Instructions
                 cpu.registers.f = 0;
 
                 // we'll be shifting left, so if bit 7 is set we set carry
-                if((d & 0x80) == 0x80)
+                if((data & 0x80) == 0x80)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
-                d <<= 1;
-                d &= 0xff;
+                data <<= 1;
+                data &= 0xff;
 
                 // move old cpu.registers.c into bit 0
                 if(carryflag)
                 {
-                  d |= 0x1;
+                  data |= 0x1;
                 }
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             case 0x18: // RR m
@@ -394,25 +393,25 @@ class Instructions
                 cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
-                if((d & 0x1) == 0x1)
+                if((data & 0x1) == 0x1)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
 
-                d >>= 1;
+                data >>= 1;
 
                 // move old cpu.registers.c into bit 7
                 if(carryflag)
                 {
-                  d |= 0x80;
+                  data |= 0x80;
                 }
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
 
                 return;
               }
@@ -421,19 +420,19 @@ class Instructions
                 cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
-                if((d & 0x1) != 0)
+                if((data & 0x1) != 0)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
 
-                d >>= 1;
+                data >>= 1;
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             case 0x20: // SLcpu.registers.a m
@@ -441,60 +440,60 @@ class Instructions
                 cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
-                if((d & 0x80) != 0)
+                if((data & 0x80) != 0)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
 
-                d <<= 1;
-                d &= 0xff;
+                data <<= 1;
+                data &= 0xff;
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             case 0x28: // SRcpu.registers.a m
               {
-                bool bit7 = (d & 0x80) != 0;
+                bool bit7 = (data & 0x80) != 0;
                 cpu.registers.f = 0;
-                if((d & 0x1) != 0)
+                if((data & 0x1) != 0)
                 {
                   cpu.registers.f |= Registers.F_CARRY;
                 }
 
-                d >>= 1;
+                data >>= 1;
 
                 if(bit7)
                 {
-                  d |= 0x80;
+                  data |= 0x80;
                 }
 
-                if(d == 0)
+                if(data == 0)
                 {
                   cpu.registers.f |= Registers.F_ZERO;
                 }
 
-                cpu.registers.setRegister(r, d);
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             case 0x30: // SWAP m
               {
-                d = ((d & 0xF0) >> 4) | ((d & 0x0F) << 4);
-                cpu.registers.f = d == 0 ? Registers.F_ZERO : 0;
-                cpu.registers.setRegister(r, d);
+                data = ((data & 0xF0) >> 4) | ((data & 0x0F) << 4);
+                cpu.registers.f = data == 0 ? Registers.F_ZERO : 0;
+                cpu.registers.setRegister(reg, data);
                 return;
               }
             default:
-              throw new Exception("cb-&f8 0x" + cbop.toRadixString(16));
+              throw new Exception("CB Prefix 0xf8 operation unknown 0x" + op.toRadixString(16));
           }
           break;
         }
       default:
-        throw new Exception("CB Prefix operation unknown 0x" + cbop.toRadixString(16));
+        throw new Exception("CB Prefix operation unknown 0x" + op.toRadixString(16));
     }
   }
 
@@ -514,7 +513,7 @@ class Instructions
     bool carryflag = (cpu.registers.f & Registers.F_CARRY) != 0;
     cpu.registers.f = 0; // &= Registers.F_ZERO;?
 
-    // we'll be shifting left, so if bit 7 is set we set carry
+    // We'll be shifting left, so if bit 7 is set we set carry
     if((cpu.registers.a & 0x80) == 0x80)
     {
       cpu.registers.f |= Registers.F_CARRY;
@@ -522,7 +521,7 @@ class Instructions
     cpu.registers.a <<= 1;
     cpu.registers.a &= 0xff;
 
-    // move old cpu.registers.c into bit 0
+    // Move old cpu.registers.c into bit 0
     if(carryflag)
     {
       cpu.registers.a |= 1;
@@ -558,7 +557,7 @@ class Instructions
     }
     cpu.registers.a >>= 1;
 
-    // we're shifting circular right, add back bit 7
+    // We're shifting circular right, add back bit 7
     if((cpu.registers.f & Registers.F_CARRY) != 0)
     {
       cpu.registers.a |= 0x80;
@@ -739,22 +738,7 @@ class Instructions
   {
     //addDebugStack('DAA', cpu);
 
-    // TODO warning: this might be implemented wrong!
-    /**
-     * <code><pre>tmp := a,
-     * if nf then
-     *      if hf or [a ANcpu.registers.d 0x0f > 9] then tmp -= 0x06
-     *      if cf or [a > 0x99] then tmp -= 0x60
-     * else
-     *      if hf or [a ANcpu.registers.d 0x0f > 9] then tmp += 0x06
-     *      if cf or [a > 0x99] then tmp += 0x60
-     * endif,
-     * tmp => flags, cf := cf OR [a > 0x99],
-     * hf := a.4 XOR tmp.4, a := tmp
-     * </pre>
-     * </code>
-     * @see http://wikiti.brandonw.net/?title=Z80_Instruction_Set
-     */
+    //TODO <CHECK DAA IMPLEMENTATION>
     
     int tmp = cpu.registers.a;
 
@@ -1175,7 +1159,7 @@ class InstructionTables
 {
   /// for A in range(0x100):
   ///     F = F_N
-  ///     if ((A & 0xf) - 1 < 0): F |= F_H
+  ///     if((A & 0xf) - 1 < 0): F |= F_H
   ///     if A - 1 == 0: F |= F_Z
   ///     DEC[A] = F
   static const List<int> DEC = [96, 192, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 96, 64, 64, 64, 64, 64,
@@ -1191,8 +1175,8 @@ class InstructionTables
 
   /// for A in range(0x100):
   ///     F = 0
-  ///     if ((((A & 0xf) + 1) & 0xF0) != 0): F |= F_H
-  ///     if (A + 1 > 0xff): F |= F_Z
+  ///     if((((A & 0xf) + 1) & 0xF0) != 0): F |= F_H
+  ///     if(A + 1 > 0xff): F |= F_Z
   ///     INC[A] = F
   static const List<int> INC = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,

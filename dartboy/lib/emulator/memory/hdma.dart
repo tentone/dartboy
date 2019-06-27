@@ -46,7 +46,7 @@ class HDMA
   /// In that case reading from FF55 may return any value for the lower 7 bits, but Bit 7 will be read as "1".
   void tick()
   {
-    for (int i = this.position; i < this.position + 0x10; i++)
+    for(int i = this.position; i < this.position + 0x10; i++)
     {
       this.memory.vram[this.memory.vramPageStart + this.destination + i] = this.memory.readByte(source + i);
     }
@@ -54,7 +54,7 @@ class HDMA
     this.position += 0x10;
     this.length -= 0x10;
 
-    if (this.length == 0)
+    if(this.length == 0)
     {
       this.memory.hdma = null;
       this.memory.registers[0x55] = 0xff;

@@ -127,9 +127,9 @@ class PaletteColors
     PaletteColors defaultPalette = new PaletteColors(defaultColors, defaultColors, defaultColors);
 
     // Set all unknown colours to default.
-    for (int i = 0; i < list.length; i++)
+    for(int i = 0; i < list.length; i++)
     {
-      if (list[i] == null)
+      if(list[i] == null)
       {
         list[i] = defaultPalette;
       }

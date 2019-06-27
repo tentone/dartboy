@@ -16,9 +16,18 @@ class MBC3 extends MBC
   /// The realtime clock registers.
   List<int> rtc = new List<int>(4);
 
-  MBC3(CPU cpu, Cartridge cartridge) : super(cpu, cartridge)
+  MBC3(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+
+  @override
+  void reset()
   {
+    super.reset();
+
+    this.rtcEnabled = false;
+    this.ramBank = 0;
+
     this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 4);
+    this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 
   void writeByte(int address, int value)

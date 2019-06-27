@@ -87,8 +87,8 @@ class CPU
   {
     this.cartridge = cartridge;
     this.mmu = this.cartridge.createController(this);
-    this.registers = new Registers(this);
     this.ppu = new PPU(this);
+    this.registers = new Registers(this);
 
     this.reset();
   }
@@ -100,10 +100,6 @@ class CPU
 
     this.buttons = new List<bool>(8);
     this.buttons.fillRange(0, 8, false);
-
-    this.registers.reset();
-    this.mmu.reset();
-    this.ppu.reset();
 
     this.doubleSpeed = false;
     this.divCycle = 0;
@@ -117,6 +113,10 @@ class CPU
     this.clocks = 0;
     this.cyclesSinceLastSleep = 0;
     this.cyclesExecutedThisSecond = 0;
+
+    this.registers.reset();
+    this.ppu.reset();
+    this.mmu.reset();
   }
 
   /// Read the next program byte and update the PC value

@@ -126,7 +126,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/pokemon.gb'));
                       }
 
                     }, child: new Text("Load"))

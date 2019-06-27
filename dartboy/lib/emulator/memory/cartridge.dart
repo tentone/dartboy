@@ -125,15 +125,15 @@ class Cartridge
   /// Set how many ROM banks exist based on the ROM type.
   void setBankSizeROM()
   {
-    if (this.romType == 52)
+    if(this.romType == 52)
     {
       this.romBanks = 72;
     }
-    else if (this.romType == 53)
+    else if(this.romType == 53)
     {
       this.romBanks = 80;
     }
-    else if (this.romType == 54)
+    else if(this.romType == 54)
     {
       this.romBanks = 96;
     }

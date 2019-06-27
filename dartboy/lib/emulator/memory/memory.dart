@@ -64,7 +64,6 @@ class Memory
   {
     this.cpu = cpu;
     this.hdma = null;
-    this.reset();
   }
 
   /// Initialize the memory, create the data array with the defined size.
@@ -261,12 +260,12 @@ class Memory
             break;
           }
 
-          int ff68 = this.registers[0x68];
-          int currentRegister = ff68 & 0x3f;
+          int data = this.registers[0x68];
+          int currentRegister = data & 0x3f;
 
           this.cpu.ppu.setBackgroundPalette(currentRegister, value);
 
-          if ((ff68 & 0x80) != 0)
+          if((data & 0x80) != 0)
           {
             currentRegister++;
             currentRegister %= 0x40;
@@ -285,7 +284,7 @@ class Memory
           int currentRegister = ff6a & 0x3f;
           this.cpu.ppu.setSpritePalette(currentRegister, value);
 
-          if ((ff6a & 0x80) != 0)
+          if((ff6a & 0x80) != 0)
           {
             currentRegister++;
             currentRegister %= 0x40;
@@ -305,7 +304,7 @@ class Memory
           int source = ((this.registers[0x51] & 0xff) << 8) | (this.registers[0x52] & 0xF0);
           int dest = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
 
-          if ((value & 0x80) != 0)
+          if((value & 0x80) != 0)
           {
             // H-Blank DMA
             this.hdma = new HDMA(this, source, dest, length);
@@ -321,7 +320,7 @@ class Memory
             }
 
             // General DMA
-            for (int i = 0; i < length; i++)
+            for(int i = 0; i < length; i++)
             {
               this.vram[this.vramPageStart + dest + i] = readByte(source + i) & 0xFF;
             }
@@ -332,7 +331,7 @@ class Memory
         }
       case MemoryRegisters.R_VRAM_BANK:
         {
-          if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
+          if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
           {
             this.vramPageStart = Memory.VRAM_PAGESIZE * (value & 0x3);
           }
@@ -340,14 +339,14 @@ class Memory
         }
       case MemoryRegisters.R_WRAM_BANK:
         {
-          if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
+          if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
           {
             this.wramPageStart = Memory.WRAM_PAGESIZE * max(1, value & 0x7);
           }
           break;
         }
       case MemoryRegisters.R_NR14:
-        if ((this.registers[MemoryRegisters.R_NR14] & 0x80) != 0)
+        if((this.registers[MemoryRegisters.R_NR14] & 0x80) != 0)
         {
           //this.cpu.sound.channel1.restart();
           value &= 0x7f;
@@ -362,7 +361,7 @@ class Memory
         //this.cpu.sound.channel1.update();
         break;
       case MemoryRegisters.R_NR24:
-        if ((value & 0x80) != 0)
+        if((value & 0x80) != 0)
         {
           //this.cpu.sound.channel2.restart();
           value &= 0x7F;
@@ -376,7 +375,7 @@ class Memory
         //this.cpu.sound.channel2.update();
         break;
       case MemoryRegisters.R_NR34:
-        if ((value & 0x80) != 0)
+        if((value & 0x80) != 0)
         {
           //this.cpu.sound.channel3.restart();
           value &= 0x7F;
@@ -391,7 +390,7 @@ class Memory
         //this.cpu.sound.channel3.update();
         break;
       case MemoryRegisters.R_NR44:
-        if ((value & 0x80) != 0)
+        if((value & 0x80) != 0)
         {
           //this.cpu.sound.channel4.restart();
           value &= 0x7F;
@@ -408,7 +407,7 @@ class Memory
         {
           int addressBase = value * 0x100;
 
-          for (int i = 0; i < 0xA0; i++)
+          for(int i = 0; i < 0xA0; i++)
           {
             this.writeByte(0xFE00 + i, this.readByte(addressBase + i));
           }
@@ -418,7 +417,7 @@ class Memory
         value = 0;
         break;
       case MemoryRegisters.R_TAC:
-        if (((this.registers[MemoryRegisters.R_TAC] ^ value) & 0x03) != 0)
+        if(((this.registers[MemoryRegisters.R_TAC] ^ value) & 0x03) != 0)
         {
           this.cpu.timerCycle = 0;
           this.registers[MemoryRegisters.R_TIMA] = this.registers[MemoryRegisters.R_TMA];
@@ -427,7 +426,7 @@ class Memory
       case MemoryRegisters.R_LCD_STAT:
         break;
       default:
-        if (0x30 <= address && address < 0x40)
+        if(0x30 <= address && address < 0x40)
         {
           //this.cpu.sound.channel3.updateSample(address - 0x30, (byte) value);
         }
@@ -450,18 +449,18 @@ class Memory
 
       if(reg & 0x10 == 0)
       {
-        if (this.cpu.buttons[Gamepad.RIGHT]){reg &= ~0x1;}
-        if (this.cpu.buttons[Gamepad.LEFT]){reg &= ~0x2;}
-        if (this.cpu.buttons[Gamepad.UP]){reg &= ~0x4;}
-        if (this.cpu.buttons[Gamepad.DOWN]){reg &= ~0x8;}
+        if(this.cpu.buttons[Gamepad.RIGHT]){reg &= ~0x1;}
+        if(this.cpu.buttons[Gamepad.LEFT]){reg &= ~0x2;}
+        if(this.cpu.buttons[Gamepad.UP]){reg &= ~0x4;}
+        if(this.cpu.buttons[Gamepad.DOWN]){reg &= ~0x8;}
       }
 
       if(reg & 0x20 == 0)
       {
-        if (this.cpu.buttons[Gamepad.A]){reg &= ~0x1;}
-        if (this.cpu.buttons[Gamepad.B]){reg &= ~0x2;}
-        if (this.cpu.buttons[Gamepad.SELECT]){reg &= ~0x4;}
-        if (this.cpu.buttons[Gamepad.START]){reg &= ~0x8;}
+        if(this.cpu.buttons[Gamepad.A]){reg &= ~0x1;}
+        if(this.cpu.buttons[Gamepad.B]){reg &= ~0x2;}
+        if(this.cpu.buttons[Gamepad.SELECT]){reg &= ~0x4;}
+        if(this.cpu.buttons[Gamepad.START]){reg &= ~0x8;}
       }
 
       return reg;

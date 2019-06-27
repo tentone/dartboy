@@ -26,7 +26,7 @@ class AudioGenerator
       File file = new File('output.wav');
 
       List<int> bytes = List<int>();
-      await for (int byte in generator.generate(note))
+      await for(int byte in generator.generate(note))
       {
         bytes.add(byte);
       }

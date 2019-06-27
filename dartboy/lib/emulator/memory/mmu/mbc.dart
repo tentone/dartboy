@@ -50,6 +50,7 @@ class MBC extends MMU
     file.writeAsBytes(this.cartRam, flush: true, mode: FileMode.write);
   }
 
+  @override
   int readByte(int address)
   {
     address &= 0xffff;
