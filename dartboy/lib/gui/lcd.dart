@@ -15,7 +15,7 @@ class LCDWidget extends StatefulWidget
   @override
   State<LCDWidget> createState()
   {
-    return new LCDState();
+    return MainScreen.lcdState;
   }
 }
 
@@ -51,18 +51,23 @@ class LCDPainter extends CustomPainter
 
     this.drawing = true;
 
-    for(int x = 0; x < PPU.LCD_WIDTH; x++)
+    int scale = 1;
+    int width = PPU.LCD_WIDTH * scale;
+    int height = PPU.LCD_HEIGHT * scale;
+
+    for(int x = 0; x < width; x++)
     {
-      for(int y = 0; y < PPU.LCD_HEIGHT; y++)
+      for(int y = 0; y < height; y++)
       {
         Paint color = new Paint();
         color.style = PaintingStyle.stroke;
         color.strokeWidth = 1.0;
-        color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.current[x + y * PPU.LCD_WIDTH]);
+
+        color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.current[(x ~/ scale) + (y ~/ scale) * PPU.LCD_WIDTH]);
 
         List<double> points = new List<double>();
-        points.add(x.toDouble() - PPU.LCD_WIDTH / 2.0);
-        points.add(y.toDouble() + PPU.LCD_HEIGHT / 2.0);
+        points.add(x.toDouble() - width / 2.0);
+        points.add(y.toDouble() + 10);
 
         canvas.drawRawPoints(PointMode.points, new Float32List.fromList(points), color);
       }

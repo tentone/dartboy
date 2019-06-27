@@ -96,7 +96,7 @@ class ButtonState extends State<Button>
                 borderRadius: new BorderRadius.circular(20.0)
 
               ),
-              child: new Center(child: new Text(this.widget.label))
+              child: new Center(child: new Text(this.widget.label, style: const TextStyle(color: Colors.white),))
             )
           ]
         )

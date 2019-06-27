@@ -18,6 +18,8 @@ class MainScreen extends StatefulWidget
   /// Emulator instance
   static Emulator emulator = new Emulator();
 
+  static LCDState lcdState = new LCDState();
+
   @override
   MainScreenState createState()
   {
@@ -32,6 +34,7 @@ class MainScreenState extends State<MainScreen>
   {
     return new Scaffold
     (
+      backgroundColor: Colors.black,
       body: new Container
       (
         child: new Column
@@ -106,15 +109,15 @@ class MainScreenState extends State<MainScreen>
                     new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.run();
-                    }, child: new Text("Run")),
+                    }, color: Colors.black, child: new Text("Run", style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.pause();
-                    }, child: new Text("Pause")),
+                    }, color: Colors.black, child: new Text("Pause", style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.reset();
-                    }, child: new Text("Reset")),
+                    }, color: Colors.black, child: new Text("Reset", style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       if(Platform.isAndroid || Platform.isIOS)
@@ -129,7 +132,7 @@ class MainScreenState extends State<MainScreen>
                         MainScreen.emulator.loadROM(new File('./roms/pokemon.gb'));
                       }
 
-                    }, child: new Text("Load"))
+                    }, color: Colors.black, child: new Text("Load", style: const TextStyle(color: Colors.white))),
                   ],
                 ))
               ]

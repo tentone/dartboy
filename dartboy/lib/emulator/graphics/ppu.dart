@@ -1,3 +1,5 @@
+import 'package:dartboy/gui/main_screen.dart';
+
 import '../cpu/cpu.dart';
 import '../memory/memory_registers.dart';
 import '../memory/memory_addresses.dart';
@@ -331,6 +333,9 @@ class PPU
       List<int> temp = this.buffer;
       this.buffer = this.current;
       this.current = temp;
+
+      //
+      MainScreen.lcdState.setState((){});
 
       //Clear drawing buffer
       this.buffer.fillRange(0, this.buffer.length, 0);
