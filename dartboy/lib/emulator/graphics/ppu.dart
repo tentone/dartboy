@@ -16,9 +16,6 @@ class PPU
   /// Height in pixels of the physical gameboy LCD.
   static const int LCD_HEIGHT = 144;
 
-  /// Indicates if the screen buffer should be cleared on the start of a new frame
-  static const bool CLEAR_SCREEN_BUFFER = true;
-
   /// Draw layer priority constants.
   ///
   /// We can only draw over pixels with equal or greater priority.
@@ -36,24 +33,29 @@ class PPU
   /// A buffer to hold the current rendered frame that can be directly copied to the canvas on the widget.
   ///
   /// Each position stores RGB encoded color value. The data is stored by rows.
-  List<int> screenBuffer = new List<int>(LCD_WIDTH * LCD_HEIGHT);
+  List<int> buffer;
+
+  /// Current rendered image to be displayed on screen.
+  ///
+  /// This buffer is swapped with the main drawing buffer.
+  List<int> current;
 
   /// Background palettes. On CGB, 0-7 are used. On GB, only 0 is used.
-  List<Palette> bgPalettes = new List<Palette>(8);
+  List<Palette> bgPalettes;
 
   /// Sprite palettes. 0-7 used on CGB, 0-1 used on GB.
-  List<Palette> spritePalettes = new List<Palette>(8);
+  List<Palette> spritePalettes;
 
   /// Background palette memory on the CGB, indexed through $FF69.
-  List<int> gbcBackgroundPaletteMemory = new List<int>(0x40);
+  List<int> gbcBackgroundPaletteMemory;
 
   /// Sprite palette memory on the CGB, indexed through $FF6B.
-  List<int> gbcSpritePaletteMemory = new List<int>(0x40);
+  List<int> gbcSpritePaletteMemory;
 
   /// Stores number of sprites drawn per each of the 144 scanlines this frame.
   ///
   /// Actual Gameboy hardware can only draw 10 sprites/line, so we artificially introduce this limitation using this array.
-  List<int> spritesDrawnPerLine = new List<int>(144);
+  List<int> spritesDrawnPerLine;
 
   /// A counter for the number of cycles elapsed since the last LCD event.
   int lcdCycles = 0;
@@ -70,6 +72,7 @@ class PPU
   PPU(CPU core)
   {
     this.cpu = core;
+    this.reset();
   }
 
   /// Initializes all palette RAM to the default on Gameboy boot.
@@ -79,8 +82,11 @@ class PPU
     this.spritePalettes = new List<Palette>(8);
     this.gbcBackgroundPaletteMemory = new List<int>(0x40);
 
-    this.screenBuffer = new List<int>(PPU.LCD_WIDTH * PPU.LCD_HEIGHT);
-    this.screenBuffer.fillRange(0, this.screenBuffer.length, 0);
+    this.buffer = new List<int>(PPU.LCD_WIDTH * PPU.LCD_HEIGHT);
+    this.buffer.fillRange(0, this.buffer.length, 0);
+
+    this.current = new List<int>(PPU.LCD_WIDTH * PPU.LCD_HEIGHT);
+    this.current.fillRange(0, this.current.length, 0);
 
     this.gbcSpritePaletteMemory = new List<int>(0x40);
     this.gbcSpritePaletteMemory.fillRange(0, this.gbcSpritePaletteMemory.length, 0);
@@ -113,16 +119,8 @@ class PPU
     }
     else
     {
-      /// FF69 - BCPD/BGPD - CGB Mode Only - Background Palette Data
-      /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
-      /// Each color is defined by two ints (Bit 0-7 in first int).
-      /// Bit 0-4   Red Intensity   (00-1F)
-      /// Bit 5-9   Green Intensity (00-1F)
-      /// Bit 10-14 Blue Intensity  (00-1F)
-      ///
-      /// Much like VRAM, Data in Palette Memory cannot be read/written during the time when the LCD Controller is reading from it. (That is when the STAT register indicates Mode 3).
-      ///
-      /// Note: Initially all background colors are initialized as white.
+      // CGB Mode Only - Background Palette Data
+      // Initially all background colors are initialized as white.
       PaletteColors colors = PaletteColors.getByHash(this.cpu.cartridge.checksum);
 
       this.bgPalettes[0] = new GBPalette(this.cpu, colors.bg, MemoryRegisters.R_BGP);
@@ -149,7 +147,10 @@ class PPU
     }
   }
 
-  /// Performs an update to a int of palette RAM.
+  /// Performs an update to a int of palette RAM, the colors are stored in two bytes as:
+  /// Bit 0-4 Red Intensity (00-1F)
+  /// Bit 5-9 Green Intensity (00-1F)
+  /// Bit 10-14 Blue Intensity (00-1F)
   ///
   /// @param from The palette RAM to read from.
   /// @param to Reference to an array of Palettes to update.
@@ -157,13 +158,6 @@ class PPU
   /// @param j The int index of the palette being updated.
   void updatePalette(List<int> from, Palette to, int i, int j)
   {
-    /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
-    /// Each color is defined by two ints (Bit 0-7 in first int).
-    ///
-    /// Bit 0-4 Red Intensity   (00-1F)
-    /// Bit 5-9 Green Intensity (00-1F)
-    /// Bit 10-14 Blue Intensity  (00-1F)
-    
     // Read an RGB value from RAM
     int data = ((from[i * 8 + j * 2 + 1] & 0xff) << 8) | (from[i * 8 + j * 2] & 0xff);
   
@@ -215,8 +209,6 @@ class PPU
     {
       this.lcdCycles -= 456;
 
-      /// The LY indicates the vertical line to which the present data is transferred to the LCD Driver.
-      /// The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the V-Blank period.
       int LY = cpu.mmu.readRegisterByte(MemoryRegisters.R_LY) & 0xFF;
 
       // draw the scanline
@@ -251,10 +243,8 @@ class PPU
       }
 
       bool isVBlank = 144 <= LY;
-
       if (!isVBlank && this.cpu.mmu.hdma != null)
       {
-        //System.err.println(LY);
         this.cpu.mmu.hdma.tick();
       }
 
@@ -272,15 +262,7 @@ class PPU
 
       if (displayEnabled && !isVBlank)
       {
-        /// INT 48 - LCDC Status Interrupt
-        ///
-        /// There are various reasons for this interrupt to occur as described by the STAT register ($FF40).
-        /// One very popular reason is to indicate to the user when the video hardware is about to redraw
-        /// a given LCD line.
-        ///
-        /// This is determined with an LY == LYC comparison.
-        ///
-        /// @{see http://bgb.bircd.org/pandocs.htm#lcdstatusregister}
+        // LCDC Status Interrupt (To indicate to the user when the video hardware is about to redraw a given LCD line)
         if ((lcdStat & MemoryRegisters.LCD_STAT_COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
         {
           int lyc = (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LYC) & 0xff);
@@ -303,15 +285,7 @@ class PPU
         }
       }
 
-      /// INT 40 - V-Blank Interrupt
-      ///
-      /// The V-Blank interrupt occurs ca. 59.7 times a second on a regular GB and ca. 61.1 times a second
-      /// on a Super GB (SGB). This interrupt occurs at the beginning of the V-Blank period (LY=144).
-      /// During this period video hardware is not using video ram so it may be freely accessed.
-      /// This period lasts approximately 1.1 milliseconds.
-      ///
-      /// @{see http://bgb.bircd.org/pandocs.htm#lcdinterrupts}
-      // use 143 here as we've just finished processing line 143 and will start 144
+      // V-Blank Interrupt
       if (LY == 143)
       {
         // Trigger interrupts if the display is enabled
@@ -336,39 +310,50 @@ class PPU
   void draw(int scanline)
   {
     // Don't even bother if the display is not enabled
-    if (!displayEnabled()) return;
+    if (!displayEnabled())
+    {
+      return;
+    }
 
     // We still receive these calls for scanlines in vblank, but we can just ignore them
-    if (scanline >= 144 || scanline < 0) return;
+    if (scanline >= 144 || scanline < 0)
+    {
+      return;
+    }
 
     // Reset our sprite counter
     this.spritesDrawnPerLine[scanline] = 0;
 
-    // If we've reached the start of a frame, clear the current buffer
-    if(scanline == 0 && PPU.CLEAR_SCREEN_BUFFER)
+    // Start of a new frame
+    if(scanline == 0)
     {
-      this.screenBuffer.fillRange(0, this.screenBuffer.length, 0);
+      // Swap buffer and current
+      List<int> temp = this.buffer;
+      this.buffer = this.current;
+      this.current = temp;
+
+      //Clear drawing buffer
+      this.buffer.fillRange(0, this.buffer.length, 0);
     }
 
     // Draw the background if it's enabled
-    if (backgroundEnabled())
+    if (this.backgroundEnabled())
     {
-      drawBackgroundTiles(this.screenBuffer, scanline);
+      this.drawBackgroundTiles(this.buffer, scanline);
     }
 
     // If sprites are enabled, draw them.
-    if (spritesEnabled())
+    if (this.spritesEnabled())
     {
-      drawSprites(this.screenBuffer, scanline);
+      this.drawSprites(this.buffer, scanline);
     }
 
     // If the window appears in this scanline, draw it
-    if (windowEnabled() && scanline >= getWindowPosY() && getWindowPosX() < LCD_WIDTH && getWindowPosY() >= 0)
+    if (this.windowEnabled() && scanline >= this.getWindowPosY() && this.getWindowPosX() < LCD_WIDTH && this.getWindowPosY() >= 0)
     {
-      drawWindow(this.screenBuffer, scanline);
+      this.drawWindow(this.buffer, scanline);
     }
   }
-
 
   /// Attempt to draw background tiles.
   ///
@@ -388,62 +373,51 @@ class PPU
     // Determine the offset into the VRAM tile bank
     int offset = getBackgroundTileMapOffset();
 
-    /// BG Map Tile Numbers
-    /// 
-    /// An area of VRAM known as Background Tile Map contains the numbers of tiles to be displayed.
-    /// It is organized as 32 rows of 32 ints each. Each int contains a number of a tile to be displayed.
-    /// Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000).
-    /// In the second case, patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
-    /// The Tile Data Table address for the background can be selected via LCDC register.
-    ///
-    /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
-
+    // BG Map Tile Numbers
+    //
+    // An area of VRAM known as Background Tile Map contains the numbers of tiles to be displayed.
+    // It is organized as 32 rows of 32 ints each. Each int contains a number of a tile to be displayed.
+    // Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000).
+    // In the second case, patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
     // 20 8x8 tiles fit in a 160px-wide screen
     for (int x = 0; x < 21; x++)
     {
       int addressBase = (offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32)).toInt();
 
-      // add 256 to jump into second tile pattern table
+      // Add 256 to jump into second tile pattern table
       int tile = tileDataOffset == 0 ? this.cpu.mmu.readVRAM(addressBase) & 0xff : this.cpu.mmu.readVRAM(addressBase) + 256;
 
-      // Tile attributes
       int gbcVramBank = 0;
       int gbcPalette = 0;
 
       bool flipX = false;
       bool flipY = false;
 
-      /// BG Map Attributes (CGB Mode only)
-      ///
-      /// In CGB Mode, an additional map of 32x32 ints is stored in VRAM Bank 1 (each int defines attributes for the corresponding tile-number map entry in VRAM Bank 0):
-      /// Bit 0-2  Background Palette number  (BGP0-7)
-      /// Bit 3    Tile VRAM Bank number      (0=Bank 0, 1=Bank 1)
-      /// Bit 4    Not used
-      /// Bit 5    Horizontal Flip            (0=Normal, 1=Mirror horizontally)
-      /// Bit 6    Vertical Flip              (0=Normal, 1=Mirror vertically)
-      /// Bit 7    BG-to-OAM Priority         (0=Use OAM priority bit, 1=BG Priority)
-      ///
-      /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
-
+      // BG Map Attributes, in CGB Mode, an additional map of 32x32 ints is stored in VRAM Bank 1
       if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
       {
-        int attribs = this.cpu.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
+        int attributes = this.cpu.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
 
-        if ((attribs & 0x8) != 0)
+        // Tile VRAM Bank number
+        if(attributes & 0x8 != 0)
         {
           gbcVramBank = 1;
         }
 
-        flipX = (attribs & 0x20) != 0;
-        flipY = (attribs & 0x40) != 0;
-        gbcPalette = (attribs & 0x7);
+        // Horizontal Flip (0=Normal, 1=Mirror horizontally)
+        flipX = (attributes & 0x20) != 0;
+
+        // Vertical Flip (0=Normal, 1=Mirror vertically)
+        flipY = (attributes & 0x40) != 0;
+
+        // Background Palette number
+        gbcPalette = attributes & 0x7;
       }
 
       // Delegate tile drawing
       drawTile(this.bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
     }
   }
-
 
   /// Attempt to draw window tiles.
   ///
@@ -473,21 +447,19 @@ class PPU
       bool flipY = false;
       int gbcPalette = 0;
 
-
-      /// Same rules apply here as for background tiles.
-      ///
-      /// @{see http://bgb.bircd.org/pandocs.htm#vrambackgroundmaps}
+      // Same rules apply here as for background tiles.
       if (this.cpu.cartridge.gameboyType == GameboyType.COLOR)
       {
-        int attribs = this.cpu.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
+        int attributes = this.cpu.mmu.readVRAM(MemoryAddresses.VRAM_PAGESIZE + addressBase);
 
-        if ((attribs & 0x8) != 0)
+        if ((attributes & 0x8) != 0)
         {
           gbcVramBank = 1;
         }
-        flipX = (attribs & 0x20) != 0;
-        flipY = (attribs & 0x40) != 0;
-        gbcPalette = (attribs & 0x07);
+
+        flipX = (attributes & 0x20) != 0;
+        flipY = (attributes & 0x40) != 0;
+        gbcPalette = (attributes & 0x07);
       }
 
       drawTile(this.bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, P_6, false);
@@ -535,7 +507,7 @@ class PPU
       // For each line, the first int defines the least significant bits of the color numbers for each pixel, and the second int defines the upper bits of the color numbers.
       // In either case, Bit 7 is the leftmost pixel, and Bit 0 the rightmost.
 
-      // here we handle the x and y flipping by tweaking the indexes we are accessing
+      // Handle the x and y flipping by tweaking the indexes we are accessing
       int logicalLine = (flipY ? 7 - line : line);
       int logicalX = (flipX ? 7 - px : px);
 

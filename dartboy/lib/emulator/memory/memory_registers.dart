@@ -31,13 +31,23 @@ class MemoryRegisters
   static const int R_NR52 = 0x26;
   static const int R_WRAM_BANK = 0x70;
   static const int R_VRAM_BANK = 0x4f;
+
+  /// The Tile Data Table address for the background can be selected via LCDC register.
   static const int R_LCDC = 0x40;
+
   static const int R_LCD_STAT = 0x41;
   static const int R_SCY = 0x42;
   static const int R_SCX = 0x43;
+
+  /// The LY indicates the vertical line to which the present data is transferred to the LCD Driver.
+  /// The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the V-Blank period.
   static const int R_LY = 0x44;
+
   static const int R_LYC = 0x45;
+
+  /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
   static const int R_BGP = 0x47;
+
   static const int R_OBP0 = 0x48;
   static const int R_OBP1 = 0x49;
   static const int R_TRIGGERED_INTERRUPTS = 0x0F; // IF

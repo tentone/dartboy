@@ -58,7 +58,7 @@ class LCDPainter extends CustomPainter
         Paint color = new Paint();
         color.style = PaintingStyle.stroke;
         color.strokeWidth = 1.0;
-        color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.screenBuffer[x + y * PPU.LCD_WIDTH]);
+        color.color = ColorConverter.toColor(MainScreen.emulator.cpu.ppu.current[x + y * PPU.LCD_WIDTH]);
 
         List<double> points = new List<double>();
         points.add(x.toDouble() - PPU.LCD_WIDTH / 2.0);
