@@ -1,8 +1,15 @@
-# DartBoy GBC emulator
+# DartBoy
 
-- Dart based game boy color emulator that runs on desktop, mobile and web using the flutter framework.
-
+- Dart based GameBoy (and GameBoy Color) emulator that runs on desktop, mobile and web using the flutter framework.
 - Project was developed using Flutter 1.5.5 and Dart 2.3.0.
+- Supports MBC1, MBC2, MBC3, MBC5 and basic cartridges, hassupport for GameBoy Color games.
+- Does not support Super GameBoy specific features.
+
+
+
+Screenshots
+
+
 
 
 
