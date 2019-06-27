@@ -513,7 +513,6 @@ class PPU
 
       int address = addressBase + logicalLine * 2;
 
-      // each tile takes up 16 ints, and each line takes 2 ints
       int paletteIndex = (((this.cpu.mmu.readVRAM(address + 1) & (0x80 >> logicalX)) >> (7 - logicalX)) << 1) // this is the upper bit of the color number
       | ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX)); // << 0, this is the lower bit of the color number
 
