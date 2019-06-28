@@ -250,7 +250,7 @@ class Memory
   {
     switch (address)
     {
-      case MemoryRegisters.R_DOUBLE_SPEED:
+      case MemoryRegisters.DOUBLE_SPEED:
         this.cpu.doubleSpeed = (value & 0x01) != 0;
         break;
       case 0x69:
@@ -292,7 +292,7 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.R_HDMA_START: // HDMA start
+      case MemoryRegisters.HDMA_START: // HDMA start
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
           {
@@ -329,7 +329,7 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.R_VRAM_BANK:
+      case MemoryRegisters.VRAM_BANK:
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
           {
@@ -337,7 +337,7 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.R_WRAM_BANK:
+      case MemoryRegisters.WRAM_BANK:
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.COLOR)
           {
@@ -345,22 +345,22 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.R_NR14:
-        if((this.registers[MemoryRegisters.R_NR14] & 0x80) != 0)
+      case MemoryRegisters.NR14:
+        if((this.registers[MemoryRegisters.NR14] & 0x80) != 0)
         {
           //this.cpu.sound.channel1.restart();
           value &= 0x7f;
         }
         this.registers[address] = value & 0xFF;
         break;
-      case MemoryRegisters.R_NR10:
-      case MemoryRegisters.R_NR11:
-      case MemoryRegisters.R_NR12:
-      case MemoryRegisters.R_NR13:
+      case MemoryRegisters.NR10:
+      case MemoryRegisters.NR11:
+      case MemoryRegisters.NR12:
+      case MemoryRegisters.NR13:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel1.update();
         break;
-      case MemoryRegisters.R_NR24:
+      case MemoryRegisters.NR24:
         if((value & 0x80) != 0)
         {
           //this.cpu.sound.channel2.restart();
@@ -368,13 +368,13 @@ class Memory
         }
         this.registers[address] = value & 0xFF;
         break;
-      case MemoryRegisters.R_NR21:
-      case MemoryRegisters.R_NR22:
-      case MemoryRegisters.R_NR23:
+      case MemoryRegisters.NR21:
+      case MemoryRegisters.NR22:
+      case MemoryRegisters.NR23:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel2.update();
         break;
-      case MemoryRegisters.R_NR34:
+      case MemoryRegisters.NR34:
         if((value & 0x80) != 0)
         {
           //this.cpu.sound.channel3.restart();
@@ -382,14 +382,14 @@ class Memory
         }
         this.registers[address] = value & 0xFF;
         break;
-      case MemoryRegisters.R_NR30:
-      case MemoryRegisters.R_NR31:
-      case MemoryRegisters.R_NR32:
-      case MemoryRegisters.R_NR33:
+      case MemoryRegisters.NR30:
+      case MemoryRegisters.NR31:
+      case MemoryRegisters.NR32:
+      case MemoryRegisters.NR33:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel3.update();
         break;
-      case MemoryRegisters.R_NR44:
+      case MemoryRegisters.NR44:
         if((value & 0x80) != 0)
         {
           //this.cpu.sound.channel4.restart();
@@ -397,13 +397,13 @@ class Memory
         }
         this.registers[address] = value & 0xFF;
         break;
-      case MemoryRegisters.R_NR41:
-      case MemoryRegisters.R_NR42:
-      case MemoryRegisters.R_NR43:
+      case MemoryRegisters.NR41:
+      case MemoryRegisters.NR42:
+      case MemoryRegisters.NR43:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel4.update();
         break;
-      case MemoryRegisters.R_DMA:
+      case MemoryRegisters.DMA:
         {
           int addressBase = value * 0x100;
 
@@ -413,17 +413,17 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.R_DIV:
+      case MemoryRegisters.DIV:
         value = 0;
         break;
-      case MemoryRegisters.R_TAC:
-        if(((this.registers[MemoryRegisters.R_TAC] ^ value) & 0x03) != 0)
+      case MemoryRegisters.TAC:
+        if(((this.registers[MemoryRegisters.TAC] ^ value) & 0x03) != 0)
         {
           this.cpu.timerCycle = 0;
-          this.registers[MemoryRegisters.R_TIMA] = this.registers[MemoryRegisters.R_TMA];
+          this.registers[MemoryRegisters.TIMA] = this.registers[MemoryRegisters.TMA];
         }
         break;
-      case MemoryRegisters.R_LCD_STAT:
+      case MemoryRegisters.LCD_STAT:
         break;
       default:
         if(0x30 <= address && address < 0x40)
@@ -438,13 +438,13 @@ class Memory
   /// Read IO address
   int readIO(int address)
   {
-    if(address == MemoryRegisters.R_DOUBLE_SPEED)
+    if(address == MemoryRegisters.DOUBLE_SPEED)
     {
       return this.cpu.doubleSpeed ? 0x80 : 0x0;
     }
-    else if(address == MemoryRegisters.R_JOYPAD)
+    else if(address == MemoryRegisters.GAMEPAD)
     {
-      int reg = this.registers[MemoryRegisters.R_JOYPAD];
+      int reg = this.registers[MemoryRegisters.GAMEPAD];
       reg |= 0x0F;
 
       if(reg & 0x10 == 0)
@@ -465,7 +465,7 @@ class Memory
 
       return reg;
     }
-    else if(address == MemoryRegisters.R_NR52)
+    else if(address == MemoryRegisters.NR52)
     {
       //TODO <ADD CODE HERE>
     }

@@ -22,7 +22,7 @@ class GBPalette implements Palette
 
   GBPalette(CPU cpu, List<int> colors, int register)
   {
-    if(register != MemoryRegisters.R_BGP && register != MemoryRegisters.R_OBP0 && register != MemoryRegisters.R_OBP1)
+    if(register != MemoryRegisters.BGP && register != MemoryRegisters.OBP0 && register != MemoryRegisters.OBP1)
     {
       throw new Exception("Register must be one of R.R_BGP, R.R_OBP0, or R.R_OBP1.");
     }

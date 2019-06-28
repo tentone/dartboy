@@ -38,8 +38,7 @@ class MMU extends Memory
       throw new Exception('Trying to access invalid OAM address.');
     }
 
-    value &= 0xFF;
-    this.oam[address] = value;
+    this.oam[address] = value & 0xFF;
   }
 
   /// Read a value from the Video RAM.
@@ -65,8 +64,7 @@ class MMU extends Memory
       throw new Exception('Trying to access invalid VRAM address.');
     }
 
-    value &= 0xFF;
-    this.vram[address] = value;
+    this.vram[address] = value & 0xFF;
   }
 
   /// Read a register value, register values are mapped between 0xFF00 to 0xFFFF
@@ -92,7 +90,6 @@ class MMU extends Memory
       throw new Exception('Trying to access invalid register address.');
     }
 
-    value &= 0xFF;
-    this.registers[address] = value;
+    this.registers[address] = value & 0xFF;
   }
 }

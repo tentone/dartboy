@@ -1,10 +1,11 @@
 import 'package:dartboy/gui/main_screen.dart';
 
-import '../cpu/cpu.dart';
+import '../../utils/byte_utils.dart';
 import '../memory/memory_registers.dart';
 import '../memory/memory_addresses.dart';
 import '../memory/cartridge.dart';
 import './palette_colors.dart';
+import '../cpu/cpu.dart';
 import './palette.dart';
 
 /// LCD class handles all the screen drawing tasks.
@@ -60,26 +61,29 @@ class PPU
   List<int> spritesDrawnPerLine;
 
   /// A counter for the number of cycles elapsed since the last LCD event.
-  int lcdCycles = 0;
+  int lcdCycles;
 
   /// Accumulator for how many VBlanks have been performed since the last reset.
-  int currentVBlankCount = 0;
+  int currentVBlankCount;
 
   /// The timestamp of the last second, in nanoseconds.
-  int lastSecondTime = -1;
+  int lastSecondTime;
 
   /// The last measured Emulator.cycle.
   int lastCoreCycle;
 
-  PPU(CPU core)
+  PPU(CPU cpu)
   {
-    this.cpu = core;
-    this.reset();
+    this.cpu = cpu;
   }
 
   /// Initializes all palette RAM to the default on Gameboy boot.
   void reset()
   {
+    this.lcdCycles = 0;
+    this.currentVBlankCount = 0;
+    this.lastSecondTime = -1;
+
     this.bgPalettes = new List<Palette>(8);
     this.spritePalettes = new List<Palette>(8);
     this.gbcBackgroundPaletteMemory = new List<int>(0x40);
@@ -125,10 +129,10 @@ class PPU
       // Initially all background colors are initialized as white.
       PaletteColors colors = PaletteColors.getByHash(this.cpu.cartridge.checksum);
 
-      this.bgPalettes[0] = new GBPalette(this.cpu, colors.bg, MemoryRegisters.R_BGP);
+      this.bgPalettes[0] = new GBPalette(this.cpu, colors.bg, MemoryRegisters.BGP);
 
-      this.spritePalettes[0] = new GBPalette(this.cpu, colors.obj0, MemoryRegisters.R_OBP0);
-      this.spritePalettes[1] = new GBPalette(this.cpu, colors.obj1, MemoryRegisters.R_OBP1);
+      this.spritePalettes[0] = new GBPalette(this.cpu, colors.obj0, MemoryRegisters.OBP0);
+      this.spritePalettes[1] = new GBPalette(this.cpu, colors.obj1, MemoryRegisters.OBP1);
     }
   }
 
@@ -162,7 +166,7 @@ class PPU
   {
     // Read an RGB value from RAM
     int data = ((from[i * 8 + j * 2 + 1] & 0xff) << 8) | (from[i * 8 + j * 2] & 0xff);
-  
+
     // Extract components
     int red = (data & 0x1f);
     int green = (data >> 5) & 0x1f;
@@ -183,6 +187,7 @@ class PPU
   void setBackgroundPalette(int reg, int data)
   {
     this.gbcBackgroundPaletteMemory[reg] = data;
+
     int palette = reg >> 3;
     updatePalette(this.gbcBackgroundPaletteMemory, this.bgPalettes[palette], palette, (reg >> 1) & 0x3);
   }
@@ -194,6 +199,7 @@ class PPU
   void setSpritePalette(int reg, int data)
   {
     this.gbcSpritePaletteMemory[reg] = data;
+
     int palette = reg >> 3;
     updatePalette(this.gbcSpritePaletteMemory, this.spritePalettes[palette], palette, (reg >> 1) & 0x3);
   }
@@ -206,25 +212,25 @@ class PPU
     // Accumulate to an internal counter
     this.lcdCycles += cycles;
 
-    // 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second = ~456 cycles / line
+    // At 4.194304MHz clock, 154 scanlines per frame, 59.7 frames/second = ~456 cycles / line
     if(this.lcdCycles >= 456)
     {
       this.lcdCycles -= 456;
 
-      int LY = cpu.mmu.readRegisterByte(MemoryRegisters.R_LY) & 0xFF;
+      int LY = this.cpu.mmu.readRegisterByte(MemoryRegisters.LY) & 0xFF;
 
-      // draw the scanline
+      // Draw the scanline
       bool displayEnabled = this.displayEnabled();
 
       // We may be running headlessly, so we must check before drawing
       if(displayEnabled)
       {
-        draw(LY);
+        this.draw(LY);
       }
 
       // Increment LY, and wrap at 154 lines
-      this.cpu.mmu.writeRegisterByte(MemoryRegisters.R_LY, (((LY + 1) % 154) & 0xff));
-      
+      this.cpu.mmu.writeRegisterByte(MemoryRegisters.LY, (((LY + 1) % 154) & 0xff));
+
       if(LY == 0)
       {
         if(this.lastSecondTime == -1)
@@ -250,7 +256,7 @@ class PPU
         this.cpu.mmu.hdma.tick();
       }
 
-      this.cpu.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) & ~0x03);
+      this.cpu.mmu.writeRegisterByte(MemoryRegisters.LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT) & ~0x03);
 
       int mode = 0;
       if(isVBlank)
@@ -258,26 +264,26 @@ class PPU
         mode = 0x01;
       }
 
-      this.cpu.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) | mode);
+      this.cpu.mmu.writeRegisterByte(MemoryRegisters.LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT) | mode);
 
-      int lcdStat = this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT);
+      int lcdStat = this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT);
 
       if(displayEnabled && !isVBlank)
       {
         // LCDC Status Interrupt (To indicate to the user when the video hardware is about to redraw a given LCD line)
         if((lcdStat & MemoryRegisters.LCD_STAT_COINCIDENCE_INTERRUPT_ENABLED_BIT) != 0)
         {
-          int lyc = (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LYC) & 0xff);
+          int lyc = (this.cpu.mmu.readRegisterByte(MemoryRegisters.LYC) & 0xff);
 
           // Fire when LYC == LY
           if(lyc == LY)
           {
             this.cpu.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
-            this.cpu.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) | MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
+            this.cpu.mmu.writeRegisterByte(MemoryRegisters.LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT) | MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
           }
           else
           {
-            this.cpu.mmu.writeRegisterByte(MemoryRegisters.R_LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCD_STAT) & ~MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
+            this.cpu.mmu.writeRegisterByte(MemoryRegisters.LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT) & ~MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
           }
         }
 
@@ -334,7 +340,6 @@ class PPU
       this.buffer = this.current;
       this.current = temp;
 
-      //
       MainScreen.lcdState.setState((){});
 
       //Clear drawing buffer
@@ -390,11 +395,10 @@ class PPU
       int addressBase = (offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32)).toInt();
 
       // Add 256 to jump into second tile pattern table
-      int tile = tileDataOffset == 0 ? this.cpu.mmu.readVRAM(addressBase) & 0xff : this.cpu.mmu.readVRAM(addressBase) + 256;
+      int tile = tileDataOffset == 0 ? (this.cpu.mmu.readVRAM(addressBase) & 0xff) : (this.cpu.mmu.readVRAM(addressBase) + 256);
 
       int gbcVramBank = 0;
       int gbcPalette = 0;
-
       bool flipX = false;
       bool flipY = false;
 
@@ -409,10 +413,10 @@ class PPU
           gbcVramBank = 1;
         }
 
-        // Horizontal Flip (0=Normal, 1=Mirror horizontally)
+        // Horizontal Flip
         flipX = (attributes & 0x20) != 0;
 
-        // Vertical Flip (0=Normal, 1=Mirror vertically)
+        // Vertical Flip
         flipY = (attributes & 0x40) != 0;
 
         // Background Palette number
@@ -420,7 +424,7 @@ class PPU
       }
 
       // Delegate tile drawing
-      drawTile(this.bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
+      this.drawTile(this.bgPalettes[gbcPalette], data, -(scrollX % 8) + x * 8, -(scrollY % 8) + y * 8, tile, scanline, flipX, flipY, gbcVramBank, 0, false);
     }
   }
 
@@ -467,7 +471,7 @@ class PPU
         gbcPalette = (attributes & 0x07);
       }
 
-      drawTile(this.bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, P_6, false);
+      this.drawTile(this.bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, P_6, false);
     }
   }
 
@@ -515,16 +519,13 @@ class PPU
       // Handle the x and y flipping by tweaking the indexes we are accessing
       int logicalLine = (flipY ? 7 - line : line);
       int logicalX = (flipX ? 7 - px : px);
-
       int address = addressBase + logicalLine * 2;
 
       int paletteIndex = (((this.cpu.mmu.readVRAM(address + 1) & (0x80 >> logicalX)) >> (7 - logicalX)) << 1) // this is the upper bit of the color number
       | ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX)); // << 0, this is the lower bit of the color number
 
-      bool index0 = paletteIndex == 0;
-      int priority = basePriority == 0 ? (index0 ? P_1 : P_3) : basePriority;
-
-      if(sprite && index0)
+      int priority = basePriority == 0 ? (paletteIndex == 0 ? PPU.P_1 : PPU.P_3) : basePriority;
+      if(sprite && paletteIndex == 0)
       {
         continue;
       }
@@ -543,40 +544,14 @@ class PPU
   void drawSprites(List<int> data, int scanline)
   {
     // Hold local references to save a lot of load opcodes
-    bool tall = isUsingTallSprites();
+    bool tall = this.isUsingTallSprites();
     bool isColorGB = this.cpu.cartridge.gameboyType == GameboyType.COLOR;
 
     // Actual GameBoy hardware can only handle drawing 10 sprites per line
     for(int i = 0; i < this.cpu.mmu.oam.length && this.spritesDrawnPerLine[scanline] < 10; i += 4)
     {
-      /// Sprite attributes reside in the Sprite Attribute Table (OAM - Object Attribute Memory) at $FE00-FE9F.
-      /// Each of the 40 entries consists of four ints with the following meanings:
-      ///
-      /// int0 - Y Position
-      /// Specifies the sprites vertical position on the screen (minus 16).
-      /// An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
-      ///
-      /// int1 - X Position
-      /// Specifies the sprites horizontal position on the screen (minus 8).
-      /// An offscreen value (X=0 or X>=168) hides the sprite, but the sprite still affects the priority ordering - a better way to hide a sprite is to set its Y-coordinate offscreen.
-      ///
-      /// int2 - Tile/Pattern Number
-      /// Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
-      /// In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
-      /// In 8x16 mode, the lower bit of the tile number is ignored. Ie. the upper 8x8 tile is "NN AND FEh", and
-      /// the lower 8x8 tile is "NN OR 01h".
-      ///
-      /// int3 - Attributes/Flags:
-      /// Bit7   OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
-      /// (Used for both BG and Window. BG color 0 is always behind OBJ)
-      /// Bit6   Y flip (0=Normal, 1=Vertically mirrored)
-      /// Bit5   X flip (0=Normal, 1=Horizontally mirrored)
-      /// Bit4   Palette number ///*Non CGB Mode Only** (0=OBP0, 1=OBP1)
-      /// Bit3   Tile VRAM-Bank ///*CGB Mode Only**     (0=Bank 0, 1=Bank 1)
-      /// Bit2-0 Palette number ///*CGB Mode Only**     (OBP0-7)
-      ///
-      /// {@see http://bgb.bircd.org/pandocs.htm#vramspriteattributetableoam}
-
+      // Specifies the sprites vertical position on the screen (minus 16).
+      // An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
       int y = this.cpu.mmu.readOAM(i) & 0xff;
 
       // Have we exited our bounds
@@ -585,17 +560,23 @@ class PPU
         continue;
       }
 
-      int attributes = this.cpu.mmu.readOAM(i + 3);
-      int vrambank = (attributes & 0x8) != 0 && isColorGB ? 1 : 0;
-      int priority = (attributes & 0x80) != 0 ? P_2 : P_5;
-
+      // Specifies the sprites horizontal position on the screen (minus 8).
+      // An offscreen value (X=0 or X>=168) hides the sprite, but the sprite still affects the priority ordering.
       int x = this.cpu.mmu.readOAM(i + 1) & 0xff;
+
+      // Specifies the sprites Tile Number (00-FF). This (unsigned) value selects a tile from memory at 8000h-8FFFh.
+      // In CGB Mode this could be either in VRAM Bank 0 or 1, depending on Bit 3 of the following int.
       int tile = this.cpu.mmu.readOAM(i + 2) & 0xff;
+
+      int attributes = this.cpu.mmu.readOAM(i + 3);
+
+      int vrambank = (attributes & 0x8) != 0 && isColorGB ? 1 : 0;
+      int priority = (attributes & 0x80) != 0 ? PPU.P_2 : PPU.P_5;
       bool flipX = (attributes & 0x20) != 0;
       bool flipY = (attributes & 0x40) != 0;
-      int obp = isColorGB ? (attributes & 0x7) : (attributes >> 4) & 0x1;
 
-      Palette pal = this.spritePalettes[obp];
+      // Palette selection
+      Palette pal = this.spritePalettes[isColorGB ? (attributes & 0x7) : ((attributes >> 4) & 0x1)];
 
       // Handle drawing double sprites
       if(tall)
@@ -606,30 +587,30 @@ class PPU
 
         if(y - 16 <= scanline && scanline < y - 8)
         {
-          drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
+          this.drawTile(pal, data, x - 8, y - 16, hi, scanline, flipX, flipY, vrambank, priority, true);
           this.spritesDrawnPerLine[scanline]++;
         }
 
         if(y - 8 <= scanline && scanline < y)
         {
-          drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
+          this.drawTile(pal, data, x - 8, y - 8, lo, scanline, flipX, flipY, vrambank, priority, true);
           this.spritesDrawnPerLine[scanline]++;
         }
       }
       else
       {
-        drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
+        this.drawTile(pal, data, x - 8, y - 16, tile, scanline, flipX, flipY, vrambank, priority, true);
         this.spritesDrawnPerLine[scanline]++;
       }
     }
   }
-  
+
   /// Determines whether the display is enabled from the LCDC register.
   ///
   /// @return The enabled state.
   bool displayEnabled()
   {
-    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_CONTROL_OPERATION_BIT) != 0;
+    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_CONTROL_OPERATION_BIT) != 0;
   }
 
   /// Determines whether the background layer is enabled from the LCDC register.
@@ -637,7 +618,7 @@ class PPU
   /// @return The enabled state.
   bool backgroundEnabled()
   {
-    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_BGWINDOW_DISPLAY_BIT) != 0;
+    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_BGWINDOW_DISPLAY_BIT) != 0;
   }
 
   /// Determines the window tile map offset from the LCDC register.
@@ -645,7 +626,7 @@ class PPU
   /// @return The offset.
   int getWindowTileMapOffset()
   {
-    if((this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+    if((this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_WINDOW_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
     {
       return 0x1c00;
     }
@@ -658,7 +639,7 @@ class PPU
   /// @return The offset.
   int getBackgroundTileMapOffset()
   {
-    if((this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
+    if((this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
     {
       return 0x1c00;
     }
@@ -671,7 +652,7 @@ class PPU
   /// @return The enabled state.
   bool isUsingTallSprites()
   {
-    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_SPRITE_SIZE_BIT) != 0;
+    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_SPRITE_SIZE_BIT) != 0;
   }
 
   /// Determines whether sprites are enabled from the LCDC register.
@@ -679,7 +660,7 @@ class PPU
   /// @return The enabled state.
   bool spritesEnabled()
   {
-    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_SPRITE_DISPLAY_BIT) != 0;
+    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_SPRITE_DISPLAY_BIT) != 0;
   }
 
   /// Determines whether the window is enabled from the LCDC register.
@@ -687,17 +668,17 @@ class PPU
   /// @return The enabled state.
   bool windowEnabled()
   {
-    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_WINDOW_DISPLAY_BIT) != 0;
+    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_WINDOW_DISPLAY_BIT) != 0;
   }
-  
+
   /// Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF.
   /// In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000).
   /// In the second case, patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
-  /// 
+  ///
   /// The Tile Data Table address for the background can be selected via LCDC register.
   int getTileDataOffset()
   {
-    if((this.cpu.mmu.readRegisterByte(MemoryRegisters.R_LCDC) & MemoryRegisters.LCDC_BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
+    if((this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
     {
       return 0;
     }
@@ -710,15 +691,15 @@ class PPU
   /// @return The signed offset.
   int getScrollX()
   {
-    return (cpu.mmu.readRegisterByte(MemoryRegisters.R_SCX) & 0xFF);
+    return this.cpu.mmu.readRegisterByte(MemoryRegisters.SCX) & 0xFF;
   }
-  
+
   /// Fetches the current background Y-coordinate from the SCY register.
   ///
   /// @return The signed offset.
   int getScrollY()
   {
-    return (cpu.mmu.readRegisterByte(MemoryRegisters.R_SCY) & 0xff);
+    return this.cpu.mmu.readRegisterByte(MemoryRegisters.SCY) & 0xff;
   }
 
   /// Fetches the current window X-coordinate from the WX register.
@@ -726,14 +707,14 @@ class PPU
   /// @return The unsigned offset.
   int getWindowPosX()
   {
-    return (cpu.mmu.readRegisterByte(MemoryRegisters.R_WX) & 0xFF) - 7;
+    return (this.cpu.mmu.readRegisterByte(MemoryRegisters.WX) & 0xFF) - 7;
   }
-  
+
   /// Fetches the current window Y-coordinate from the WY register.
   ///
   /// @return The unsigned offset.
   int getWindowPosY()
   {
-    return (cpu.mmu.readRegisterByte(MemoryRegisters.R_WY) & 0xFF);
+    return this.cpu.mmu.readRegisterByte(MemoryRegisters.WY) & 0xFF;
   }
 }

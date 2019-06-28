@@ -63,11 +63,12 @@ class MBC extends MMU
         {
           return this.cartRam[address - 0xA000 + this.ramPageStart];
         }
+        // Return an invalid value
         else
         {
-          // Return an invalid value
           return 0xFF;
         }
+        break;
     }
 
     return super.readByte(address);

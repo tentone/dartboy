@@ -241,11 +241,11 @@ class CPU
     if(this.divCycle >= 256)
     {
       this.divCycle -= 256;
-      this.mmu.writeRegisterByte(MemoryRegisters.R_DIV, this.mmu.readRegisterByte(MemoryRegisters.R_DIV) + 1);
+      this.mmu.writeRegisterByte(MemoryRegisters.DIV, this.mmu.readRegisterByte(MemoryRegisters.DIV) + 1);
     }
 
     // The Timer is similar to DIV, except that when it overflows it triggers an interrupt
-    int tac = this.mmu.readRegisterByte(MemoryRegisters.R_TAC);
+    int tac = this.mmu.readRegisterByte(MemoryRegisters.TAC);
 
     // If timer 3 bit is set the timer should start
     if((tac & 0x4) != 0)
@@ -280,15 +280,15 @@ class CPU
         this.timerCycle -= timerPeriod;
 
         // And it resets to a specific value
-        int tima = (this.mmu.readRegisterByte(MemoryRegisters.R_TIMA) & 0xff) + 1;
+        int tima = (this.mmu.readRegisterByte(MemoryRegisters.TIMA) & 0xff) + 1;
 
         if(tima > 0xff)
         {
-          tima = this.mmu.readRegisterByte(MemoryRegisters.R_TMA) & 0xff;
+          tima = this.mmu.readRegisterByte(MemoryRegisters.TMA) & 0xff;
           setInterruptTriggered(MemoryRegisters.TIMER_OVERFLOW_BIT);
         }
 
-        this.mmu.writeRegisterByte(MemoryRegisters.R_TIMA, tima & 0xff);
+        this.mmu.writeRegisterByte(MemoryRegisters.TIMA, tima & 0xff);
       }
     }
 
@@ -300,7 +300,7 @@ class CPU
   /// @param interrupt The interrupt bit.
   void setInterruptTriggered(int interrupt)
   {
-    this.mmu.writeRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS, this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) | interrupt);
+    this.mmu.writeRegisterByte(MemoryRegisters.TRIGGERED_INTERRUPTS, this.mmu.readRegisterByte(MemoryRegisters.TRIGGERED_INTERRUPTS) | interrupt);
   }
 
   /// Fires interrupts if interrupts are enabled.
@@ -309,7 +309,7 @@ class CPU
     // Auxiliary method to check if an interruption was triggered.
     bool interruptTriggered(int interrupt)
     {
-      return (this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) & this.mmu.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS) & interrupt) != 0;
+      return (this.mmu.readRegisterByte(MemoryRegisters.TRIGGERED_INTERRUPTS) & this.mmu.readRegisterByte(MemoryRegisters.ENABLED_INTERRUPTS) & interrupt) != 0;
     }
 
     // If interrupts are disabled (via the DI instruction), ignore this call
@@ -319,10 +319,10 @@ class CPU
     }
 
     // Flag of which interrupts should be triggered
-    int triggeredInterrupts = this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS);
+    int triggeredInterrupts = this.mmu.readRegisterByte(MemoryRegisters.TRIGGERED_INTERRUPTS);
 
     // Which interrupts the program is actually interested in, these are the ones we will fire
-    int enabledInterrupts =  this.mmu.readRegisterByte(MemoryRegisters.R_ENABLED_INTERRUPTS);
+    int enabledInterrupts =  this.mmu.readRegisterByte(MemoryRegisters.ENABLED_INTERRUPTS);
 
     // If this is nonzero, then some interrupt that we are checking for was triggered
     if((triggeredInterrupts & enabledInterrupts) != 0)
@@ -359,7 +359,7 @@ class CPU
         triggeredInterrupts &= ~MemoryRegisters.HILO_BIT;
       }
 
-      this.mmu.writeRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS, triggeredInterrupts);
+      this.mmu.writeRegisterByte(MemoryRegisters.TRIGGERED_INTERRUPTS, triggeredInterrupts);
     }
   }
 
@@ -379,7 +379,7 @@ class CPU
   {
     if(this.halted)
     {
-      if(this.mmu.readRegisterByte(MemoryRegisters.R_TRIGGERED_INTERRUPTS) == 0)
+      if(this.mmu.readRegisterByte(MemoryRegisters.TRIGGERED_INTERRUPTS) == 0)
       {
         this.clocks += 4;
       }
