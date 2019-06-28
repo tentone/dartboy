@@ -21,6 +21,7 @@ class MainScreen extends StatefulWidget
 
   static LCDState lcdState = new LCDState();
 
+  static bool keyboardHandlerCreated = false;
   @override
   MainScreenState createState()
   {
@@ -28,22 +29,54 @@ class MainScreen extends StatefulWidget
   }
 }
 
+
+
 class MainScreenState extends State<MainScreen>
 {
+  static Map<PhysicalKeyboardKey, int> keyMapping =
+  {
+    PhysicalKeyboardKey.arrowLeft: Gamepad.LEFT,
+    PhysicalKeyboardKey.arrowRight: Gamepad.RIGHT,
+    PhysicalKeyboardKey.arrowUp: Gamepad.UP,
+    PhysicalKeyboardKey.arrowDown: Gamepad.DOWN,
+    PhysicalKeyboardKey.keyZ: Gamepad.A,
+    PhysicalKeyboardKey.keyX: Gamepad.B,
+    PhysicalKeyboardKey.enter: Gamepad.START,
+    PhysicalKeyboardKey.keyC: Gamepad.SELECT
+  };
+
   @override
   Widget build(BuildContext context)
   {
-    RawKeyboard.instance.addListener((RawKeyEvent key)
+    if(!MainScreen.keyboardHandlerCreated)
     {
-      if(key is RawKeyUpEvent)
-      {
-        print(key.hashCode);
-      }
-      else if(key is RawKeyDownEvent)
-      {
+      MainScreen.keyboardHandlerCreated = true;
 
-      }
-    });
+      RawKeyboard.instance.addListener((RawKeyEvent key)
+      {
+        print(key.data.toString());
+
+        if(key.data is RawKeyEventDataLinux)
+        {
+          //key.data.keyLabel
+        }
+
+        if(!keyMapping.containsKey(key.physicalKey))
+        {
+          return;
+        }
+
+        if(key is RawKeyUpEvent)
+        {
+          MainScreen.emulator.buttonUp(keyMapping[key.physicalKey]);
+        }
+        else if(key is RawKeyDownEvent)
+        {
+          MainScreen.emulator.buttonDown(keyMapping[key.physicalKey]);
+        }
+      });
+    }
+
 
     return new Scaffold
     (
@@ -142,7 +175,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
                       }
 
                     }, color: Colors.black, child: new Text("Load", style: const TextStyle(color: Colors.white))),
