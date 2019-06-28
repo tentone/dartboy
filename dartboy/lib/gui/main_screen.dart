@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../emulator/memory/gamepad.dart';
 import '../emulator/emulator.dart';
@@ -32,6 +33,18 @@ class MainScreenState extends State<MainScreen>
   @override
   Widget build(BuildContext context)
   {
+    RawKeyboard.instance.addListener((RawKeyEvent key)
+    {
+      if(key is RawKeyUpEvent)
+      {
+        print(key.hashCode);
+      }
+      else if(key is RawKeyDownEvent)
+      {
+
+      }
+    });
+
     return new Scaffold
     (
       backgroundColor: Colors.black,
