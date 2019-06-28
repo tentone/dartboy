@@ -33,16 +33,24 @@ class MainScreen extends StatefulWidget
 
 class MainScreenState extends State<MainScreen>
 {
-  static Map<PhysicalKeyboardKey, int> keyMapping =
+  static Map<int, int> keyMapping =
   {
-    PhysicalKeyboardKey.arrowLeft: Gamepad.LEFT,
-    PhysicalKeyboardKey.arrowRight: Gamepad.RIGHT,
-    PhysicalKeyboardKey.arrowUp: Gamepad.UP,
-    PhysicalKeyboardKey.arrowDown: Gamepad.DOWN,
-    PhysicalKeyboardKey.keyZ: Gamepad.A,
-    PhysicalKeyboardKey.keyX: Gamepad.B,
-    PhysicalKeyboardKey.enter: Gamepad.START,
-    PhysicalKeyboardKey.keyC: Gamepad.SELECT
+    // Left arrow
+    263: Gamepad.LEFT,
+    // Right arrow
+    262: Gamepad.RIGHT,
+    // Up arrow
+    265 : Gamepad.UP,
+    // Down arrow
+    264: Gamepad.DOWN,
+    // Z
+    90: Gamepad.A,
+    // X
+    88: Gamepad.B,
+    // Enter
+    257: Gamepad.START,
+    // C
+    67: Gamepad.SELECT
   };
 
   @override
@@ -54,25 +62,28 @@ class MainScreenState extends State<MainScreen>
 
       RawKeyboard.instance.addListener((RawKeyEvent key)
       {
-        print(key.data.toString());
-
-        if(key.data is RawKeyEventDataLinux)
+        // Get the keyCode from the object string description (keyCode does not seem to be exposed other way)
+        String keyPress = key.data.toString();
+        String value = keyPress.substring(keyPress.indexOf('keyCode: ') + 9, keyPress.indexOf(', scanCode:'));
+        if(value.length == 0)
         {
-          //key.data.keyLabel
+          return;
         }
 
-        if(!keyMapping.containsKey(key.physicalKey))
+        int keyCode = int.parse(value);
+
+        if(!keyMapping.containsKey(keyCode))
         {
           return;
         }
 
         if(key is RawKeyUpEvent)
         {
-          MainScreen.emulator.buttonUp(keyMapping[key.physicalKey]);
+          MainScreen.emulator.buttonUp(keyMapping[keyCode]);
         }
         else if(key is RawKeyDownEvent)
         {
-          MainScreen.emulator.buttonDown(keyMapping[key.physicalKey]);
+          MainScreen.emulator.buttonDown(keyMapping[keyCode]);
         }
       });
     }
