@@ -129,7 +129,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/pokemon.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
                       }
 
                     }, color: Colors.black, child: new Text("Load", style: const TextStyle(color: Colors.white))),
