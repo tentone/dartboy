@@ -1,15 +1,14 @@
 # DartBoy
 
-- Dart based GameBoy (and GameBoy Color) emulator that runs on desktop, mobile and web using the flutter framework.
+- Dart based GameBoy (and GameBoy Color) emulator that runs on desktop, mobile and web using the Flutter framework (tested on Windows and Android).
 - Project was developed using Flutter 1.5.5 and Dart 2.3.0.
-- Supports MBC1, MBC2, MBC3, MBC5 and basic cartridges, hassupport for GameBoy Color games.
-- Does not support Super GameBoy specific features.
+- Supports MBC1, MBC2, MBC3, MBC5 and basic cartridges, has basic support for GameBoy Color games. Does not support Super GameBoy specific features.
 
 
 
-Screenshots
+### Screenshots
 
-
+TODO
 
 
 
@@ -37,6 +36,7 @@ flutter devices
 
 - [GameBoy CPU Manual](http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf)
 - [Everything You Always Wanted To Know About GAMEBOY](http://bgb.bircd.org/pandocs.htm)
+- [GameBoy CPU (LR35902)](http://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html)
 - [Flutter desktop quick start guide](https://github.com/google/flutter-desktop-embedding/blob/master/Quick-Start.md)
 - [Flutter desktop embedding example](https://github.com/google/flutter-desktop-embedding)
 - [Flutter desktop plugins (file chooser)](https://github.com/google/flutter-desktop-embedding/tree/master/plugins)
