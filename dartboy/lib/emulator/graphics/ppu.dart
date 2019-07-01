@@ -432,17 +432,17 @@ class PPU
   /// @param scanline The current scanline.
   void drawWindow(List<int> data, int scanline)
   {
-    int tileDataOffset = getTileDataOffset();
+    int tileDataOffset = this.getTileDataOffset();
 
     // The window layer is offset-able from 0,0
-    int posX = getWindowPosX();
-    int posY = getWindowPosY();
+    int posX = this.getWindowPosX();
+    int posY = this.getWindowPosY();
 
-    int tileMapOffset = getWindowTileMapOffset();
+    int tileMapOffset = this.getWindowTileMapOffset();
 
     int y = (scanline - posY) ~/ 8;
 
-    for(int x = getWindowPosX() ~/ 8; x < 21; x++)
+    for(int x = this.getWindowPosX() ~/ 8; x < 21; x++)
     {
       // 32 tiles a row
       int addressBase = tileMapOffset + (x + y * 32);
@@ -523,6 +523,7 @@ class PPU
       int paletteLower = ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX));
 
       int paletteIndex = paletteUpper | paletteLower;
+
       int priority = (basePriority == 0) ? (paletteIndex == 0 ? PPU.P_1 : PPU.P_3) : basePriority;
 
       if(sprite && paletteIndex == 0)
@@ -682,7 +683,7 @@ class PPU
   {
     if((this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_BGWINDOW_TILE_DATA_SELECT_BIT) != 0)
     {
-      return 0;
+      return 0x0;
     }
 
     return 0x0800;

@@ -48,7 +48,7 @@ class Instructions
   {
     //addDebugStack('CALL_cc_nn', cpu);
 
-    int jmp = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
+    int jmp = (cpu.nextUnsignedBytePC()) | (cpu.nextUnsignedBytePC() << 8);
 
     if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
@@ -62,7 +62,7 @@ class Instructions
   {
     //addDebugStack('CALL_nn', cpu);
 
-    int jmp = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
+    int jmp = (cpu.nextUnsignedBytePC()) | (cpu.nextUnsignedBytePC() << 8);
     cpu.pushWordSP(cpu.pc);
     cpu.pc = jmp;
     cpu.tick(4);
@@ -72,7 +72,7 @@ class Instructions
   {
     //addDebugStack('LD_dd_nn', cpu);
 
-    cpu.setRegisterPairSP((op >> 4) & 0x3, cpu.nextUBytePC() | (cpu.nextUBytePC() << 8));
+    cpu.setRegisterPairSP((op >> 4) & 0x3, cpu.nextUnsignedBytePC() | (cpu.nextUnsignedBytePC() << 8));
   }
 
   static void LD_r_n(CPU cpu, int op)
@@ -80,7 +80,7 @@ class Instructions
     //addDebugStack('LD_r_n', cpu);
 
     int to = (op >> 3) & 0x7;
-    int n = cpu.nextUBytePC();
+    int n = cpu.nextUnsignedBytePC();
     cpu.registers.setRegister(to, n);
   }
 
@@ -88,14 +88,14 @@ class Instructions
   {
     //addDebugStack('LD_A_BC', cpu);
 
-    cpu.registers.a = cpu.getUByte(cpu.registers.bc);
+    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.bc);
   }
 
   static void LD_A_DE(CPU cpu)
   {
     //addDebugStack('LD_A_DE', cpu);
 
-    cpu.registers.a = cpu.getUByte(cpu.registers.de);
+    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.de);
   }
 
   static void LD_BC_A(CPU cpu)
@@ -116,14 +116,14 @@ class Instructions
   {
     //addDebugStack('LD_A_C', cpu);
 
-    cpu.registers.a = cpu.getUByte(0xFF00 | cpu.registers.c);
+    cpu.registers.a = cpu.getUnsignedByte(0xFF00 | cpu.registers.c);
   }
 
   static void ADD_SP_n(CPU cpu)
   {
     //addDebugStack('ADD_SP_n', cpu);
 
-    int offset = cpu.nextBytePC();
+    int offset = cpu.nextSignedBytePC();
     int nsp = (cpu.sp + offset);
 
     cpu.registers.f = 0;
@@ -164,7 +164,7 @@ class Instructions
   {
     //addDebugStack('LD_A_n', cpu);
 
-    cpu.registers.a = cpu.getUByte(cpu.registers.hl & 0xffff);
+    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.hl & 0xffff);
     cpu.registers.hl = (cpu.registers.hl - 1) & 0xFFFF;
   }
 
@@ -172,14 +172,14 @@ class Instructions
   {
     //addDebugStack('LD_nn_A', cpu);
 
-    cpu.mmu.writeByte(cpu.nextUBytePC() | (cpu.nextUBytePC() << 8), cpu.registers.a);
+    cpu.mmu.writeByte(cpu.nextUnsignedBytePC() | (cpu.nextUnsignedBytePC() << 8), cpu.registers.a);
   }
 
   static void LDHL_SP_n(CPU cpu)
   {
     //addDebugStack('LDHL_SP_n', cpu);
 
-    int offset = cpu.nextBytePC();
+    int offset = cpu.nextSignedBytePC();
     int nsp = (cpu.sp + offset);
 
     cpu.registers.f = 0; // (short) (cpu.registers.f & Registers.F_ZERO);
@@ -211,7 +211,7 @@ class Instructions
   {
     //addDebugStack('LD_FFn_A', cpu);
 
-    cpu.mmu.writeByte(0xff00 | cpu.nextUBytePC(), cpu.registers.a);
+    cpu.mmu.writeByte(0xff00 | cpu.nextUnsignedBytePC(), cpu.registers.a);
   }
 
   static void LDH_FFC_A(CPU cpu)
@@ -225,15 +225,15 @@ class Instructions
   {
     //addDebugStack('LD_A_nn', cpu);
 
-    int nn = cpu.nextUBytePC() | (cpu.nextUBytePC() << 8);
-    cpu.registers.a = cpu.getUByte(nn);
+    int nn = cpu.nextUnsignedBytePC() | (cpu.nextUnsignedBytePC() << 8);
+    cpu.registers.a = cpu.getUnsignedByte(nn);
   }
 
   static void LD_A_HLI(CPU cpu)
   {
     //addDebugStack('LD_A_HLI', cpu);
 
-    cpu.registers.a = cpu.getUByte(cpu.registers.hl & 0xffff);
+    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.hl & 0xffff);
     cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
   }
 
@@ -276,7 +276,7 @@ class Instructions
   {
     //addDebugStack('CBPrefix', cpu);
 
-    int op = cpu.getUByte(cpu.pc++);
+    int op = cpu.getUnsignedByte(cpu.pc++);
     int reg = op & 0x7;
     int data = cpu.registers.getRegister(reg) & 0xff;
 
@@ -594,7 +594,7 @@ class Instructions
   {
     //addDebugStack('ADC_n', cpu);
 
-    int val = cpu.nextUBytePC();
+    int val = cpu.nextUnsignedBytePC();
     int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
     int n = val + carry;
 
@@ -623,7 +623,7 @@ class Instructions
   {
     //addDebugStack('RET', cpu);
 
-    cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
+    cpu.pc = (cpu.getUnsignedByte(cpu.sp + 1) << 8) | cpu.getUnsignedByte(cpu.sp);
     cpu.sp += 2;
     cpu.tick(4);
 }
@@ -632,7 +632,7 @@ class Instructions
   {
     //addDebugStack('XOR_n', cpu);
 
-    cpu.registers.a ^= cpu.nextUBytePC();
+    cpu.registers.a ^= cpu.nextUnsignedBytePC();
     cpu.registers.f = 0;
 
     if(cpu.registers.a == 0)
@@ -645,7 +645,7 @@ class Instructions
   {
     //addDebugStack('AND_n', cpu);
 
-    cpu.registers.a &= cpu.nextUBytePC();
+    cpu.registers.a &= cpu.nextUnsignedBytePC();
     cpu.registers.f = Registers.F_HALF_CARRY;
 
     if(cpu.registers.a == 0)
@@ -687,7 +687,7 @@ class Instructions
 
     if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
-      cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
+      cpu.pc = (cpu.getUnsignedByte(cpu.sp + 1) << 8) | cpu.getUnsignedByte(cpu.sp);
       cpu.sp += 2;
     }
 
@@ -705,14 +705,14 @@ class Instructions
   {
     //addDebugStack('LDH_FFnn', cpu);
 
-    cpu.registers.a = cpu.getUByte(0xFF00 | cpu.nextUBytePC());
+    cpu.registers.a = cpu.getUnsignedByte(0xFF00 | cpu.nextUnsignedBytePC());
   }
 
   static void JR_c_e(CPU cpu, int op)
   {
     //addDebugStack('JR_c_e', cpu);
 
-    int e = cpu.nextBytePC();
+    int e = cpu.nextSignedBytePC();
 
     if(cpu.registers.getFlag((op >> 3) & 0x7))
     {
@@ -725,7 +725,7 @@ class Instructions
   {
     //addDebugStack('JP_c_nn', cpu);
 
-    int npc = cpu.nextUBytePC() | (cpu.nextUBytePC() << 8);
+    int npc = cpu.nextUnsignedBytePC() | (cpu.nextUnsignedBytePC() << 8);
 
     if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
@@ -782,7 +782,7 @@ class Instructions
   {
     //addDebugStack('JR_e', cpu);
 
-    int e = cpu.nextBytePC();
+    int e = cpu.nextSignedBytePC();
     cpu.pc += e;
     cpu.tick(4);
 }
@@ -810,7 +810,7 @@ class Instructions
   {
     //addDebugStack('OR_n', cpu);
 
-    int n = cpu.nextUBytePC();
+    int n = cpu.nextUnsignedBytePC();
 
     OR(cpu, n);
   }
@@ -904,7 +904,7 @@ class Instructions
   {
     //addDebugStack('ADD_n', cpu);
 
-    int n = cpu.nextUBytePC();
+    int n = cpu.nextUnsignedBytePC();
     ADD(cpu, n);
   }
 
@@ -944,7 +944,7 @@ class Instructions
   {
     //addDebugStack('SUB_n', cpu);
 
-    int n = cpu.nextUBytePC();
+    int n = cpu.nextUnsignedBytePC();
 
     SUB(cpu, n);
   }
@@ -953,7 +953,7 @@ class Instructions
   {
     //addDebugStack('SBC_n', cpu);
 
-    int val = cpu.nextUBytePC();
+    int val = cpu.nextUnsignedBytePC();
     int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
     int n = val + carry;
 
@@ -1037,16 +1037,14 @@ class Instructions
   {
     //addDebugStack('CP_n', cpu);
 
-    int n = cpu.nextUBytePC();
-    CP(cpu, n);
+    CP(cpu, cpu.nextUnsignedBytePC());
   }
 
   static void CP_rr(CPU cpu, int op)
   {
     //addDebugStack('CP_rr', cpu);
 
-    int n = cpu.registers.getRegister(op & 0x7) & 0xFF;
-    CP(cpu, n);
+    CP(cpu, cpu.registers.getRegister(op & 0x7) & 0xFF);
   }
 
   static void INC_rr(CPU cpu, int op)
@@ -1111,7 +1109,7 @@ class Instructions
   {
     //addDebugStack('JP_nn', cpu);
 
-    cpu.pc = (cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8);
+    cpu.pc = (cpu.nextUnsignedBytePC()) | (cpu.nextUnsignedBytePC() << 8);
     cpu.tick(4);
   }
 
@@ -1120,7 +1118,7 @@ class Instructions
     //addDebugStack('RETI', cpu);
 
     cpu.interruptsEnabled = true;
-    cpu.pc = (cpu.getUByte(cpu.sp + 1) << 8) | cpu.getUByte(cpu.sp);
+    cpu.pc = (cpu.getUnsignedByte(cpu.sp + 1) << 8) | cpu.getUnsignedByte(cpu.sp);
     cpu.sp += 2;
     cpu.tick(4);
   }
@@ -1129,7 +1127,7 @@ class Instructions
   {
     //addDebugStack('LD_a16_SP', cpu);
 
-    int pos = ((cpu.nextUBytePC()) | (cpu.nextUBytePC() << 8));
+    int pos = ((cpu.nextUnsignedBytePC()) | (cpu.nextUnsignedBytePC() << 8));
     cpu.mmu.writeByte(pos + 1, (cpu.sp & 0xFF00) >> 8);
     cpu.mmu.writeByte(pos, (cpu.sp & 0x00FF));
   }
@@ -1138,7 +1136,7 @@ class Instructions
   {
     //addDebugStack('POP_rr', cpu);
 
-    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getByte(cpu.sp + 1), lo: cpu.getByte(cpu.sp));
+    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getSignedByte(cpu.sp + 1), lo: cpu.getSignedByte(cpu.sp));
     cpu.sp += 2;
   }
 

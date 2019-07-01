@@ -120,31 +120,29 @@ class CPU
   }
 
   /// Read the next program byte and update the PC value
-  int nextUBytePC()
+  int nextUnsignedBytePC()
   {
-    return this.getUByte(this.pc++);
+    return this.getUnsignedByte(this.pc++);
   }
 
   /// Read the next program byte and update the PC value
-  int nextBytePC()
+  int nextSignedBytePC()
   {
-    return this.getByte(this.pc++);
+    return this.getSignedByte(this.pc++);
   }
 
   /// Read a unsiged byte value from memory.
-  int getUByte(int address)
+  int getUnsignedByte(int address)
   {
     this.tick(4);
-
     return this.mmu.readByte(address) & 0xff;
   }
 
   /// Read a byte from memory and update the clock count.
-  int getByte(int address)
+  int getSignedByte(int address)
   {
     this.tick(4);
-
-    return ByteUtils.toSignedByte(this.mmu.readByte(address));
+    return ByteUtils.toSignedByte(this.mmu.readByte(address) & 0xff);
   }
 
   /// Write a byte into memory (takes 4 clocks)
@@ -178,38 +176,38 @@ class CPU
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
   /// It can set a register pair or the CPU SP value.
   /// Returns the value of the register
-  void setRegisterPairSP(int r, int hi, {int lo})
+  void setRegisterPairSP(int r, int high, {int low})
   {
-    if(lo == null)
+    if(low == null)
     {
-      int value = hi;
-      hi = (value >> 8) & 0xFF;
-      lo = value & 0xFF;
+      int value = high;
+      high = (value >> 8) & 0xFF;
+      low = value & 0xFF;
     }
     else
     {
-      hi &= 0xff;
-      lo &= 0xff;
+      high &= 0xFF;
+      low &= 0xFF;
     }
 
     if(r == 0x0)
     {
-      this.registers.b = hi;
-      this.registers.c = lo;
+      this.registers.b = high;
+      this.registers.c = low;
     }
     else if(r == 0x1)
     {
-      this.registers.d = hi;
-      this.registers.e = lo;
+      this.registers.d = high;
+      this.registers.e = low;
     }
     else if(r == 0x2)
     {
-      this.registers.h = hi;
-      this.registers.l = lo;
+      this.registers.h = high;
+      this.registers.l = low;
     }
     else if(r == 0x3)
     {
-      this.sp = ((hi & 0xff) << 8) | lo & 0xff;
+      this.sp = ((high & 0xFF) << 8) | low & 0xFF;
     }
   }
 
@@ -280,15 +278,15 @@ class CPU
         this.timerCycle -= timerPeriod;
 
         // And it resets to a specific value
-        int tima = (this.mmu.readRegisterByte(MemoryRegisters.TIMA) & 0xff) + 1;
+        int tima = (this.mmu.readRegisterByte(MemoryRegisters.TIMA) & 0xFF) + 1;
 
-        if(tima > 0xff)
+        if(tima > 0xFF)
         {
-          tima = this.mmu.readRegisterByte(MemoryRegisters.TMA) & 0xff;
+          tima = this.mmu.readRegisterByte(MemoryRegisters.TMA) & 0xFF;
           setInterruptTriggered(MemoryRegisters.TIMER_OVERFLOW_BIT);
         }
 
-        this.mmu.writeRegisterByte(MemoryRegisters.TIMA, tima & 0xff);
+        this.mmu.writeRegisterByte(MemoryRegisters.TIMA, tima & 0xFF);
       }
     }
 
@@ -387,7 +385,7 @@ class CPU
       this.halted = false;
     }
 
-    int op = this.nextUBytePC();
+    int op = this.nextUnsignedBytePC();
     
     if(op == null)
     {

@@ -132,9 +132,6 @@ class Memory
     value &= 0xFF;
     address &= 0xFFFF;
 
-    //TODO <DEBUG PRINT>
-    //print('Write byte 0x' + value.toRadixString(16) + ' from memory 0x' + address.toRadixString(16));
-
     // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
@@ -189,9 +186,6 @@ class Memory
   int readByte(int address)
   {
     address &= 0xFFFF;
-
-    //TODO <DEBUG PRINT>
-    //print('Read byte from memory 0x' + address.toRadixString(16));
 
     // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
@@ -308,7 +302,7 @@ class Memory
           {
             // H-Blank DMA
             this.hdma = new HDMA(this, source, dest, length);
-            this.registers[0x55] = (length ~/ 0x10 - 1) & 0xFF;
+            this.registers[MemoryRegisters.HDMA_START] = (length ~/ 0x10 - 1) & 0xFF;
             break;
           }
           else
@@ -325,7 +319,7 @@ class Memory
               this.vram[this.vramPageStart + dest + i] = readByte(source + i) & 0xFF;
             }
 
-            this.registers[0x55] = 0xFF;
+            this.registers[MemoryRegisters.HDMA_START] = 0xFF;
           }
           break;
         }
@@ -467,7 +461,14 @@ class Memory
     }
     else if(address == MemoryRegisters.NR52)
     {
+      int reg = this.registers[MemoryRegisters.NR52] & 0x80;
       //TODO <ADD CODE HERE>
+      //if(this.cpu.sound.channel1.isPlaying) reg |= 0x01;
+      //if(this.cpu.sound.channel2.isPlaying) reg |= 0x02;
+      //if(this.cpu.sound.channel3.isPlaying) reg |= 0x04;
+      //if(this.cpu.sound.channel4.isPlaying) reg |= 0x08;
+
+      return reg;
     }
 
     return this.registers[address];
