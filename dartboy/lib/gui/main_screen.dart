@@ -9,6 +9,7 @@ import '../emulator/memory/gamepad.dart';
 import '../emulator/emulator.dart';
 import './lcd.dart';
 import './button.dart';
+import './Modal.dart';
 
 class MainScreen extends StatefulWidget
 {
@@ -173,6 +174,16 @@ class MainScreenState extends State<MainScreen>
                     {
                       MainScreen.emulator.reset();
                     }, color: Colors.black, child: new Text("Reset", style: const TextStyle(color: Colors.white))),
+                    new RaisedButton(onPressed: ()
+                    {
+                      if(MainScreen.emulator == null || MainScreen.emulator.state != EmulatorState.READY)
+                      {
+                        Modal.alert(context, 'Error', 'Emulator not ready to step.');
+                        return;
+                      }
+
+                      MainScreen.emulator.cpu.step();
+                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       if(Platform.isAndroid || Platform.isIOS)
