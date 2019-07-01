@@ -35,7 +35,40 @@ class MBC5 extends MBC
   @override
   void writeByte(int address, int value)
   {
-    //TODO <ADD CODE HERE>
-    super.writeByte(address, value);
+    address &= 0xffff;
+
+    switch (address & 0xF000)
+    {
+      case 0x0000:
+      case 0x1000:
+        if(this.cpu.cartridge.ramBanks > 0)
+        {
+          this.ramEnabled = (value & 0x0F) == 0x0A;
+        }
+        break;
+      case 0xA000:
+      case 0xB000:
+        if(this.ramEnabled)
+        {
+          this.cartRam[address - 0xA000 + this.ramPageStart] = value;
+        }
+        break;
+      case 0x2000:
+        // The lower 8 bits of the ROM bank number goes here.
+        // Writing 0 will indeed give bank 0 on MBC5, unlike other MBCs.
+        this.mapRom((this.romBank & 0x100) | (value & 0xFF));
+        break;
+      case 0x3000:
+        // The 9th bit of the ROM bank number goes here.
+        this.mapRom((this.romBank & 0xff) | ((value & 0x1) << 8));
+        break;
+      case 0x4000:
+      case 0x5000:
+        this.ramPageStart = (value & 0x03) * MBC.RAM_PAGESIZE;
+        break;
+      default:
+        super.writeByte(address, value);
+        break;
+    }
   }
 }
