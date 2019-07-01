@@ -395,7 +395,7 @@ class PPU
       int addressBase = (offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32)).toInt();
 
       // Add 256 to jump into second tile pattern table
-      int tile = tileDataOffset == 0 ? (this.cpu.mmu.readVRAM(addressBase) & 0xff) : (this.cpu.mmu.readVRAM(addressBase) + 256);
+      int tile = tileDataOffset == 0 ? (this.cpu.mmu.readVRAM(addressBase) & 0xFF) : (this.cpu.mmu.readVRAM(addressBase) + 256);
 
       int gbcVramBank = 0;
       int gbcPalette = 0;
@@ -443,6 +443,7 @@ class PPU
     int tileMapOffset = getWindowTileMapOffset();
 
     int y = (scanline - posY) ~/ 8;
+
     for(int x = getWindowPosX() ~/ 8; x < 21; x++)
     {
       // 32 tiles a row
@@ -468,10 +469,10 @@ class PPU
 
         flipX = (attributes & 0x20) != 0;
         flipY = (attributes & 0x40) != 0;
-        gbcPalette = (attributes & 0x07);
+        gbcPalette = attributes & 0x07;
       }
 
-      this.drawTile(this.bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, P_6, false);
+      this.drawTile(this.bgPalettes[gbcPalette], data, posX + x * 8, posY + y * 8, tile, scanline, flipX, flipY, gbcVramBank, PPU.P_6, false);
     }
   }
 
@@ -521,10 +522,15 @@ class PPU
       int logicalX = (flipX ? 7 - px : px);
       int address = addressBase + logicalLine * 2;
 
-      int paletteIndex = (((this.cpu.mmu.readVRAM(address + 1) & (0x80 >> logicalX)) >> (7 - logicalX)) << 1) // this is the upper bit of the color number
-      | ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX)); // << 0, this is the lower bit of the color number
 
-      int priority = basePriority == 0 ? (paletteIndex == 0 ? PPU.P_1 : PPU.P_3) : basePriority;
+      // this is the upper bit of the color number
+      int paletteUpper = (((this.cpu.mmu.readVRAM(address + 1) & (0x80 >> logicalX)) >> (7 - logicalX)) << 1);
+      // << 0, this is the lower bit of the color number
+      int paletteLower = ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX));
+
+      int paletteIndex = paletteUpper | paletteLower;
+      int priority = (basePriority == 0) ? (paletteIndex == 0 ? PPU.P_1 : PPU.P_3) : basePriority;
+
       if(sprite && paletteIndex == 0)
       {
         continue;

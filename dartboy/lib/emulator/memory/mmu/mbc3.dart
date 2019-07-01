@@ -30,6 +30,7 @@ class MBC3 extends MBC
     this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 
+  @override
   void writeByte(int address, int value)
   {
     address &= 0xffff;
