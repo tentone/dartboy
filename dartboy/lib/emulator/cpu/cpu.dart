@@ -51,11 +51,14 @@ class CPU
   /// The current cycle of the TIMA register.
   int timerCycle;
 
-  /// Debug infromation about the instructions executed on the CPU.
-  List<String> debugStack;
-
   /// Buttons of the gameboy the index stored in the Gamepad class corresponds to the position here
   List<bool> buttons;
+
+  /// Debug information about the instructions executed on the CPU.
+  List<String> debugStack;
+
+  /// If true the instructions debug info is printed.
+  bool debugInstructions = false;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   int _pc = 0;

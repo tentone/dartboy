@@ -6,28 +6,17 @@ import 'cpu.dart';
 /// This class is just an abstraction to make the CPU structure cleaner.
 class Instructions
 {
-  static const DEBUG = false;
-
   /// Add a new state to the debug stack.
   ///
   /// The debug stack stores the operations, PC, clock count of a instruction.
   static addDebugStack(String value, CPU cpu)
   {
-    if(!Instructions.DEBUG)
+    if(!cpu.debugInstructions)
     {
       return;
     }
 
     String data = '0x' + (cpu.pc - 1).toRadixString(16) + '(' + cpu.clocks.toString() + ') [' + value + '] | ';
-
-    /*data += ' A: 0x' + cpu.registers.a.toRadixString(16) + ', ';
-    data += ' B: 0x' + cpu.registers.b.toRadixString(16) + ', ';
-    data += ' C: 0x' + cpu.registers.c.toRadixString(16) + ', ';
-    data += ' D: 0x' + cpu.registers.d.toRadixString(16) + ', ';
-    data += ' E: 0x' + cpu.registers.e.toRadixString(16) + ', ';
-    data += ' F: 0x' + cpu.registers.f.toRadixString(16) + ', ';
-    data += ' H: 0x' + cpu.registers.h.toRadixString(16) + ', ';
-    data += ' L: 0x' + cpu.registers.l.toRadixString(16) + ' | ';*/
 
     data += ' AF: 0x' + cpu.registers.af.toRadixString(16) + ', ';
     data += ' BC: 0x' + cpu.registers.bc.toRadixString(16) + ', ';
@@ -36,7 +25,8 @@ class Instructions
 
     data += ' SP: 0x' + cpu.sp.toRadixString(16);
 
-    cpu.debugStack.add(data);
+    print(data);
+    //cpu.debugStack.add(data);
   }
 
   static void NOP(CPU cpu)
