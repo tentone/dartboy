@@ -104,7 +104,6 @@ class PPU
     {
       this.gbcBackgroundPaletteMemory.fillRange(0, this.gbcBackgroundPaletteMemory.length, 0x1f);
 
-      // Create palette structures
       for(int i = 0; i < this.spritePalettes.length; i++)
       {
         List<int> colors = new List<int>(4);
@@ -119,18 +118,17 @@ class PPU
         this.bgPalettes[i] = new GBCPalette(colors);
       }
 
-      // And "load" them from RAM
+      // Load palettes from RAM
       loadPalettesFromMemory(this.gbcSpritePaletteMemory, this.spritePalettes);
       loadPalettesFromMemory(this.gbcBackgroundPaletteMemory, this.bgPalettes);
     }
     else
     {
-      // CGB Mode Only - Background Palette Data
+      // Classic gameboy background palette data only
       // Initially all background colors are initialized as white.
       PaletteColors colors = PaletteColors.getByHash(this.cpu.cartridge.checksum);
 
       this.bgPalettes[0] = new GBPalette(this.cpu, colors.bg, MemoryRegisters.BGP);
-
       this.spritePalettes[0] = new GBPalette(this.cpu, colors.obj0, MemoryRegisters.OBP0);
       this.spritePalettes[1] = new GBPalette(this.cpu, colors.obj1, MemoryRegisters.OBP1);
     }
@@ -177,7 +175,7 @@ class PPU
     int b = (blue / 31.0 * 255 + 0.5).toInt() & 0xFF;
 
     // Convert from [0, 1Fh] to [0, FFh], and recombine
-    to.colors[j] = r | g | b;
+    to.colors[j] = (r | g | b);
   }
 
   /// Updates an entry of background palette RAM. Internal function for use in a Memory controller.
@@ -392,7 +390,7 @@ class PPU
     // 20 8x8 tiles fit in a 160px-wide screen
     for(int x = 0; x < 21; x++)
     {
-      int addressBase = (offset + ((y + scrollY / 8) % 32 * 32) + ((x + scrollX / 8) % 32)).toInt();
+      int addressBase = offset + ((y + scrollY ~/ 8) % 32 * 32) + ((x + scrollX ~/ 8) % 32);
 
       // Add 256 to jump into second tile pattern table
       int tile = tileDataOffset == 0 ? (this.cpu.mmu.readVRAM(addressBase) & 0xFF) : (this.cpu.mmu.readVRAM(addressBase) + 256);
@@ -501,7 +499,7 @@ class PPU
       // Destination pixels
       int dx = x + px;
 
-      // If we're out of bounds, continue iteration
+      // Skip if out of bounds
       if(dx < 0 || dx >= PPU.LCD_WIDTH || scanline >= PPU.LCD_HEIGHT)
       {
         continue;
@@ -514,18 +512,14 @@ class PPU
         continue;
       }
 
-      // For each line, the first int defines the least significant bits of the color numbers for each pixel, and the second int defines the upper bits of the color numbers.
-      // In either case, Bit 7 is the leftmost pixel, and Bit 0 the rightmost.
-
       // Handle the x and y flipping by tweaking the indexes we are accessing
       int logicalLine = (flipY ? 7 - line : line);
       int logicalX = (flipX ? 7 - px : px);
       int address = addressBase + logicalLine * 2;
 
-
-      // this is the upper bit of the color number
+      // Upper bit of the color number
       int paletteUpper = (((this.cpu.mmu.readVRAM(address + 1) & (0x80 >> logicalX)) >> (7 - logicalX)) << 1);
-      // << 0, this is the lower bit of the color number
+      // lower bit of the color number
       int paletteLower = ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX));
 
       int paletteIndex = paletteUpper | paletteLower;
@@ -576,8 +570,8 @@ class PPU
 
       int attributes = this.cpu.mmu.readOAM(i + 3);
 
-      int vrambank = (attributes & 0x8) != 0 && isColorGB ? 1 : 0;
-      int priority = (attributes & 0x80) != 0 ? PPU.P_2 : PPU.P_5;
+      int vrambank = ((attributes & 0x8) != 0 && isColorGB) ? 1 : 0;
+      int priority = ((attributes & 0x80) != 0) ? PPU.P_2 : PPU.P_5;
       bool flipX = (attributes & 0x20) != 0;
       bool flipY = (attributes & 0x40) != 0;
 
@@ -647,9 +641,11 @@ class PPU
   {
     if((this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
     {
+      //0x9C00
       return 0x1c00;
     }
 
+    //0x9800
     return 0x1800;
   }
 
