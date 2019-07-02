@@ -1,10 +1,18 @@
 class MemoryRegisters
 {
   static const int DOUBLE_SPEED = 0x4d;
+
   static const int HDMA_START = 0x55;
 
+  /// Gamepad I/O register, stores which keys are pressed by the user.
   static const int GAMEPAD = 0x00;
-  static const int SERIAL = 0x02;
+
+  /// Stores the data transferred by serial cable
+  static const int SERIAL_SB = 0x01;
+
+  /// Serial data control register, (data connection control, clock speed, etc).
+  static const int SERIAL_SC = 0x02;
+
   static const int DIV = 0x04;
   static const int TIMA = 0x05;
   static const int TMA = 0x06;
@@ -34,7 +42,6 @@ class MemoryRegisters
 
   /// The Tile Data Table address for the background can be selected via LCDC register.
   static const int LCDC = 0x40;
-
   static const int LCD_STAT = 0x41;
   static const int SCY = 0x42;
   static const int SCX = 0x43;

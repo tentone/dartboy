@@ -80,7 +80,22 @@ class Emulator
     this.state = EmulatorState.WAITING;
   }
 
-  /// Run the emulation
+  /// Do a single step in the cpu, set it to debug mode, step and then reset.
+  void debugStep()
+  {
+    if(this.state != EmulatorState.READY)
+    {
+      print('Emulator not ready, cannot step.');
+      return;
+    }
+
+    bool wasDebug = this.cpu.debugInstructions;
+    this.cpu.debugInstructions = true;
+    this.cpu.step();
+    this.cpu.debugInstructions = wasDebug;
+  }
+
+  /// Run the emulation all full speed.
   void run()
   {
     if(this.state != EmulatorState.READY)
@@ -137,7 +152,6 @@ class Emulator
   {
     if(this.state != EmulatorState.RUNNING)
     {
-      //TODO <DEBUG PRINT>
       print('Emulator not running cannot be paused');
       return;
     }

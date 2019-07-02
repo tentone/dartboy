@@ -108,7 +108,7 @@ class CPU
     this.divCycle = 0;
     this.timerCycle = 0;
     this.sp = 0xFFFE;
-    this.pc = 0x100;
+    this.pc = 0x0100;
 
     this.halted = false;
     this.interruptsEnabled = false;

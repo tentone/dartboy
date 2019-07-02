@@ -176,13 +176,7 @@ class MainScreenState extends State<MainScreen>
                     }, color: Colors.black, child: new Text("Reset", style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
-                      if(MainScreen.emulator == null || MainScreen.emulator.state != EmulatorState.READY)
-                      {
-                        Modal.alert(context, 'Error', 'Emulator not ready to step.');
-                        return;
-                      }
-
-                      MainScreen.emulator.cpu.step();
+                      MainScreen.emulator.debugStep();
                     }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {

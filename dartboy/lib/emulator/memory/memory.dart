@@ -242,6 +242,8 @@ class Memory
   /// Write data into the IO section of memory space.
   void writeIO(int address, int value)
   {
+    // TODO <CHECK IF VALUES SHOULD ALWAYS BE WRITTEN>
+
     switch (address)
     {
       case MemoryRegisters.DOUBLE_SPEED:
@@ -267,7 +269,7 @@ class Memory
           }
           break;
         }
-      case 0x6b:
+      case 0x6B:
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
           {
@@ -298,12 +300,11 @@ class Memory
           int source = ((this.registers[0x51] & 0xff) << 8) | (this.registers[0x52] & 0xF0);
           int dest = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
 
+          // H-Blank DMA
           if((value & 0x80) != 0)
           {
-            // H-Blank DMA
             this.hdma = new HDMA(this, source, dest, length);
             this.registers[MemoryRegisters.HDMA_START] = (length ~/ 0x10 - 1) & 0xFF;
-            break;
           }
           else
           {
@@ -321,7 +322,7 @@ class Memory
 
             this.registers[MemoryRegisters.HDMA_START] = 0xFF;
           }
-          break;
+          return;
         }
       case MemoryRegisters.VRAM_BANK:
         {
@@ -346,14 +347,14 @@ class Memory
           value &= 0x7f;
         }
         this.registers[address] = value & 0xFF;
-        break;
+        return;
       case MemoryRegisters.NR10:
       case MemoryRegisters.NR11:
       case MemoryRegisters.NR12:
       case MemoryRegisters.NR13:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel1.update();
-        break;
+        return;
       case MemoryRegisters.NR24:
         if((value & 0x80) != 0)
         {
@@ -361,13 +362,13 @@ class Memory
           value &= 0x7F;
         }
         this.registers[address] = value & 0xFF;
-        break;
+        return;
       case MemoryRegisters.NR21:
       case MemoryRegisters.NR22:
       case MemoryRegisters.NR23:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel2.update();
-        break;
+        return;
       case MemoryRegisters.NR34:
         if((value & 0x80) != 0)
         {
@@ -375,14 +376,14 @@ class Memory
           value &= 0x7F;
         }
         this.registers[address] = value & 0xFF;
-        break;
+        return;
       case MemoryRegisters.NR30:
       case MemoryRegisters.NR31:
       case MemoryRegisters.NR32:
       case MemoryRegisters.NR33:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel3.update();
-        break;
+        return;
       case MemoryRegisters.NR44:
         if((value & 0x80) != 0)
         {
@@ -390,13 +391,13 @@ class Memory
           value &= 0x7F;
         }
         this.registers[address] = value & 0xFF;
-        break;
+        return;
       case MemoryRegisters.NR41:
       case MemoryRegisters.NR42:
       case MemoryRegisters.NR43:
         this.registers[address] = value & 0xFF;
         //this.cpu.sound.channel4.update();
-        break;
+        return;
       case MemoryRegisters.DMA:
         {
           int addressBase = value * 0x100;
@@ -416,6 +417,15 @@ class Memory
           this.cpu.timerCycle = 0;
           this.registers[MemoryRegisters.TIMA] = this.registers[MemoryRegisters.TMA];
         }
+        break;
+      case MemoryRegisters.SERIAL_SC:
+
+        // TODO <DEBUG PRINT SERIAL CHARS>
+        /*if(value & 0xFF == 0x81)
+        {
+          print(String.fromCharCode(this.registers[MemoryRegisters.SERIAL_SB]));
+        }*/
+
         break;
       case MemoryRegisters.LCD_STAT:
         break;
