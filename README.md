@@ -3,12 +3,11 @@
 - Dart based GameBoy (and GameBoy Color) emulator that runs on desktop, mobile and web using the Flutter framework (tested on Windows and Android).
 - Project was developed using Flutter 1.5.5 and Dart 2.3.0.
 - Supports MBC1, MBC2, MBC3, MBC5 and basic cartridges, has basic support for GameBoy Color games. Does not support Super GameBoy specific features.
-
+- Full support for the Sharp LR35902 CPU instruction set.
 
 
 ### Screenshots
 
-TODO
 
 
 
