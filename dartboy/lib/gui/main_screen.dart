@@ -164,10 +164,21 @@ class MainScreenState extends State<MainScreen>
                   [
                     new RaisedButton(onPressed: ()
                     {
+                      if(MainScreen.emulator.state != EmulatorState.READY)
+                      {
+                        Modal.alert(context, 'Error', 'Not ready to run. Load ROM first.');
+                        return;
+                      }
                       MainScreen.emulator.run();
                     }, color: Colors.black, child: new Text("Run", style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
+                      if(MainScreen.emulator.state != EmulatorState.RUNNING)
+                      {
+                        Modal.alert(context, 'Error', 'Not running cant be paused.');
+                        return;
+                      }
+
                       MainScreen.emulator.pause();
                     }, color: Colors.black, child: new Text("Pause", style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
@@ -180,6 +191,12 @@ class MainScreenState extends State<MainScreen>
                     }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
+                      if(MainScreen.emulator.state != EmulatorState.WAITING)
+                      {
+                        Modal.alert(context, 'Error', 'There is a ROM already loaded. Reset before loading new ROM.');
+                        return;
+                      }
+
                       if(Platform.isAndroid || Platform.isIOS)
                       {
                         FilePicker.getFile(fileExtension: 'gb').then((File file)
@@ -190,6 +207,11 @@ class MainScreenState extends State<MainScreen>
                       else
                       {
                         MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
+                      }
+
+                      if(MainScreen.emulator.state == EmulatorState.READY)
+                      {
+                        Modal.alert(context, 'Success', 'ROM loaded, ready to play.');
                       }
 
                     }, color: Colors.black, child: new Text("Load", style: const TextStyle(color: Colors.white))),
