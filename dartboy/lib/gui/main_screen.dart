@@ -191,6 +191,14 @@ class MainScreenState extends State<MainScreen>
                     }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
+                      for(int i = 0; i < 100; i++)
+                      {
+                        MainScreen.emulator.debugStep();
+                      }
+
+                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))),
+                    new RaisedButton(onPressed: ()
+                    {
                       if(MainScreen.emulator.state != EmulatorState.WAITING)
                       {
                         Modal.alert(context, 'Error', 'There is a ROM already loaded. Reset before loading new ROM.');

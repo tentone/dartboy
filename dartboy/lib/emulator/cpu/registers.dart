@@ -144,6 +144,17 @@ class Registers
     this.e = 0xD8;
     this.h = 0x01;
     this.l = 0x4D;
+
+    //TODO <FOR SOME REASON THERE ARE INITIALIZED DIFERENTLY IN SOME EMULATORS FOR SOME ROMS>
+    /*
+    this.f = 0x80;
+    this.b = 0x00;
+    this.c = 0x00;
+    this.d = 0xFF;
+    this.e = 0x56;
+    this.h = 0x00;
+    this.l = 0x0D;
+    */
   }
 
   ///Checks a condition from an opcode.
