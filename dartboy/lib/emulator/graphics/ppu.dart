@@ -249,9 +249,9 @@ class PPU
       }
 
       bool isVBlank = 144 <= LY;
-      if(!isVBlank && this.cpu.mmu.hdma != null)
+      if(!isVBlank && this.cpu.mmu.dma != null)
       {
-        this.cpu.mmu.hdma.tick();
+        this.cpu.mmu.dma.tick();
       }
 
       this.cpu.mmu.writeRegisterByte(MemoryRegisters.LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT) & ~0x03);

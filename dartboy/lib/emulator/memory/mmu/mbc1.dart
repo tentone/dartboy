@@ -20,7 +20,7 @@ class MBC1 extends MBC
     super.reset();
 
     this.modeSelect = 0;
-    this.romBank = 0;
+    this.romBank = 1;
 
     this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 4);
     this.cartRam.fillRange(0, this.cartRam.length, 0);

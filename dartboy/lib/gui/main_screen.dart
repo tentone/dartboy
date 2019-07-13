@@ -212,7 +212,7 @@ class MainScreenState extends State<MainScreen>
                           MainScreen.emulator.loadROM(file);
                         });
                       }
-                      else
+                      else //if(Platform.isWindows || Platform.isLinux)
                       {
                         MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
                       }

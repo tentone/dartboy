@@ -3,7 +3,7 @@ import 'dart:math';
 
 import '../cpu/cpu.dart';
 import './cartridge.dart';
-import './hdma.dart';
+import './dma.dart';
 import './memory_addresses.dart';
 import './memory_registers.dart';
 import './gamepad.dart';
@@ -55,15 +55,15 @@ class Memory
   /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
   CPU cpu;
 
-  /// HDMA memory controller (only available on gameboy color games).
+  /// DMA memory controller (only available on gameboy color games).
   ///
   /// Used for direct memory copy operations.
-  HDMA hdma;
+  DMA dma;
 
   Memory(CPU cpu)
   {
     this.cpu = cpu;
-    this.hdma = null;
+    this.dma = null;
   }
 
   /// Initialize the memory, create the data array with the defined size.
@@ -303,12 +303,12 @@ class Memory
           // H-Blank DMA
           if((value & 0x80) != 0)
           {
-            this.hdma = new HDMA(this, source, dest, length);
+            this.dma = new DMA(this, source, dest, length);
             this.registers[MemoryRegisters.HDMA_START] = (length ~/ 0x10 - 1) & 0xFF;
           }
           else
           {
-            if(this.hdma != null)
+            if(this.dma != null)
             {
               //TODO <DEBUG PRINT>
               //print("Terminated HDMA from " + source.toString() + "-" + dest.toString() + ", " + length.toString() + " remaining.");

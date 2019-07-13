@@ -48,7 +48,7 @@ class Instructions
   {
     addDebugStack('CALL_cc_nn', cpu);
 
-    int jmp = (cpu.nextUnsignedBytePC()) | (cpu.nextUnsignedBytePC() << 8);
+    int jmp = (cpu.nextUnsignedBytePC() | (cpu.nextUnsignedBytePC() << 8));
 
     if(cpu.registers.getFlag(0x4 | ((op >> 3) & 0x7)))
     {
@@ -62,7 +62,7 @@ class Instructions
   {
     addDebugStack('CALL_nn', cpu);
 
-    int jmp = (cpu.nextUnsignedBytePC()) | (cpu.nextUnsignedBytePC() << 8);
+    int jmp = (cpu.nextUnsignedBytePC() | (cpu.nextUnsignedBytePC() << 8));
     cpu.pushWordSP(cpu.pc);
     cpu.pc = jmp;
     cpu.tick(4);

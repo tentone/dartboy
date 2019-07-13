@@ -1,11 +1,11 @@
 import './memory.dart';
 
-/// Represents a H-Blank DMA transfer session.
+/// Represents a H-Blank DMA (direct memory access) transfer session.
 ///
-/// HDMA transfers 16 bytes from source to dest every H-Blank interval, and can be used for a lot of video effects.
-class HDMA
+/// DMA transfers 16 bytes from source to dest every H-Blank interval, and can be used for a lot of video effects.
+class DMA
 {
-  /// Memory of the HDMA
+  /// Memory for the DMA (memory of the system).
   Memory memory;
 
   /// The source address.
@@ -20,12 +20,12 @@ class HDMA
   /// The current offset into the source/dest buffers.
   int position;
 
-  /// Creates a new HDMA instance.
+  /// Creates a new DMA instance.
   ///
   /// @param source The source address to copy from.
   /// @param dest The destination address to copy to.
   /// @param length How many bytes to copy.
-  HDMA(Memory memory, int source, int dest, int length)
+  DMA(Memory memory, int source, int dest, int length)
   {
     this.memory = memory;
     this.source = source;
@@ -33,7 +33,7 @@ class HDMA
     this.length = length;
   }
 
-  /// The H-Blank DMA transfers 10h bytes of data during each H-Blank, ie. at LY=0-143, no data is transferred during V-Blank (LY=144-153), but the transfer will then continue at LY=00.
+  /// DMA transfers 10h bytes of data during each H-Blank, ie. at LY=0-143, no data is transferred during V-Blank (LY=144-153), but the transfer will then continue at LY=00.
   ///
   /// The execution of the program is halted during the separate transfers, but the program execution continues during the 'spaces' between each data block.
   ///
@@ -56,11 +56,11 @@ class HDMA
 
     if(this.length == 0)
     {
-      this.memory.hdma = null;
+      this.memory.dma = null;
       this.memory.registers[0x55] = 0xff;
 
       //TODO <DEBUG PRINT>
-      print("Finished HDMA from " + this.source.toString() + " to " + this.destination.toString());
+      print("Finished DMA from " + this.source.toString() + " to " + this.destination.toString());
     }
     else
     {

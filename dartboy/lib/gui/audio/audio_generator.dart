@@ -17,12 +17,8 @@ class AudioGenerator
     {
       WaveGenerator generator = new WaveGenerator(/* sample rate */ 44100, BitDepth.Depth8bit);
 
-      Note note = new Note(
-        /* frequency */ 220,
-          /* msDuration */ 3000,
-          /* waveform */ Waveform.Sine,
-          /* volume */ 0.5);
-
+      // new Note(frequency, msDuration, waveform, volume);
+      Note note = new Note(220, 3000, Waveform.Sine, 0.5);
       File file = new File('output.wav');
 
       List<int> bytes = List<int>();
