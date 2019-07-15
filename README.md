@@ -24,10 +24,11 @@ flutter pub global activate webdev
 flutter pub upgrade
 ```
 
+- After installing the development tools some changes are required in the `package.yaml` file, to allow the web version to run. (Check the [migration guide](https://github.com/flutter/flutter_web/blob/master/docs/migration_guide.md))
 - To run the web version locally (by default on localhost:8080) use the following command.
 
 ```
-webdev serve
+flutter pub global run webdev serve
 ```
 
 

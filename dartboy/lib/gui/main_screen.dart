@@ -188,14 +188,14 @@ class MainScreenState extends State<MainScreen>
                     (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.debugStep();
-                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))) : new Placeholder(),
+                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))) : new Container(width: 0.0),
                     (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
                     {
                       for(int i = 0; i < 100; i++)
                       {
                         MainScreen.emulator.debugStep();
                       }
-                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))) : new Placeholder(),
+                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))) : new Container(width: 0.0),
                     new RaisedButton(onPressed: ()
                     {
                       if(MainScreen.emulator.state != EmulatorState.WAITING)
