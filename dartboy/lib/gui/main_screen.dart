@@ -150,16 +150,16 @@ class MainScreenState extends State<MainScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>
                   [
-                    new Button(color: Colors.orange, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.START);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.START);}, label: "Start"),
+                    new Button(color: Colors.orange, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.START);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.START);}, labelColor: Colors.black, label: "Start"),
                     new Container(width: 20),
-                    new Button(color: Colors.yellowAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.SELECT);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.SELECT);}, label: "Select"),
+                    new Button(color: Colors.yellowAccent, onPressed: (){MainScreen.emulator.buttonDown(Gamepad.SELECT);}, onReleased: (){MainScreen.emulator.buttonUp(Gamepad.SELECT);}, labelColor: Colors.black, label: "Select"),
                   ],
                 ),
                 // Button (Start + Pause + Load)
-                new Expanded(child: new Row
+                new Expanded(child: new ListView
                 (
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  padding: const EdgeInsets.only(left:10.0, right: 10.0),
+                  scrollDirection: Axis.horizontal,
                   children: <Widget>
                   [
                     new RaisedButton(onPressed: ()
@@ -185,18 +185,17 @@ class MainScreenState extends State<MainScreen>
                     {
                       MainScreen.emulator.reset();
                     }, color: Colors.black, child: new Text("Reset", style: const TextStyle(color: Colors.white))),
-                    new RaisedButton(onPressed: ()
+                    (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.debugStep();
-                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))),
-                    new RaisedButton(onPressed: ()
+                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))) : new Placeholder(),
+                    (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
                     {
                       for(int i = 0; i < 100; i++)
                       {
                         MainScreen.emulator.debugStep();
                       }
-
-                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))),
+                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))) : new Placeholder(),
                     new RaisedButton(onPressed: ()
                     {
                       if(MainScreen.emulator.state != EmulatorState.WAITING)
@@ -212,9 +211,9 @@ class MainScreenState extends State<MainScreen>
                           MainScreen.emulator.loadROM(file);
                         });
                       }
-                      else //if(Platform.isWindows || Platform.isLinux)
+                      else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/cpu_instrs.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
                       }
 
                       if(MainScreen.emulator.state == EmulatorState.READY)

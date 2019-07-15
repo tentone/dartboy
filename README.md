@@ -6,12 +6,33 @@
 - Full support for the Sharp LR35902 CPU instruction set.
 
 
+
+
 ### Screenshots
 
+TODO
 
 
 
-### Setup Flutter Desktop
+### Setup Web
+
+- To enable the web version of flutter, you need to install the flutter web tools first by running the following code on your terminal. 
+- You need to ensure that `flutter\.pub-cache\bin`  is available from the environment path.
+
+```
+flutter pub global activate webdev
+flutter pub upgrade
+```
+
+- To run the web version locally (by default on localhost:8080) use the following command.
+
+```
+webdev serve
+```
+
+
+
+### Setup Desktop
 
 - In Windows install visual studio with C++ support and make sure that the command `msbuild` works properly and that `vcvars64.bat` is in the path. (If visual studio is installed but `msbuild` is not found, add it to your path).
 - Flutter desktop support is still experimental and not enabled by default, its only available on the master channel.

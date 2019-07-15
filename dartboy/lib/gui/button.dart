@@ -12,10 +12,13 @@ class Button extends StatefulWidget
   /// Color of the button
   Color color;
 
+  /// Color of the label
+  Color labelColor;
+
   /// Label
   String label;
 
-  Button({this.label, this.color, this.onPressed, this.onReleased, Key key}) : super(key: key);
+  Button({this.label, this.color, this.onPressed, this.onReleased, this.labelColor = Colors.white, Key key}) : super(key: key);
 
   ButtonState createState()
   {
@@ -41,18 +44,6 @@ class ButtonState extends State<Button>
         enableFeedback: true,
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        onTapDown: (TapDownDetails details)
-        {
-          /*if(this.widget.onPressed != null)
-          {
-            this.widget.onPressed();
-          }
-
-          this.setState(()
-          {
-            this.pressed = true;
-          });*/
-        },
         onHighlightChanged: (bool highlight)
         {
           if(!this.pressed && highlight && this.widget.onPressed != null)
@@ -67,18 +58,6 @@ class ButtonState extends State<Button>
 
           this.pressed = highlight;
           this.setState((){});
-        },
-        onTapCancel: ()
-        {
-          /*if(this.widget.onReleased != null)
-          {
-            this.widget.onReleased();
-          }
-
-          this.setState(()
-          {
-            this.pressed = false;
-          });*/
         },
         onTap: (){},
         child: new Row
@@ -96,7 +75,7 @@ class ButtonState extends State<Button>
                 borderRadius: new BorderRadius.circular(20.0)
 
               ),
-              child: new Center(child: new Text(this.widget.label, style: const TextStyle(color: Colors.white),))
+              child: new Center(child: new Text(this.widget.label, style: new TextStyle(color: this.widget.labelColor),))
             )
           ]
         )
