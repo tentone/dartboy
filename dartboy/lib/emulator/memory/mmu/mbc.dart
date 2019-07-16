@@ -58,7 +58,7 @@ class MBC extends MMU
 
     if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
     {
-      return this.ramEnabled ? this.cartRam[address - 0xA000 + this.ramPageStart] : 0xFF;
+      return this.ramEnabled ? this.cartRam[address - MemoryAddresses.SWITCHABLE_RAM_START + this.ramPageStart] : 0xFF;
     }
 
     return super.readByte(address);
