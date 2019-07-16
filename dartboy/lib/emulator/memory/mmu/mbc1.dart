@@ -1,6 +1,7 @@
 import '../../cpu/cpu.dart';
 import '../cartridge.dart';
 import '../memory.dart';
+import '../memory_addresses.dart';
 import 'mbc.dart';
 
 /// Memory banking chip
@@ -49,18 +50,19 @@ class MBC1 extends MBC
       case 0x0000:
       case 0x1000:
         // It is recommended to disable external RAM after accessing it.
-        // Practically any value with 0Ah in the lower 4 bits enables RAM, and any other value disables RAM.
+        // Practically any value with 0xA in the lower 4 bits enables RAM, and any other value disables RAM.
         if(this.cpu.cartridge.ramBanks > 0)
         {
           this.ramEnabled = (value & 0x0F) == 0x0A;
         }
+
         break;
       case 0xA000:
       case 0xB000:
         // This area is used to address external RAM in the cartridge.
         if(this.ramEnabled)
         {
-          this.cartRam[address - 0xA000 + this.ramPageStart] = value;
+          this.cartRam[address - MemoryAddresses.SWITCHABLE_RAM_START + this.ramPageStart] = value;
         }
         break;
       case 0x2000:

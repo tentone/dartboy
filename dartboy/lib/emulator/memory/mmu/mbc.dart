@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../../cpu/cpu.dart';
 import '../cartridge.dart';
+import '../memory_addresses.dart';
 import 'mmu.dart';
 
 /// Abstract implementation of features shared by all Memory Banking Chips.
@@ -53,22 +54,11 @@ class MBC extends MMU
   @override
   int readByte(int address)
   {
-    address &= 0xffff;
+    address &= 0xFFFF;
 
-    switch (address & 0xF000)
+    if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
     {
-      case 0xA000:
-      case 0xB000:
-        if(this.ramEnabled)
-        {
-          return this.cartRam[address - 0xA000 + this.ramPageStart];
-        }
-        // Return an invalid value
-        else
-        {
-          return 0xFF;
-        }
-        break;
+      return this.ramEnabled ? this.cartRam[address - 0xA000 + this.ramPageStart] : 0xFF;
     }
 
     return super.readByte(address);
