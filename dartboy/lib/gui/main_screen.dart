@@ -213,7 +213,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/individual/03-op sp,hl.gb'));
                       }
 
                       if(MainScreen.emulator.state == EmulatorState.READY)
