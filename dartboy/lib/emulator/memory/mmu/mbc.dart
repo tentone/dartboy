@@ -12,15 +12,25 @@ class MBC extends MMU
   static const int RAM_PAGESIZE = 0x2000;
 
   /// The current offset (page) into cart ram.
-  int ramPageStart;
+  int ramPageStart = 0;
 
   /// Whether or not accessing RAM is currently enabled.
-  bool ramEnabled;
+  bool ramEnabled = false;
 
   /// Raw cart ram.
   List<int> cartRam;
 
-  MBC(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+  MBC(CPU cpu) : super(cpu);
+
+  /// Reset the MBC
+  @override
+  void reset()
+  {
+    super.reset();
+
+    this.ramPageStart = 0;
+    this.ramEnabled = false;
+  }
 
   /// Load the state of the internal RAM of the cartridge from file.
   void load(File file)

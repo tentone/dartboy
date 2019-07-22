@@ -13,7 +13,7 @@ class MBC1 extends MBC
   /// Selected ROM bank
   int romBank;
 
-  MBC1(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+  MBC1(CPU cpu) : super(cpu);
 
   @override
   void reset()

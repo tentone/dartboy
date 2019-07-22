@@ -14,9 +14,9 @@ class MBC3 extends MBC
   bool rtcEnabled;
 
   /// The realtime clock registers.
-  List<int> rtc = new List<int>(4);
+  List<int> rtc;
 
-  MBC3(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+  MBC3(CPU cpu) : super(cpu);
 
   @override
   void reset()
@@ -25,6 +25,9 @@ class MBC3 extends MBC
 
     this.rtcEnabled = false;
     this.ramBank = 0;
+
+    this.rtc = new List<int>(4);
+    this.rtc.fillRange(0, this.rtc.length, 0);
 
     this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 4);
     this.cartRam.fillRange(0, this.cartRam.length, 0);
@@ -82,7 +85,7 @@ class MBC3 extends MBC
         else if(this.rtcEnabled)
         {
           // TODO <RTC READ>
-          this.rtc[ramBank - 0x08] = value;
+          this.rtc[this.ramBank - 0x08] = value;
         }
         break;
       default:

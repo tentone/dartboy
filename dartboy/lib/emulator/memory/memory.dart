@@ -78,13 +78,15 @@ class Memory
     this.romPageStart = Memory.ROM_PAGESIZE;
 
     this.registers = new List<int>(0x100);
-    this.oam = new List<int>(0xA0);
-    this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
-    this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
-
     this.registers.fillRange(0, this.registers.length, 0);
+
+    this.oam = new List<int>(0xA0);
     this.oam.fillRange(0, this.oam.length, 0);
+
+    this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
     this.wram.fillRange(0, this.wram.length, 0);
+
+    this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
     this.vram.fillRange(0, this.vram.length, 0);
 
     for(int i = 0; i < 0x100; i++)
@@ -311,7 +313,7 @@ class Memory
             if(this.dma != null)
             {
               //TODO <DEBUG PRINT>
-              //print("Terminated HDMA from " + source.toString() + "-" + dest.toString() + ", " + length.toString() + " remaining.");
+              //print("Terminated DMA from " + source.toString() + "-" + dest.toString() + ", " + length.toString() + " remaining.");
             }
 
             // General DMA

@@ -5,7 +5,7 @@ import 'mbc.dart';
 
 class MBC5 extends MBC
 {
-  MBC5(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+  MBC5(CPU cpu) : super(cpu);
 
   /// Indicates if the addresses 0x5000 to 0x6000 are redirected to RAM or to ROM
   int modeSelect;

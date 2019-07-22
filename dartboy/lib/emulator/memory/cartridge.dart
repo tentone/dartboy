@@ -90,27 +90,27 @@ class Cartridge
     if(this.type == CartridgeType.ROM)
     {
       print('Created basic MMU unit.');
-      return new MMU(cpu, this);
+      return new MMU(cpu);
     }
     else if(this.type == CartridgeType.MBC1 || this.type == CartridgeType.MBC1_RAM || this.type == CartridgeType.MBC1_RAM_BATT)
     {
       print('Created MBC1 unit.');
-      return new MBC1(cpu, this);
+      return new MBC1(cpu);
     }
     else if(this.type == CartridgeType.MBC2 || this.type == CartridgeType.MBC2_BATT)
     {
       print('Created MBC2 unit.');
-      return new MBC2(cpu, this);
+      return new MBC2(cpu);
     }
     else if(this.type == CartridgeType.MBC3 || this.type == CartridgeType.MBC3_RAM || this.type == CartridgeType.MBC3_RAM_BATT || this.type == CartridgeType.MBC3_TIMER_BATT || this.type == CartridgeType.MBC3_TIMER_RAM_BATT)
     {
       print('Created MBC3 unit.');
-      return new MBC3(cpu, this);
+      return new MBC3(cpu);
     }
     else if(this.type == CartridgeType.MBC5 || this.type == CartridgeType.MBC5_RAM || this.type == CartridgeType.MBC5_RAM_BATT || this.type == CartridgeType.MBC5_RUMBLE || this.type == CartridgeType.MBC5_RUMBLE_SRAM || this.type == CartridgeType.MBC5_RUMBLE_SRAM_BATT)
     {
       print('Created MBC5 unit.');
-      return new MBC5(cpu, this);
+      return new MBC5(cpu);
     }
 
     return null;

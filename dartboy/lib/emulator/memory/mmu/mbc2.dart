@@ -4,7 +4,7 @@ import 'mbc.dart';
 
 class MBC2 extends MBC
 {
-  MBC2(CPU cpu, Cartridge cartridge) : super(cpu, cartridge);
+  MBC2(CPU cpu) : super(cpu);
 
 
   @override

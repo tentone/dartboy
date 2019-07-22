@@ -38,3 +38,7 @@ wgbc/\.vs/
 dartboy/roms/pokemon\.gbc
 
 dartboy/windows/roms/pokemon\.gb
+
+*.rtc
+
+*.sav
