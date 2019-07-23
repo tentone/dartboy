@@ -76,6 +76,21 @@ class MainScreenState extends State<MainScreen>
 
         int keyCode = int.parse(value);
 
+        // Debug functions
+        if(key is RawKeyDownEvent)
+        {
+          if(keyCode == KEY_I)
+          {
+            print('Toogle background layer.');
+            MainScreen.emulator.cpu.ppu.debugBackgroundEnabled = !MainScreen.emulator.cpu.ppu.debugBackgroundEnabled;
+          }
+          else if(keyCode == KEY_O)
+          {
+            print('Toogle sprite layer.');
+            MainScreen.emulator.cpu.ppu.debugSpritesEnabled = !MainScreen.emulator.cpu.ppu.debugSpritesEnabled;
+          }
+        }
+
         if(!keyMapping.containsKey(keyCode))
         {
           return;
@@ -87,15 +102,6 @@ class MainScreenState extends State<MainScreen>
         }
         else if(key is RawKeyDownEvent)
         {
-          if(keyCode == KEY_I)
-          {
-            MainScreen.emulator.cpu.ppu.debugBackgroundEnabled = !MainScreen.emulator.cpu.ppu.debugBackgroundEnabled;
-          }
-          if(keyCode == KEY_O)
-          {
-            MainScreen.emulator.cpu.ppu.debugSpritesEnabled = !MainScreen.emulator.cpu.ppu.debugSpritesEnabled;
-          }
-
           MainScreen.emulator.buttonDown(keyMapping[keyCode]);
         }
       });
