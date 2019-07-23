@@ -571,8 +571,7 @@ class PPU
     // Actual GameBoy hardware can only handle drawing 10 sprites per line
     for(int i = 0; i < this.cpu.mmu.oam.length && this.spritesDrawnPerLine[scanline] < 10; i += 4)
     {
-      // Specifies the sprites vertical position on the screen (minus 16).
-      // An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
+      // Specifies the sprites vertical position on the screen (minus 16). An offscreen value (for example, Y=0 or Y>=160) hides the sprite.
       int y = this.cpu.mmu.readOAM(i) & 0xff;
 
       // Have we exited our bounds

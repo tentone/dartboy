@@ -32,6 +32,10 @@ class MainScreen extends StatefulWidget
 
 class MainScreenState extends State<MainScreen>
 {
+  static const int KEY_I = 73;
+  static const int KEY_O = 79;
+  static const int KEY_P = 80;
+
   static Map<int, int> keyMapping =
   {
     // Left arrow
@@ -63,6 +67,7 @@ class MainScreenState extends State<MainScreen>
       {
         // Get the keyCode from the object string description (keyCode does not seem to be exposed other way)
         String keyPress = key.data.toString();
+
         String value = keyPress.substring(keyPress.indexOf('keyCode: ') + 9, keyPress.indexOf(', scanCode:'));
         if(value.length == 0)
         {
@@ -82,6 +87,15 @@ class MainScreenState extends State<MainScreen>
         }
         else if(key is RawKeyDownEvent)
         {
+          if(keyCode == KEY_I)
+          {
+            MainScreen.emulator.cpu.ppu.debugBackgroundEnabled = !MainScreen.emulator.cpu.ppu.debugBackgroundEnabled;
+          }
+          if(keyCode == KEY_O)
+          {
+            MainScreen.emulator.cpu.ppu.debugSpritesEnabled = !MainScreen.emulator.cpu.ppu.debugSpritesEnabled;
+          }
+
           MainScreen.emulator.buttonDown(keyMapping[keyCode]);
         }
       });
