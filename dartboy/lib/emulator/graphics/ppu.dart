@@ -12,6 +12,12 @@ import './palette.dart';
 /// Is responsible for managing the sprites and background layers.
 class PPU
 {
+  /// Debug variable to enable and disable the sprite layer rendering.
+  bool debugSpritesEnabled = true;
+
+  /// Debug variable to enable and disable the background rendering.
+  bool debugBackgroundEnabled = true;
+
   /// Width in pixels of the physical gameboy LCD.
   static const int LCD_WIDTH = 160;
 
@@ -369,17 +375,22 @@ class PPU
   /// @param scanline The current scanline.
   void drawBackgroundTiles(List<int> data, int scanline)
   {
+    if(!this.debugBackgroundEnabled)
+    {
+      return;
+    }
+
     // Local reference to save time
-    int tileDataOffset = getTileDataOffset();
+    int tileDataOffset = this.getTileDataOffset();
 
     // The background is scrollable
-    int scrollY = getScrollY();
-    int scrollX = getScrollX();
+    int scrollY = this.getScrollY();
+    int scrollX = this.getScrollX();
 
-    int y = (scanline + getScrollY() % 8) ~/ 8;
+    int y = (scanline + scrollY % 8) ~/ 8;
 
     // Determine the offset into the VRAM tile bank
-    int offset = getBackgroundTileMapOffset();
+    int offset = this.getBackgroundTileMapOffset();
 
     // BG Map Tile Numbers
     //
@@ -480,7 +491,7 @@ class PPU
   /// Attempt to draw a single line of a tile.
   ///
   /// @param palette The palette currently in use.
-  /// @param data An array of W/// H elements, representing the LCD raster.
+  /// @param data An array of elements, representing the LCD raster.
   /// @param x The x-coordinate of the tile.
   /// @param y The y-coordinate of the tile.
   /// @param tile The tile id to draw.
@@ -542,10 +553,17 @@ class PPU
 
   /// Attempts to draw all sprites.
   ///
-  /// @param data     The raster to write to.
+  /// GameBoy video controller can display up to 40 sprites, but only a maximum of 10 per line.
+  ///
+  /// @param data The raster to write to.
   /// @param scanline The current scanline.
   void drawSprites(List<int> data, int scanline)
   {
+    if(!this.debugSpritesEnabled)
+    {
+      return;
+    }
+
     // Hold local references to save a lot of load opcodes
     bool tall = this.isUsingTallSprites();
     bool isColorGB = this.cpu.cartridge.gameboyType == GameboyType.COLOR;
