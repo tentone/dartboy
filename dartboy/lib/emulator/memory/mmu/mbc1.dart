@@ -4,9 +4,22 @@ import '../memory.dart';
 import '../memory_addresses.dart';
 import 'mbc.dart';
 
-/// Memory banking chip
+
+/// Memory banking chip 1 (MBC1).
+///
+/// Supports two modes up to 16Mb ROM/8KB RAM or 4Mb ROM/32KB RAM
 class MBC1 extends MBC
 {
+
+  static const int SELECT_MEMORY_MODE_START = 0x6000;
+  static const int SELECT_MEMORY_MODE_END = 0x8000;
+
+  static const int ROM_BANK_SELECT_START = 0x2000;
+  static const int ROM_BANK_SELECT_END = 0x4000;
+
+  static const int MODE_16ROM_8RAM = 0;
+  static const int MODE_4ROM_32RAM = 1;
+
   /// Indicates if the addresses 0x5000 to 0x6000 are redirected to RAM or to ROM
   int modeSelect;
 
@@ -20,13 +33,14 @@ class MBC1 extends MBC
   {
     super.reset();
 
-    this.modeSelect = 0;
+    this.modeSelect = MBC1.MODE_16ROM_8RAM;
     this.romBank = 1;
 
     this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 4);
     this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 
+  /// Select the ROM bank
   void mapRom(int bank)
   {
     // Not usable banks, use the next bank available.
@@ -45,54 +59,50 @@ class MBC1 extends MBC
     address &= 0xffff;
     value &= 0xff;
 
-    switch(address & 0xF000)
+    // Any value with 0xA in the lower 4 bits enables RAM, and any other value disables RAM.
+    if(address >= MemoryAddresses.CARTRIDGE_ROM_START && address < 0x2000)
     {
-      case 0x0000:
-      case 0x1000:
-        // It is recommended to disable external RAM after accessing it.
-        // Practically any value with 0xA in the lower 4 bits enables RAM, and any other value disables RAM.
-        if(this.cpu.cartridge.ramBanks > 0)
-        {
-          this.ramEnabled = (value & 0x0F) == 0x0A;
-        }
-
-        break;
-      case 0xA000:
-      case 0xB000:
-        // This area is used to address external RAM in the cartridge.
-        if(this.ramEnabled)
-        {
-          this.cartRam[address - MemoryAddresses.SWITCHABLE_RAM_START + this.ramPageStart] = value;
-        }
-        break;
-      case 0x2000:
-      case 0x3000:
-        // Writing to this address space selects the lower 5 bits of the ROM Bank Number.
-        this.mapRom((this.romBank & 0x60) | (value & 0x1F));
-        break;
-      case 0x4000:
-      case 0x5000:
-        // Select a RAM Bank in range from 00-03h, or to specify the upper two bits (Bit 5-6) of the ROM Bank number, depending on the current ROM/RAM Mode.
-        if(this.modeSelect == 0)
-        {
-          this.ramPageStart = (value & 0x03) * MBC.RAM_PAGESIZE;
-        }
-        else
-        {
-          this.mapRom((this.romBank & 0x1F) | ((value & 0x03) << 4));
-        }
-        break;
-      case 0x6000:
-      case 0x7000:
-        // Selects whether the two bits of the above register should be used as upper two bits of the ROM Bank, or as RAM Bank Number.
-        if(this.cpu.cartridge.ramBanks == 3)
-        {
-          this.modeSelect = (value & 0x01);
-        }
-        break;
-      default:
-        super.writeByte(address, value);
-        break;
+      if(this.cpu.cartridge.ramBanks > 0)
+      {
+        this.ramEnabled = (value & 0x0F) == 0x0A;
+      }
+    }
+    // Writing to this address space selects the lower 5 bits of the ROM Bank Number.
+    else if(address >= MBC1.ROM_BANK_SELECT_START && address < MBC1.ROM_BANK_SELECT_END)
+    {
+      this.mapRom((this.romBank & 0x60) | (value & 0x1F));
+    }
+    // Select a RAM Bank in range from 00-03h, or to specify the upper two bits (Bit 5-6) of the ROM Bank number, depending on the current ROM/RAM Mode.
+    else if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < 0x6000)
+    {
+      if(this.modeSelect == MBC1.MODE_16ROM_8RAM)
+      {
+        this.ramPageStart = (value & 0x03) * MBC.RAM_PAGESIZE;
+      }
+      else // if(this.modeSelect == MBC1.MODE_4ROM_32RAM)
+      {
+        this.mapRom((this.romBank & 0x1F) | ((value & 0x03) << 4));
+      }
+    }
+    // Selects whether the two bits of the above register should be used as upper two bits of the ROM Bank, or as RAM Bank Number.
+    else if(address >= MBC1.SELECT_MEMORY_MODE_START && address < MBC1.SELECT_MEMORY_MODE_END)
+    {
+      if(this.cpu.cartridge.ramBanks == 3)
+      {
+        this.modeSelect = (value & 0x01);
+      }
+    }
+    // This area is used to address external RAM in the cartridge.
+    else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
+    {
+      if(this.ramEnabled)
+      {
+        this.cartRam[address - MemoryAddresses.SWITCHABLE_RAM_START + this.ramPageStart] = value;
+      }
+    }
+    else
+    {
+      super.writeByte(address, value);
     }
   }
 }

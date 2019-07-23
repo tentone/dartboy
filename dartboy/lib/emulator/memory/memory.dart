@@ -70,7 +70,7 @@ class Memory
   ///
   /// Reset the memory to default boot values, Also sets all bytes in the memory space to 0 value.
   ///
-  /// (Check page 17 and 18 of the GB CPU manual)
+  /// Should be used to reset the system state after loading new data.
   void reset()
   {
     this.vramPageStart = 0;
@@ -128,7 +128,9 @@ class Memory
     this.writeByte(0xFFFF, 0x00);
   }
 
-  /// Write a byte into memory address
+  /// Write a byte into memory address.
+  ///
+  /// The memory is not directly accessed some addresses might be used for I/O or memory control operations.
   void writeByte(int address, int value)
   {
     value &= 0xFF;
@@ -244,8 +246,6 @@ class Memory
   /// Write data into the IO section of memory space.
   void writeIO(int address, int value)
   {
-    // TODO <CHECK IF VALUES SHOULD ALWAYS BE WRITTEN>
-
     switch (address)
     {
       case MemoryRegisters.DOUBLE_SPEED:

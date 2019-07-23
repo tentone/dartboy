@@ -1,6 +1,7 @@
 import '../../cpu/cpu.dart';
 import '../cartridge.dart';
 import '../memory.dart';
+import '../memory_addresses.dart';
 import 'mbc.dart';
 
 class MBC5 extends MBC
@@ -36,39 +37,39 @@ class MBC5 extends MBC
   void writeByte(int address, int value)
   {
     address &= 0xffff;
+    value &= 0xff;
 
-    switch (address & 0xF000)
+    if(address >= MemoryAddresses.CARTRIDGE_ROM_START && address < 0x2000)
     {
-      case 0x0000:
-      case 0x1000:
-        if(this.cpu.cartridge.ramBanks > 0)
-        {
-          this.ramEnabled = (value & 0x0F) == 0x0A;
-        }
-        break;
-      case 0xA000:
-      case 0xB000:
-        if(this.ramEnabled)
-        {
-          this.cartRam[address - 0xA000 + this.ramPageStart] = value;
-        }
-        break;
-      case 0x2000:
-        // The lower 8 bits of the ROM bank number goes here.
-        // Writing 0 will indeed give bank 0 on MBC5, unlike other MBCs.
-        this.mapRom((this.romBank & 0x100) | (value & 0xFF));
-        break;
-      case 0x3000:
-        // The 9th bit of the ROM bank number goes here.
-        this.mapRom((this.romBank & 0xff) | ((value & 0x1) << 8));
-        break;
-      case 0x4000:
-      case 0x5000:
-        this.ramPageStart = (value & 0x03) * MBC.RAM_PAGESIZE;
-        break;
-      default:
-        super.writeByte(address, value);
-        break;
+      if(this.cpu.cartridge.ramBanks > 0)
+      {
+        this.ramEnabled = (value & 0x0F) == 0x0A;
+      }
+    }
+    else if(address >= 0x2000 && address < 0x3000)
+    {
+      // The lower 8 bits of the ROM bank number goes here. Writing 0 will indeed give bank 0 on MBC5, unlike other MBCs.
+      this.mapRom((this.romBank & 0x100) | (value & 0xFF));
+    }
+    else if(address >= 0x3000 && address < 0x4000)
+    {
+      // The 9th bit of the ROM bank number goes here.
+      this.mapRom((this.romBank & 0xff) | ((value & 0x1) << 8));
+    }
+    else if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < 0x6000)
+    {
+      this.ramPageStart = (value & 0x03) * MBC.RAM_PAGESIZE;
+    }
+    else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
+    {
+      if(this.ramEnabled)
+      {
+        this.cartRam[address - MemoryAddresses.SWITCHABLE_RAM_START + this.ramPageStart] = value;
+      }
+    }
+    else
+    {
+      super.writeByte(address, value);
     }
   }
 }
