@@ -39,11 +39,11 @@ class MBC3 extends MBC
   void writeByte(int address, int value)
   {
     address &= 0xffff;
-    value = value & 0xff;
+    value &= 0xff;
 
-    if(address >= MemoryAddresses.CARTRIDGE_ROM_START && address < 0x2000)
+    if(address >= MBC1.RAM_DISABLE_START && address < MBC1.RAM_DISABLE_END)
     {
-      if(this.cpu.cartridge.ramBanks != 0)
+      if(this.cpu.cartridge.ramBanks > 0)
       {
         this.ramEnabled = (value & 0x0F) == 0x0A;
       }
@@ -58,7 +58,7 @@ class MBC3 extends MBC
     // As for the MBC1s RAM Banking Mode, writing a value in range for 00h-03h maps the corresponding external RAM Bank (if any) into memory at A000-BFFF.
     // When writing a value of 08h-0Ch, this will map the corresponding RTC register into memory at A000-BFFF.
     // That register could then be read/written by accessing any address in that area, typically that is done by using address A000.
-    else if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < 0x6000)
+    else if(address >= 0x4000 && address < 0x6000)
     {
       // TODO <RTC WRITE>
       if(value >= 0x08 && value <= 0x0C)
@@ -83,7 +83,7 @@ class MBC3 extends MBC
       }
       else if(this.rtcEnabled)
       {
-        //TODO <ADD CODE HERE TO WRITE RTC>
+        // TODO <ADD CODE HERE TO WRITE RTC>
         //this.rtc[this.ramBank - 0x08] = value;
       }
     }

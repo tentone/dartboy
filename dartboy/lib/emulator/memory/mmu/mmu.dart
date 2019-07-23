@@ -20,11 +20,6 @@ class MMU extends Memory
   /// The OAM start address is added to the address received as parameter.
   int readOAM(int address)
   {
-    if(address > this.oam.length)
-    {
-      throw new Exception('Trying to access invalid OAM address.');
-    }
-
     return this.oam[address];
   }
 
@@ -33,11 +28,6 @@ class MMU extends Memory
   /// The OAM start address is added to the address received as parameter.
   void writeOAM(int address, int value)
   {
-    if(address > this.oam.length)
-    {
-      throw new Exception('Trying to access invalid OAM address.');
-    }
-
     this.oam[address] = value & 0xFF;
   }
 
@@ -46,11 +36,6 @@ class MMU extends Memory
   /// The video RAM start address is added to the address received as parameter.
   int readVRAM(int address)
   {
-    if(address > this.vram.length)
-    {
-      throw new Exception('Trying to access invalid VRAM address.');
-    }
-
     return this.vram[address];
   }
 
@@ -59,11 +44,6 @@ class MMU extends Memory
   /// The video RAM start address is added to the address received as parameter.
   void writeVRAM(int address, int value)
   {
-    if(address > this.vram.length)
-    {
-      throw new Exception('Trying to access invalid VRAM address.');
-    }
-
     this.vram[address] = value & 0xFF;
   }
 
@@ -72,11 +52,6 @@ class MMU extends Memory
   /// Meaning of the values is stored in the MemoryRegisters class
   int readRegisterByte(int address)
   {
-    if(address > this.registers.length)
-    {
-      throw new Exception('Trying to access invalid register address.');
-    }
-
     return this.registers[address];
   }
 
@@ -85,11 +60,6 @@ class MMU extends Memory
   /// Meaning of the values is stored in the MemoryRegisters class
   void writeRegisterByte(int address, int value)
   {
-    if(address > this.registers.length)
-    {
-      throw new Exception('Trying to access invalid register address.');
-    }
-
     this.registers[address] = value & 0xFF;
   }
 }

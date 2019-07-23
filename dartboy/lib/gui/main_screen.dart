@@ -209,13 +209,13 @@ class MainScreenState extends State<MainScreen>
                     {
                       MainScreen.emulator.debugStep();
                     }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))) : new Container(width: 0.0),
-                    (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
+                    /*(!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
                     {
                       for(int i = 0; i < 100; i++)
                       {
                         MainScreen.emulator.debugStep();
                       }
-                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))) : new Container(width: 0.0),
+                    }, color: Colors.black, child: new Text('Step 100x', style: const TextStyle(color: Colors.white))) : new Container(width: 0.0),*/
                     new RaisedButton(onPressed: ()
                     {
                       if(MainScreen.emulator.state != EmulatorState.WAITING)
@@ -233,14 +233,13 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/pokemonred.gb'));
                       }
 
                       if(MainScreen.emulator.state == EmulatorState.READY)
                       {
                         Modal.alert(context, 'Success', 'ROM loaded, ready to play.');
                       }
-
                     }, color: Colors.black, child: new Text("Load", style: const TextStyle(color: Colors.white))),
                   ],
                 ))

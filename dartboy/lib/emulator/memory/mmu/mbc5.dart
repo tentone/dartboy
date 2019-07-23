@@ -3,6 +3,7 @@ import '../cartridge.dart';
 import '../memory.dart';
 import '../memory_addresses.dart';
 import 'mbc.dart';
+import 'mbc1.dart';
 
 class MBC5 extends MBC
 {
@@ -39,7 +40,7 @@ class MBC5 extends MBC
     address &= 0xffff;
     value &= 0xff;
 
-    if(address >= MemoryAddresses.CARTRIDGE_ROM_START && address < 0x2000)
+    if(address >= MBC1.RAM_DISABLE_START && address < MBC1.RAM_DISABLE_END)
     {
       if(this.cpu.cartridge.ramBanks > 0)
       {

@@ -10,14 +10,19 @@ import 'mbc.dart';
 /// Supports two modes up to 16Mb ROM/8KB RAM or 4Mb ROM/32KB RAM
 class MBC1 extends MBC
 {
-
-  static const int SELECT_MEMORY_MODE_START = 0x6000;
-  static const int SELECT_MEMORY_MODE_END = 0x8000;
+  static const int RAM_DISABLE_START = 0x0000;
+  static const int RAM_DISABLE_END = 0x2000;
 
   static const int ROM_BANK_SELECT_START = 0x2000;
   static const int ROM_BANK_SELECT_END = 0x4000;
 
+  static const int SELECT_MEMORY_MODE_START = 0x6000;
+  static const int SELECT_MEMORY_MODE_END = 0x8000;
+
+  /// MBC1 mode for 16Mb ROM and 8KB RAM, default mode of the controller.
   static const int MODE_16ROM_8RAM = 0;
+
+  /// MBC1 mode for 4Mb ROM and 32KB RAM
   static const int MODE_4ROM_32RAM = 1;
 
   /// Indicates if the addresses 0x5000 to 0x6000 are redirected to RAM or to ROM
@@ -60,7 +65,7 @@ class MBC1 extends MBC
     value &= 0xff;
 
     // Any value with 0xA in the lower 4 bits enables RAM, and any other value disables RAM.
-    if(address >= MemoryAddresses.CARTRIDGE_ROM_START && address < 0x2000)
+    if(address >= MBC1.RAM_DISABLE_START && address < MBC1.RAM_DISABLE_END)
     {
       if(this.cpu.cartridge.ramBanks > 0)
       {
@@ -73,7 +78,7 @@ class MBC1 extends MBC
       this.selectROMBank((this.romBank & 0x60) | (value & 0x1F));
     }
     // Select a RAM Bank in range from 00-03h, or to specify the upper two bits (Bit 5-6) of the ROM Bank number, depending on the current ROM/RAM Mode.
-    else if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < 0x6000)
+    else if(address >= 0x4000 && address < 0x6000)
     {
       if(this.modeSelect == MBC1.MODE_16ROM_8RAM)
       {
