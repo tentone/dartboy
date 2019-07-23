@@ -40,8 +40,8 @@ class MBC1 extends MBC
     this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 
-  /// Select the ROM bank
-  void mapRom(int bank)
+  /// Select the ROM bank to be used.
+  void selectROMBank(int bank)
   {
     // Not usable banks, use the next bank available.
     if(bank == 0x00 || bank == 0x20 || bank == 0x40 || bank == 0x60)
@@ -70,7 +70,7 @@ class MBC1 extends MBC
     // Writing to this address space selects the lower 5 bits of the ROM Bank Number.
     else if(address >= MBC1.ROM_BANK_SELECT_START && address < MBC1.ROM_BANK_SELECT_END)
     {
-      this.mapRom((this.romBank & 0x60) | (value & 0x1F));
+      this.selectROMBank((this.romBank & 0x60) | (value & 0x1F));
     }
     // Select a RAM Bank in range from 00-03h, or to specify the upper two bits (Bit 5-6) of the ROM Bank number, depending on the current ROM/RAM Mode.
     else if(address >= MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START && address < 0x6000)
@@ -81,7 +81,7 @@ class MBC1 extends MBC
       }
       else // if(this.modeSelect == MBC1.MODE_4ROM_32RAM)
       {
-        this.mapRom((this.romBank & 0x1F) | ((value & 0x03) << 4));
+        this.selectROMBank((this.romBank & 0x1F) | ((value & 0x03) << 4));
       }
     }
     // Selects whether the two bits of the above register should be used as upper two bits of the ROM Bank, or as RAM Bank Number.

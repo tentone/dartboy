@@ -6,9 +6,11 @@ import '../memory_addresses.dart';
 import 'mmu.dart';
 
 /// Abstract implementation of features shared by all Memory Banking Chips.
+///
+/// Implements the battery load and save to and from file and the access to individual memory regions.
 class MBC extends MMU
 {
-  /// The size of a page of cart RAM, 8k in size.
+  /// The size of a page of cartridge RAM, 8k in size for each page.
   static const int RAM_PAGESIZE = 0x2000;
 
   /// The current offset (page) into cart ram.

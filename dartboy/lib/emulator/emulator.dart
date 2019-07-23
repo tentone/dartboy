@@ -4,6 +4,11 @@ import 'dart:io';
 import './cpu/cpu.dart';
 import './memory/cartridge.dart';
 
+/// Represents the state of the emulator.
+///
+/// If data is not loaded the emulator is in WAITING state, after loading data is get into READY state.
+///
+/// When the game starts running it goes to RUNNING state, on pause it returns to READY.
 enum EmulatorState
 {
   WAITING,
@@ -46,7 +51,6 @@ class Emulator
   {
     if(this.state != EmulatorState.WAITING)
     {
-      //TODO <DEBUG PRINT>
       print('Emulator should be reset to load ROM.');
       return;
     }

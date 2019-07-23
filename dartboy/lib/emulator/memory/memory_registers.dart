@@ -2,7 +2,8 @@ class MemoryRegisters
 {
   static const int DOUBLE_SPEED = 0x4d;
 
-  static const int HDMA_START = 0x55;
+  /// HDMA control register
+  static const int HDMA = 0x55;
 
   /// Gamepad I/O register, stores which keys are pressed by the user.
   static const int GAMEPAD = 0x00;

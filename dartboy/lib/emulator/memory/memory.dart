@@ -24,32 +24,32 @@ class Memory
   /// Size of a page of ROM, in bytes. 16kb.
   static const int ROM_PAGESIZE = 0x4000;
 
-  /// Register values, mapped from $FF00-$FF7F + HRAM ($FF80-$FFFE) + Interrupt Enable Register ($FFFF)
+  /// Register values, mapped from 0xFF00-0xFF7F + HRAM (0xFF80-0xFFFE) + Interrupt Enable Register (0xFFFF)
   List<int> registers;
 
-  /// Sprite Attribute Table, mapped from $FE00-$FE9F.
+  /// Sprite Attribute Table, mapped from 0xFE00-0xFE9F.
   List<int> oam;
 
-  /// Video RAM, mapped from $8000-$9FFF.
-  /// On the GBC, this bank is switchable 0-1 by writing to $FF4F.
+  /// Video RAM, mapped from 0x8000-0x9FFF.
+  /// On the GBC, this bank is switchable 0-1 by writing to 0xFF4F.
   List<int> vram;
 
-  /// Work RAM, mapped from $C000-$CFFF and $D000-$DFFF.
+  /// Work RAM, mapped from 0xC000-0xCFFF and 0xD000-0xDFFF.
   ///
-  /// On the GBC, this bank is switchable 1-7 by writing to $FF07.
+  /// On the GBC, this bank is switchable 1-7 by writing to 0xFF07.
   List<int> wram;
 
-  /// The current page of Video RAM, always multiples of Memory.VRAM_PAGESIZE.
+  /// The current page of Video RAM, always multiples of VRAM_PAGESIZE.
   ///
   /// On non-GBC, this is always 0.
   int vramPageStart;
 
-  /// The current page of Work RAM, always multiples of Memory.WRAM_PAGESIZE.
+  /// The current page of Work RAM, always multiples of WRAM_PAGESIZE.
   ///
-  /// On non-GBC, this is always Memory.VRAM_PAGESIZE.
+  /// On non-GBC, this is always VRAM_PAGESIZE.
   int wramPageStart;
 
-  /// The current page of ROM, always multiples of Memory.ROM_PAGESIZE.
+  /// The current page of ROM, always multiples of ROM_PAGESIZE.
   int romPageStart;
 
   /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
@@ -94,38 +94,26 @@ class Memory
       this.writeIO(i, 0);
     }
 
-    this.writeByte(0xFF04, 0xAB);
-    this.writeByte(0xFF05, 0x00);
-    this.writeByte(0xFF06, 0x00);
-    this.writeByte(0xFF07, 0x00);
-    this.writeByte(0xFF10, 0x80);
-    this.writeByte(0xFF11, 0xBF);
-    this.writeByte(0xFF12, 0xF3);
-    this.writeByte(0xFF14, 0xBF);
-    this.writeByte(0xFF16, 0x3F);
-    this.writeByte(0xFF17, 0x00);
-    this.writeByte(0xFF19, 0xBF);
-    this.writeByte(0xFF1A, 0x7F);
-    this.writeByte(0xFF1B, 0xFF);
-    this.writeByte(0xFF1C, 0x9F);
-    this.writeByte(0xFF1E, 0xBF);
-    this.writeByte(0xFF20, 0xFF);
-    this.writeByte(0xFF21, 0x00);
-    this.writeByte(0xFF22, 0x00);
-    this.writeByte(0xFF23, 0xBF);
-    this.writeByte(0xFF24, 0x77);
-    this.writeByte(0xFF25, 0xF3);
-    this.writeByte(0xFF26, this.cpu.cartridge.superGameboy ? 0xF0 : 0xF1);
-    this.writeByte(0xFF40, 0x91);
-    this.writeByte(0xFF42, 0x00);
-    this.writeByte(0xFF43, 0x00);
-    this.writeByte(0xFF45, 0x00);
-    this.writeByte(0xFF47, 0xFC);
-    this.writeByte(0xFF48, 0xFF);
-    this.writeByte(0xFF49, 0xFF);
-    this.writeByte(0xFF4A, 0x00);
-    this.writeByte(0xFF4B, 0x00);
-    this.writeByte(0xFFFF, 0x00);
+    this.writeIO(0x04, 0xAB);
+    this.writeIO(0x10, 0x80);
+    this.writeIO(0x11, 0xBF);
+    this.writeIO(0x12, 0xF3);
+    this.writeIO(0x14, 0xBF);
+    this.writeIO(0x16, 0x3F);
+    this.writeIO(0x19, 0xBF);
+    this.writeIO(0x1A, 0x7F);
+    this.writeIO(0x1B, 0xFF);
+    this.writeIO(0x1C, 0x9F);
+    this.writeIO(0x1E, 0xBF);
+    this.writeIO(0x20, 0xFF);
+    this.writeIO(0x23, 0xBF);
+    this.writeIO(0x24, 0x77);
+    this.writeIO(0x25, 0xF3);
+    this.writeIO(0x26, this.cpu.cartridge.superGameboy ? 0xF0 : 0xF1);
+    this.writeIO(0x40, 0x91);
+    this.writeIO(0x47, 0xFC);
+    this.writeIO(0x48, 0xFF);
+    this.writeIO(0x49, 0xFF);
   }
 
   /// Write a byte into memory address.
@@ -139,7 +127,6 @@ class Memory
     // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_END)
     {
-      //throw new Exception('Cannot write data into cartridge ROM memory.');
       return;
     }
     // VRAM
@@ -150,7 +137,6 @@ class Memory
     // Cartridge RAM
     else if(address >= MemoryAddresses.SWITCHABLE_RAM_START && address < MemoryAddresses.SWITCHABLE_RAM_END)
     {
-      //throw new Exception('Cannot write data into cartridge RAM memory.');
       return;
     }
     // RAM A
@@ -240,12 +226,15 @@ class Memory
       return this.readIO(address - MemoryAddresses.IO_START);
     }
 
-    return 0xFF;
+    throw new Exception('Trying to access invalid address.');
   }
 
   /// Write data into the IO section of memory space.
   void writeIO(int address, int value)
   {
+    value &= 0xFF;
+    address &= 0xFFFF;
+
     switch (address)
     {
       case MemoryRegisters.DOUBLE_SPEED:
@@ -290,7 +279,7 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.HDMA_START: // HDMA start
+      case MemoryRegisters.HDMA: // HDMA start
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
           {
@@ -306,7 +295,7 @@ class Memory
           if((value & 0x80) != 0)
           {
             this.dma = new DMA(this, source, dest, length);
-            this.registers[MemoryRegisters.HDMA_START] = (length ~/ 0x10 - 1) & 0xFF;
+            this.registers[MemoryRegisters.HDMA] = (length ~/ 0x10 - 1) & 0xFF;
           }
           else
           {
@@ -322,7 +311,7 @@ class Memory
               this.vram[this.vramPageStart + dest + i] = readByte(source + i) & 0xFF;
             }
 
-            this.registers[MemoryRegisters.HDMA_START] = 0xFF;
+            this.registers[MemoryRegisters.HDMA] = 0xFF;
           }
           return;
         }

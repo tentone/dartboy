@@ -1,6 +1,5 @@
 import 'package:dartboy/gui/main_screen.dart';
 
-import '../../utils/byte_utils.dart';
 import '../memory/memory_registers.dart';
 import '../memory/memory_addresses.dart';
 import '../memory/cartridge.dart';
@@ -215,7 +214,7 @@ class PPU
     {
       this.lcdCycles -= 456;
 
-      int LY = this.cpu.mmu.readRegisterByte(MemoryRegisters.LY) & 0xFF;
+      int ly = this.cpu.mmu.readRegisterByte(MemoryRegisters.LY) & 0xFF;
 
       // Draw the scanline
       bool displayEnabled = this.displayEnabled();
@@ -223,13 +222,13 @@ class PPU
       // We may be running headlessly, so we must check before drawing
       if(displayEnabled)
       {
-        this.draw(LY);
+        this.draw(ly);
       }
 
       // Increment LY, and wrap at 154 lines
-      this.cpu.mmu.writeRegisterByte(MemoryRegisters.LY, (((LY + 1) % 154) & 0xff));
+      this.cpu.mmu.writeRegisterByte(MemoryRegisters.LY, (((ly + 1) % 154) & 0xff));
 
-      if(LY == 0)
+      if(ly == 0)
       {
         if(this.lastSecondTime == -1)
         {
@@ -248,7 +247,7 @@ class PPU
         }
       }
 
-      bool isVBlank = 144 <= LY;
+      bool isVBlank = 144 <= ly;
       if(!isVBlank && this.cpu.mmu.dma != null)
       {
         this.cpu.mmu.dma.tick();
@@ -274,7 +273,7 @@ class PPU
           int lyc = (this.cpu.mmu.readRegisterByte(MemoryRegisters.LYC) & 0xff);
 
           // Fire when LYC == LY
-          if(lyc == LY)
+          if(lyc == ly)
           {
             this.cpu.setInterruptTriggered(MemoryRegisters.LCDC_BIT);
             this.cpu.mmu.writeRegisterByte(MemoryRegisters.LCD_STAT, this.cpu.mmu.readRegisterByte(MemoryRegisters.LCD_STAT) | MemoryRegisters.LCD_STAT_COINCIDENCE_BIT);
@@ -292,7 +291,7 @@ class PPU
       }
 
       // V-Blank Interrupt
-      if(LY == 143)
+      if(ly == 143)
       {
         // Trigger interrupts if the display is enabled
         if(displayEnabled)
@@ -338,6 +337,7 @@ class PPU
       this.buffer = this.current;
       this.current = temp;
 
+      // ignore: invalid_use_of_protected_member
       MainScreen.lcdState.setState((){});
 
       //Clear drawing buffer
@@ -385,8 +385,11 @@ class PPU
     //
     // An area of VRAM known as Background Tile Map contains the numbers of tiles to be displayed.
     // It is organized as 32 rows of 32 ints each. Each int contains a number of a tile to be displayed.
-    // Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF. In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000).
+
+    // Tile patterns are taken from the Tile Data Table located either at $8000-8FFF or $8800-97FF.
+    // In the first case, patterns are numbered with unsigned numbers from 0 to 255 (i.e. pattern #0 lies at address $8000).
     // In the second case, patterns have signed numbers from -128 to 127 (i.e. pattern #0 lies at address $9000).
+
     // 20 8x8 tiles fit in a 160px-wide screen
     for(int x = 0; x < 21; x++)
     {
@@ -523,7 +526,6 @@ class PPU
       int paletteLower = ((this.cpu.mmu.readVRAM(address) & (0x80 >> logicalX)) >> (7 - logicalX));
 
       int paletteIndex = paletteUpper | paletteLower;
-
       int priority = (basePriority == 0) ? (paletteIndex == 0 ? PPU.P_1 : PPU.P_3) : basePriority;
 
       if(sprite && paletteIndex == 0)
@@ -642,11 +644,9 @@ class PPU
   {
     if((this.cpu.mmu.readRegisterByte(MemoryRegisters.LCDC) & MemoryRegisters.LCDC_BG_TILE_MAP_DISPLAY_SELECT_BIT) != 0)
     {
-      //0x9C00
       return 0x1c00;
     }
 
-    //0x9800
     return 0x1800;
   }
 

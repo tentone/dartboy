@@ -69,7 +69,7 @@ class Cartridge
     this.name = String.fromCharCodes(this.readBytes(0x134, 0x142));
     this.romType = this.readByte(0x148);
     this.ramType = this.readByte(0x149);
-    this.gameboyType = this.readByte(0x143) != 0 ? GameboyType.COLOR : GameboyType.CLASSIC;
+    this.gameboyType = this.readByte(0x143) == 0x80 ? GameboyType.COLOR : GameboyType.CLASSIC;
     this.superGameboy = this.readByte(0x146) == 0x3;
 
     // Calculate the special value used by the CGB boot ROM to colorize some monochrome games.
