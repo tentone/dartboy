@@ -49,9 +49,9 @@ class DMA
   /// In that case reading from 0xFF55 may return any value for the lower 7 bits, but Bit 7 will be read as 1.
   void tick()
   {
-    for(int i = this.position; i < this.position + 0x10; i++)
+    for(int i = 0; i < 0x10; i++)
     {
-      this.memory.vram[this.memory.vramPageStart + this.destination + i] = this.memory.readByte(this.source + i) & 0xFF;
+      this.memory.vram[this.memory.vramPageStart + this.destination + this.position + i] = this.memory.readByte(this.source + i) & 0xFF;
     }
 
     this.position += 0x10;
