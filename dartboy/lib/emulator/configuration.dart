@@ -10,6 +10,8 @@ class Configuration
   static bool drawSpriteLayer = true;
 
   /// If true data sent trough the serial port will be printed on the debug terminal.
+  ///
+  /// Useful for debug codes printed by test ROMs.
   static bool printSerialCharacters = true;
 
   /// Instructions debug info and registers information is printed to the terminal if set true.

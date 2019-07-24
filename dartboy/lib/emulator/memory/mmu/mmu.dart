@@ -1,4 +1,3 @@
-import '../cartridge.dart';
 import '../memory.dart';
 import '../../cpu/cpu.dart';
 
@@ -28,7 +27,7 @@ class MMU extends Memory
   /// The OAM start address is added to the address received as parameter.
   void writeOAM(int address, int value)
   {
-    this.oam[address] = value & 0xFF;
+    this.oam[address] = value;
   }
 
   /// Read a value from the Video RAM.
@@ -44,7 +43,7 @@ class MMU extends Memory
   /// The video RAM start address is added to the address received as parameter.
   void writeVRAM(int address, int value)
   {
-    this.vram[address] = value & 0xFF;
+    this.vram[address] = value;
   }
 
   /// Read a register value, register values are mapped between 0xFF00 to 0xFFFF
@@ -60,6 +59,6 @@ class MMU extends Memory
   /// Meaning of the values is stored in the MemoryRegisters class
   void writeRegisterByte(int address, int value)
   {
-    this.registers[address] = value & 0xFF;
+    this.registers[address] = value;
   }
 }

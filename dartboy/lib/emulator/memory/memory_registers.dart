@@ -1,20 +1,33 @@
 class MemoryRegisters
 {
+  // Used to control the double speed mode (gameboy color only).
   static const int DOUBLE_SPEED = 0x4d;
 
-  /// Gamepad I/O register, stores which keys are pressed by the user.
+  // Gamepad I/O register, stores which keys are pressed by the user.
   static const int GAMEPAD = 0x00;
 
-  /// Stores the data transferred by serial cable
+  // Stores the data transferred by serial cable
   static const int SERIAL_SB = 0x01;
 
-  /// Serial data control register, (data connection control, clock speed, etc).
+  // Serial data control register, (data connection control, clock speed, etc).
   static const int SERIAL_SC = 0x02;
+  
+  // Background palette (gameboy color only)
+  static const int BACKGROUND_PALETTE_INDEX = 0x68;
+  static const int BACKGROUND_PALETTE_DATA = 0x69;
+
+  // Sprite palette (gameboy color only)
+  static const int SPRITE_PALETTE_INDEX = 0x6A;
+  static const int SPRITE_PALETTE_DATA = 0x6B;
 
   static const int DIV = 0x04;
   static const int TIMA = 0x05;
   static const int TMA = 0x06;
   static const int TAC = 0x07;
+  static const int WRAM_BANK = 0x70;
+  static const int VRAM_BANK = 0x4f;
+
+  // Sound registers
   static const int NR10 = 0x10;
   static const int NR11 = 0x11;
   static const int NR12 = 0x12;
@@ -35,26 +48,26 @@ class MemoryRegisters
   static const int NR44 = 0x23;
   static const int NR51 = 0x25;
   static const int NR52 = 0x26;
-  static const int WRAM_BANK = 0x70;
-  static const int VRAM_BANK = 0x4f;
 
-  /// The Tile Data Table address for the background can be selected via LCDC register.
+  // The Tile Data Table address for the background can be selected via LCDC register.
   static const int LCDC = 0x40;
   static const int LCD_STAT = 0x41;
   static const int SCY = 0x42;
   static const int SCX = 0x43;
 
-  /// The LY indicates the vertical line to which the present data is transferred to the LCD Driver.
-  /// The LY can take on any value between 0 through 153. The values between 144 and 153 indicate the V-Blank period.
+  // The LY indicates the vertical line to which the present data is transferred to the LCD Driver.
+  // Has value between 0 to 153. The values between 144 and 153 indicate the V-Blank period.
   static const int LY = 0x44;
 
   static const int LYC = 0x45;
 
-  /// H-DMA control register contains the remaining length divided by 0x10 minus 1, a value of 0FFH indicates that the transfer is complete.
-  static const int HDMA_LENGTH = 0x55;
+  // H-DMA control register contains the remaining length divided by 0x10 minus 1, a value of 0FFH indicates that the transfer is complete.
+  static const int HDMA = 0x55;
+
+  // OAM DMA copy from ROM or RAM to OAM memory.
   static const int DMA = 0x46;
 
-  /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
+  // This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
   static const int BGP = 0x47;
 
   static const int OBP0 = 0x48;

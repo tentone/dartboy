@@ -1,5 +1,4 @@
 import '../../cpu/cpu.dart';
-import '../cartridge.dart';
 import 'mbc.dart';
 
 class MBC2 extends MBC
@@ -18,9 +17,6 @@ class MBC2 extends MBC
   @override
   void writeByte(int address, int value)
   {
-    address &= 0xffff;
-    value = value & 0xff;
-
     //TODO <ADD CODE HERE>
 
     super.writeByte(address, value);

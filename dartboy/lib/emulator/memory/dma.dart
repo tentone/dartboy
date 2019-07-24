@@ -60,13 +60,13 @@ class DMA
     if(this.length == 0)
     {
       this.memory.dma = null;
-      this.memory.registers[MemoryRegisters.HDMA_LENGTH] = 0xff;
+      this.memory.registers[MemoryRegisters.HDMA] = 0xff;
       this.memory = null;
       //print("Finished DMA from " + this.source.toString() + " to " + this.destination.toString());
     }
     else
     {
-      this.memory.registers[MemoryRegisters.HDMA_LENGTH] = (this.length ~/ 0x10 - 1);
+      this.memory.registers[MemoryRegisters.HDMA] = (this.length ~/ 0x10 - 1);
     }
   }
 }

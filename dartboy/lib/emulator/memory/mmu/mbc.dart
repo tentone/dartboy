@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import '../../cpu/cpu.dart';
-import '../cartridge.dart';
 import '../memory_addresses.dart';
 import 'mmu.dart';
 

@@ -1,5 +1,4 @@
 import '../../cpu/cpu.dart';
-import '../cartridge.dart';
 import '../memory.dart';
 import '../memory_addresses.dart';
 import 'mbc.dart';
@@ -37,9 +36,6 @@ class MBC5 extends MBC
   @override
   void writeByte(int address, int value)
   {
-    address &= 0xffff;
-    value &= 0xff;
-
     if(address >= MBC1.RAM_DISABLE_START && address < MBC1.RAM_DISABLE_END)
     {
       if(this.cpu.cartridge.ramBanks > 0)
