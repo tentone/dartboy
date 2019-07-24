@@ -36,6 +36,8 @@ class MBC5 extends MBC
   @override
   void writeByte(int address, int value)
   {
+    address &= 0xFFFF;
+
     if(address >= MBC1.RAM_DISABLE_START && address < MBC1.RAM_DISABLE_END)
     {
       if(this.cpu.cartridge.ramBanks > 0)

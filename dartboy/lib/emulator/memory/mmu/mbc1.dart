@@ -60,6 +60,8 @@ class MBC1 extends MBC
   @override
   void writeByte(int address, int value)
   {
+    address &= 0xFFFF;
+
     // Any value with 0xA in the lower 4 bits enables RAM, and any other value disables RAM.
     if(address >= MBC1.RAM_DISABLE_START && address < MBC1.RAM_DISABLE_END)
     {

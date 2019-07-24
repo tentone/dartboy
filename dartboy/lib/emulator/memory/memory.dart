@@ -124,13 +124,11 @@ class Memory
   /// The memory is not directly accessed some addresses might be used for I/O or memory control operations.
   void writeByte(int address, int value)
   {
+    address &= 0xFFFF;
+
     if(value > 0xFF)
     {
       throw new Exception('Tring to write ' + value.toRadixString(16) + ' (>0xFF) into ' + address.toRadixString(16) + '.');
-    }
-    if(address > 0xFFFF)
-    {
-      throw new Exception('Tring to write ' + value.toRadixString(16) + ' into ' + address.toRadixString(16) + ' (>0xFFFF).');
     }
 
     // ROM
@@ -184,10 +182,7 @@ class Memory
   /// If the address falls into the cartridge addressing zone read directly from the cartridge object.
   int readByte(int address)
   {
-    if(address > 0xFFFF)
-    {
-      throw new Exception('Tring to read data from ' + address.toRadixString(16) + ' (>0xFFFF).');
-    }
+    address &= 0xFFFF;
 
     // ROM
     if(address < MemoryAddresses.CARTRIDGE_ROM_SWITCHABLE_START)
@@ -432,6 +427,11 @@ class Memory
   /// Read IO address
   int readIO(int address)
   {
+    if(address > 0xFF)
+    {
+      throw new Exception('Tring to read register from ' + address.toRadixString(16) + ' (>0xFF).');
+    }
+
     if(address == MemoryRegisters.DOUBLE_SPEED)
     {
       return this.cpu.doubleSpeed ? 0x80 : 0x0;

@@ -33,7 +33,7 @@ class Instructions
     data += ' HL: 0x' + Instructions.extendStr(cpu.registers.hl.toRadixString(16), 6) + ', ';
     data += ' DE: 0x' + Instructions.extendStr(cpu.registers.de.toRadixString(16), 6) + ' | ';
     data += ' SP: 0x' + Instructions.extendStr(cpu.sp.toRadixString(16), 6);
-    
+
     print(data);
   }
 
