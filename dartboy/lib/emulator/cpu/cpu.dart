@@ -54,9 +54,6 @@ class CPU
   /// Buttons of the gameboy the index stored in the Gamepad class corresponds to the position here
   List<bool> buttons;
 
-  /// Debug information about the instructions executed on the CPU.
-  List<String> debugStack;
-
   /// Current clock speed of the system (can be double on GBC hardware).
   int clockSpeed;
 
@@ -99,8 +96,6 @@ class CPU
   /// Reset the CPU, also resets the MMU, registers and PPU.
   void reset()
   {
-    this.debugStack = new List<String>();
-
     this.buttons = new List<bool>(8);
     this.buttons.fillRange(0, 8, false);
 
@@ -393,7 +388,7 @@ class CPU
     
     if(op == null)
     {
-      throw new Exception('Read null op code. (' + debugInformation() + ')');
+      throw new Exception('Read null op code. (' + getDebugString() + ')');
     }
 
     switch (op)
@@ -743,25 +738,18 @@ class CPU
   /// Returns a string with debug information on the current status of the CPU.
   ///
   /// Returns the current values of all registers, and a history of the instructions executed by the CPU.
-  String debugInformation()
+  String getDebugString()
   {
-    String data = '\nRegisters:\n';
+    String data = 'Registers:\n';
     data += 'AF: 0x' + this.registers.af.toRadixString(16) + '\n';
     data += 'BC: 0x' + this.registers.bc.toRadixString(16) + '\n';
     data += 'DE: 0x' + this.registers.de.toRadixString(16) + '\n';
     data += 'HL: 0x' + this.registers.hl.toRadixString(16) + '\n';
 
-    data += '\nCPU:\n';
+    data += 'CPU:\n';
     data += 'PC: 0x' + this.pc.toRadixString(16) + '\n';
     data += 'SP: 0x' + this.sp.toRadixString(16) + '\n';
     data += 'Clocks: ' + this.clocks.toString() + '\n';
-
-    data += '\nDebug Stack:\n';
-
-    for(int i = 0; i < this.debugStack.length; i++)
-    {
-      data += this.debugStack[i] + '\n';
-    }
 
     return data;
   }

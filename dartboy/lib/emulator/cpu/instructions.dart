@@ -27,17 +27,14 @@ class Instructions
       return;
     }
 
-    String data = extendStr('0x' + (cpu.pc - 1).toRadixString(16), 6) + '(' + extendStr(cpu.clocks.toString(), 6) + ') [' + extendStr(value, 12) + '] | ';
-
-    data += ' AF: 0x' + extendStr(cpu.registers.af.toRadixString(16), 6) + ', ';
-    data += ' BC: 0x' + extendStr(cpu.registers.bc.toRadixString(16), 6) + ', ';
-    data += ' HL: 0x' + extendStr(cpu.registers.hl.toRadixString(16), 6) + ', ';
-    data += ' DE: 0x' + extendStr(cpu.registers.de.toRadixString(16), 6) + ' | ';
-
-    data += ' SP: 0x' + extendStr(cpu.sp.toRadixString(16), 6);
-
+    String data = Instructions.extendStr('0x' + (cpu.pc - 1).toRadixString(16), 6) + '(' + Instructions.extendStr(cpu.clocks.toString(), 6) + ') [' + Instructions.extendStr(value, 12) + '] | ';
+    data += ' AF: 0x' + Instructions.extendStr(cpu.registers.af.toRadixString(16), 6) + ', ';
+    data += ' BC: 0x' + Instructions.extendStr(cpu.registers.bc.toRadixString(16), 6) + ', ';
+    data += ' HL: 0x' + Instructions.extendStr(cpu.registers.hl.toRadixString(16), 6) + ', ';
+    data += ' DE: 0x' + Instructions.extendStr(cpu.registers.de.toRadixString(16), 6) + ' | ';
+    data += ' SP: 0x' + Instructions.extendStr(cpu.sp.toRadixString(16), 6);
+    
     print(data);
-    //cpu.debugStack.add(data);
   }
 
   static void NOP(CPU cpu)

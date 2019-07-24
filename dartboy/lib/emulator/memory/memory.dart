@@ -89,11 +89,6 @@ class Memory
     this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
     this.vram.fillRange(0, this.vram.length, 0);
 
-    for(int i = 0; i < 0x100; i++)
-    {
-      this.writeIO(i, 0);
-    }
-
     this.writeIO(0x04, 0xAB);
     this.writeIO(0x10, 0x80);
     this.writeIO(0x11, 0xBF);
@@ -114,6 +109,14 @@ class Memory
     this.writeIO(0x47, 0xFC);
     this.writeIO(0x48, 0xFF);
     this.writeIO(0x49, 0xFF);
+
+    for(int i = 0; i < this.registers.length; i++)
+    {
+      if(this.registers[i] == 0)
+      {
+        this.writeIO(i, 0x0);
+      }
+    }
   }
 
   /// Write a byte into memory address.
