@@ -1,6 +1,7 @@
 import 'dart:math';
-//import 'dart:typed_data';
+import 'dart:typed_data';
 
+import '../configuration.dart';
 import '../cpu/cpu.dart';
 import './cartridge.dart';
 import './dma.dart';
@@ -26,18 +27,22 @@ class Memory
 
   /// Register values, mapped from 0xFF00-0xFF7F + HRAM (0xFF80-0xFFFE) + Interrupt Enable Register (0xFFFF)
   List<int> registers;
+  //Uint8List registers;
 
   /// Sprite Attribute Table, mapped from 0xFE00-0xFE9F.
   List<int> oam;
+  //Uint8List oam;
 
   /// Video RAM, mapped from 0x8000-0x9FFF.
   /// On the GBC, this bank is switchable 0-1 by writing to 0xFF4F.
   List<int> vram;
+  //Uint8List vram;
 
   /// Work RAM, mapped from 0xC000-0xCFFF and 0xD000-0xDFFF.
   ///
   /// On the GBC, this bank is switchable 1-7 by writing to 0xFF07.
   List<int> wram;
+  //Uint8List wram;
 
   /// The current page of Video RAM, always multiples of VRAM_PAGESIZE.
   ///
@@ -78,15 +83,19 @@ class Memory
     this.romPageStart = Memory.ROM_PAGESIZE;
 
     this.registers = new List<int>(0x100);
+    //this.registers = new Uint8List(0x100);
     this.registers.fillRange(0, this.registers.length, 0);
 
     this.oam = new List<int>(0xA0);
+    //this.oam = new Uint8List(0xA0);
     this.oam.fillRange(0, this.oam.length, 0);
 
     this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
+    //this.wram = new Uint8List(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
     this.wram.fillRange(0, this.wram.length, 0);
 
     this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
+    //this.vram = new Uint8List(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
     this.vram.fillRange(0, this.vram.length, 0);
 
     for(int i = 0; i < 0x100; i++)
@@ -238,7 +247,7 @@ class Memory
     switch (address)
     {
       case MemoryRegisters.DOUBLE_SPEED:
-        this.cpu.doubleSpeed = (value & 0x01) != 0;
+        this.cpu.setDoubleSpeed((value & 0x01) != 0);
         break;
       case 0x69:
         {
@@ -279,7 +288,8 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.HDMA_LENGTH: // HDMA start
+      // Start H-DMA transfer
+      case MemoryRegisters.HDMA_LENGTH:
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
           {
@@ -287,7 +297,7 @@ class Memory
             break;
           }
 
-          // Get the configuration of the HDMA transfer
+          // Get the configuration of the H-DMA transfer
           int length = ((value & 0x7f) + 1) * 0x10;
           int source = ((this.registers[0x51] & 0xff) << 8) | (this.registers[0x52] & 0xF0);
           int destination = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
@@ -409,13 +419,14 @@ class Memory
         }
         break;
       case MemoryRegisters.SERIAL_SC:
-
-        // TODO <DEBUG PRINT SERIAL CHARS>
-        /*if(value & 0xFF == 0x81)
+        // Print serial data as characters to the terminal
+        if(Configuration.printSerialCharacters)
         {
-          print(String.fromCharCode(this.registers[MemoryRegisters.SERIAL_SB]));
-        }*/
-
+          if(value & 0xFF == 0x81)
+          {
+            print(String.fromCharCode(this.registers[MemoryRegisters.SERIAL_SB]));
+          }
+        }
         break;
       case MemoryRegisters.LCD_STAT:
         break;

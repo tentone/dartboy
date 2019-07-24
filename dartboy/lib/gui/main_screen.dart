@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../emulator/configuration.dart';
 import '../emulator/memory/gamepad.dart';
 import '../emulator/emulator.dart';
 import './lcd.dart';
@@ -82,12 +83,12 @@ class MainScreenState extends State<MainScreen>
           if(keyCode == KEY_I)
           {
             print('Toogle background layer.');
-            MainScreen.emulator.cpu.ppu.debugBackgroundEnabled = !MainScreen.emulator.cpu.ppu.debugBackgroundEnabled;
+            Configuration.drawBackgroundLayer = !Configuration.drawBackgroundLayer;
           }
           else if(keyCode == KEY_O)
           {
             print('Toogle sprite layer.');
-            MainScreen.emulator.cpu.ppu.debugSpritesEnabled = !MainScreen.emulator.cpu.ppu.debugSpritesEnabled;
+            Configuration.drawSpriteLayer = !Configuration.drawSpriteLayer;
           }
         }
 
@@ -233,7 +234,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/pokemongold.gbc'));
+                        MainScreen.emulator.loadROM(new File('./roms/tetris.gb'));
                       }
 
                       if(MainScreen.emulator.state == EmulatorState.READY)

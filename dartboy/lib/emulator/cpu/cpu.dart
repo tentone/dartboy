@@ -57,8 +57,8 @@ class CPU
   /// Debug information about the instructions executed on the CPU.
   List<String> debugStack;
 
-  /// If true the instructions debug info is printed.
-  bool debugInstructions = false;
+  /// Current clock speed of the system (can be double on GBC hardware).
+  int clockSpeed;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   int _pc = 0;
@@ -104,6 +104,7 @@ class CPU
     this.buttons = new List<bool>(8);
     this.buttons.fillRange(0, 8, false);
 
+    this.clockSpeed = FREQUENCY;
     this.doubleSpeed = false;
     this.divCycle = 0;
     this.timerCycle = 0;
@@ -260,19 +261,19 @@ class CPU
       {
         // 4096 Hz
         case 0x0:
-          timerPeriod = FREQUENCY ~/ 4096;
+          timerPeriod = this.clockSpeed ~/ 4096;
           break;
         // 262144 Hz
         case 0x1:
-          timerPeriod = FREQUENCY ~/ 262144;
+          timerPeriod = this.clockSpeed ~/ 262144;
           break;
         // 65536 Hz
         case 0x2:
-          timerPeriod = FREQUENCY ~/ 65536;
+          timerPeriod = this.clockSpeed ~/ 65536;
           break;
         // 16384 Hz
         case 0x3:
-          timerPeriod = FREQUENCY ~/ 16384;
+          timerPeriod = this.clockSpeed ~/ 16384;
           break;
       }
 
@@ -724,6 +725,18 @@ class CPU
           default:
             throw new Exception('Unsupported operation, (OP: 0x' + op.toRadixString(16) + ')');
         }
+    }
+  }
+
+  /// Puts the emulator in and out of double speed mode.
+  ///
+  /// @param doubleSpeed the new double speed state
+  void setDoubleSpeed(bool doubleSpeed)
+  {
+    if(this.doubleSpeed != doubleSpeed)
+    {
+      this.doubleSpeed = doubleSpeed;
+      this.clockSpeed = this.doubleSpeed ? (FREQUENCY * 2) : FREQUENCY;
     }
   }
 

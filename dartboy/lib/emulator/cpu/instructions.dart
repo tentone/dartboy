@@ -1,3 +1,4 @@
+import '../configuration.dart';
 import 'registers.dart';
 import 'cpu.dart';
 
@@ -21,7 +22,7 @@ class Instructions
   /// The debug stack stores the operations, PC, clock count of a instruction.
   static addDebugStack(String value, CPU cpu)
   {
-    if(!cpu.debugInstructions)
+    if(!Configuration.debugInstructions)
     {
       return;
     }

@@ -1,5 +1,6 @@
 import 'package:dartboy/gui/main_screen.dart';
 
+import '../configuration.dart';
 import '../memory/memory_registers.dart';
 import '../memory/memory_addresses.dart';
 import '../memory/cartridge.dart';
@@ -12,12 +13,6 @@ import './palette.dart';
 /// Is responsible for managing the sprites and background layers.
 class PPU
 {
-  /// Debug variable to enable and disable the sprite layer rendering.
-  bool debugSpritesEnabled = true;
-
-  /// Debug variable to enable and disable the background rendering.
-  bool debugBackgroundEnabled = true;
-
   /// Width in pixels of the physical gameboy LCD.
   static const int LCD_WIDTH = 160;
 
@@ -375,7 +370,7 @@ class PPU
   /// @param scanline The current scanline.
   void drawBackgroundTiles(List<int> data, int scanline)
   {
-    if(!this.debugBackgroundEnabled)
+    if(!Configuration.drawBackgroundLayer)
     {
       return;
     }
@@ -559,7 +554,7 @@ class PPU
   /// @param scanline The current scanline.
   void drawSprites(List<int> data, int scanline)
   {
-    if(!this.debugSpritesEnabled)
+    if(!Configuration.drawSpriteLayer)
     {
       return;
     }

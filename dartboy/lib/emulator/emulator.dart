@@ -3,6 +3,7 @@ import 'dart:io';
 
 import './cpu/cpu.dart';
 import './memory/cartridge.dart';
+import './configuration.dart';
 
 /// Represents the state of the emulator.
 ///
@@ -93,10 +94,10 @@ class Emulator
       return;
     }
 
-    bool wasDebug = this.cpu.debugInstructions;
-    this.cpu.debugInstructions = true;
+    bool wasDebug = Configuration.debugInstructions;
+    Configuration.debugInstructions = true;
     this.cpu.step();
-    this.cpu.debugInstructions = wasDebug;
+    Configuration.debugInstructions = wasDebug;
   }
 
   /// Run the emulation all full speed.
