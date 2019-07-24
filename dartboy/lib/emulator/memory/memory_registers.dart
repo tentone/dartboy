@@ -2,9 +2,6 @@ class MemoryRegisters
 {
   static const int DOUBLE_SPEED = 0x4d;
 
-  /// HDMA control register
-  static const int HDMA = 0x55;
-
   /// Gamepad I/O register, stores which keys are pressed by the user.
   static const int GAMEPAD = 0x00;
 
@@ -53,6 +50,10 @@ class MemoryRegisters
 
   static const int LYC = 0x45;
 
+  /// H-DMA control register contains the remaining length divided by 0x10 minus 1, a value of 0FFH indicates that the transfer is complete.
+  static const int HDMA_LENGTH = 0x55;
+  static const int DMA = 0x46;
+
   /// This register allows to read/write data to the CGBs Background Palette Memory, addressed through Register FF68.
   static const int BGP = 0x47;
 
@@ -60,7 +61,6 @@ class MemoryRegisters
   static const int OBP1 = 0x49;
   static const int TRIGGERED_INTERRUPTS = 0x0F; // IF
   static const int ENABLED_INTERRUPTS = 0xFF;
-  static const int DMA = 0x46;
   static const int WY = 0x4a;
   static const int WX = 0x4b;
 

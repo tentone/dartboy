@@ -6,7 +6,7 @@ import 'cpu.dart';
 /// This class is just an abstraction to make the CPU structure cleaner.
 class Instructions
 {
-  static String extend(String value, int length)
+  static String extendStr(String value, int length)
   {
     for(int i = value.length - 1; i < length; i++)
     {
@@ -26,14 +26,14 @@ class Instructions
       return;
     }
 
-    String data = extend('0x' + (cpu.pc - 1).toRadixString(16), 6) + '(' + extend(cpu.clocks.toString(), 6) + ') [' + extend(value, 12) + '] | ';
+    String data = extendStr('0x' + (cpu.pc - 1).toRadixString(16), 6) + '(' + extendStr(cpu.clocks.toString(), 6) + ') [' + extendStr(value, 12) + '] | ';
 
-    data += ' AF: 0x' + extend(cpu.registers.af.toRadixString(16), 6) + ', ';
-    data += ' BC: 0x' + extend(cpu.registers.bc.toRadixString(16), 6) + ', ';
-    data += ' HL: 0x' + extend(cpu.registers.hl.toRadixString(16), 6) + ', ';
-    data += ' DE: 0x' + extend(cpu.registers.de.toRadixString(16), 6) + ' | ';
+    data += ' AF: 0x' + extendStr(cpu.registers.af.toRadixString(16), 6) + ', ';
+    data += ' BC: 0x' + extendStr(cpu.registers.bc.toRadixString(16), 6) + ', ';
+    data += ' HL: 0x' + extendStr(cpu.registers.hl.toRadixString(16), 6) + ', ';
+    data += ' DE: 0x' + extendStr(cpu.registers.de.toRadixString(16), 6) + ' | ';
 
-    data += ' SP: 0x' + extend(cpu.sp.toRadixString(16), 6);
+    data += ' SP: 0x' + extendStr(cpu.sp.toRadixString(16), 6);
 
     print(data);
     //cpu.debugStack.add(data);

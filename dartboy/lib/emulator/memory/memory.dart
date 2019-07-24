@@ -279,39 +279,38 @@ class Memory
           }
           break;
         }
-      case MemoryRegisters.HDMA: // HDMA start
+      case MemoryRegisters.HDMA_LENGTH: // HDMA start
         {
           if(this.cpu.cartridge.gameboyType == GameboyType.CLASSIC)
           {
+            //print('Not possible to used H-DMA transfer on GB classic.');
             break;
           }
 
           // Get the configuration of the HDMA transfer
           int length = ((value & 0x7f) + 1) * 0x10;
           int source = ((this.registers[0x51] & 0xff) << 8) | (this.registers[0x52] & 0xF0);
-          int dest = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
+          int destination = ((this.registers[0x53] & 0x1f) << 8) | (this.registers[0x54] & 0xF0);
 
           // H-Blank DMA
           if((value & 0x80) != 0)
           {
-            this.dma = new DMA(this, source, dest, length);
-            this.registers[MemoryRegisters.HDMA] = (length ~/ 0x10 - 1) & 0xFF;
+            this.dma = new DMA(this, source, destination, length);
+            this.registers[MemoryRegisters.HDMA_LENGTH] = (length ~/ 0x10 - 1) & 0xFF;
           }
           else
           {
             if(this.dma != null)
             {
-              //TODO <DEBUG PRINT>
-              //print("Terminated DMA from " + source.toString() + "-" + dest.toString() + ", " + length.toString() + " remaining.");
+              //print('Terminated DMA from ' + source.toString() + '-' + dest.toString() + ', ' + length.toString() + ' remaining.');
             }
 
             // General DMA
             for(int i = 0; i < length; i++)
             {
-              this.vram[this.vramPageStart + dest + i] = readByte(source + i) & 0xFF;
+              this.vram[this.vramPageStart + destination + i] = readByte(source + i) & 0xFF;
             }
-
-            this.registers[MemoryRegisters.HDMA] = 0xFF;
+            this.registers[MemoryRegisters.HDMA_LENGTH] = 0xFF;
           }
           return;
         }

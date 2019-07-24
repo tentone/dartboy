@@ -233,7 +233,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/pokemonred.gb'));
+                        MainScreen.emulator.loadROM(new File('./roms/pokemongold.gbc'));
                       }
 
                       if(MainScreen.emulator.state == EmulatorState.READY)
