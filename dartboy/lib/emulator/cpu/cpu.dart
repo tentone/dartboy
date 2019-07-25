@@ -164,10 +164,10 @@ class CPU
   /// Returns the value of the register
   int getRegisterPairSP(int r)
   {
-    if(r == 0x0) {return this.registers.bc;}
-    if(r == 0x1) {return this.registers.de;}
-    if(r == 0x2) {return this.registers.hl;}
-    if(r == 0x3) {return this.sp;}
+    if(r == Registers.ADDR_BC) {return this.registers.bc;}
+    if(r == Registers.ADDR_DE) {return this.registers.de;}
+    if(r == Registers.ADDR_HL) {return this.registers.hl;}
+    if(r == Registers.ADDR_SP) {return this.sp;}
 
     throw new Exception('Unknown register pair address getRegisterPair().');
   }
@@ -175,38 +175,29 @@ class CPU
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
   /// It can set a register pair or the CPU SP value.
   /// Returns the value of the register
-  void setRegisterPairSP(int r, int high, {int low})
+  void setRegisterPairSP(int r, int value)
   {
-    if(low == null)
-    {
-      int value = high;
-      high = (value >> 8) & 0xFF;
-      low = value & 0xFF;
-    }
-    else
-    {
-      high &= 0xFF;
-      low &= 0xFF;
-    }
+    int high = (value >> 8) & 0xFF;
+    int low = value & 0xFF;
 
-    if(r == 0x0)
+    if(r == Registers.ADDR_BC)
     {
       this.registers.b = high;
       this.registers.c = low;
     }
-    else if(r == 0x1)
+    else if(r == Registers.ADDR_DE)
     {
       this.registers.d = high;
       this.registers.e = low;
     }
-    else if(r == 0x2)
+    else if(r == Registers.ADDR_HL)
     {
       this.registers.h = high;
       this.registers.l = low;
     }
-    else if(r == 0x3)
+    else if(r == Registers.ADDR_SP)
     {
-      this.sp = ((high & 0xFF) << 8) | low & 0xFF;
+      this.sp = (high << 8) | low;
     }
   }
 
@@ -479,7 +470,7 @@ class CPU
           Instructions.STOP(this);
           break;
       case 0xf9:
-          this.setRegisterPairSP(Registers.ADDR_SP, this.registers.hl);
+          Instructions.LD_SP_HL(this);
           break;
       case 0xc5: // BC
       case 0xd5: // DE

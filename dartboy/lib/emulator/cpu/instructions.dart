@@ -1134,7 +1134,7 @@ class Instructions
   {
     addDebugStack('POP_rr', cpu);
 
-    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getSignedByte(cpu.sp + 1), lo: cpu.getSignedByte(cpu.sp));
+    cpu.registers.setRegisterPair((op >> 4) & 0x3, cpu.getSignedByte(cpu.sp + 1), cpu.getSignedByte(cpu.sp));
     cpu.sp += 2;
   }
 
@@ -1145,6 +1145,11 @@ class Instructions
     int val = cpu.registers.getRegisterPair((op >> 4) & 0x3);
     cpu.pushWordSP(val);
     cpu.tick(4);
+  }
+
+  static void LD_SP_HL(CPU cpu)
+  {
+    cpu.setRegisterPairSP(Registers.ADDR_SP, cpu.registers.hl);
   }
 }
 

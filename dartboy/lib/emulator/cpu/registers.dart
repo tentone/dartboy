@@ -53,18 +53,6 @@ class Registers
     throw new Exception('Unknown register address getRegister().');
   }
 
-  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
-  /// Returns the value of the register
-  int getRegisterPair(int r)
-  {
-    if(r == 0x0) {return this.bc;}
-    if(r == 0x1) {return this.de;}
-    if(r == 0x2) {return this.hl;}
-    if(r == 0x3) {return this.af;}
-
-    throw new Exception('Unknown register pair address getRegisterPair().');
-  }
-
   /// Alters the byte value contained in a register, r is the register id as encoded by opcode.
   void setRegister(int r, int value)
   {
@@ -81,26 +69,29 @@ class Registers
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
+  /// Returns the value of the register
+  int getRegisterPair(int r)
+  {
+    if(r == Registers.ADDR_BC) {return this.bc;}
+    if(r == Registers.ADDR_DE) {return this.de;}
+    if(r == Registers.ADDR_HL) {return this.hl;}
+    if(r == Registers.ADDR_AF) {return this.af;}
+
+    throw new Exception('Unknown register pair address getRegisterPair().');
+  }
+
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
   /// Can be used with a single word value as the second argument.
   /// Returns the value of the register
-  void setRegisterPair(int r, int hi, {int lo})
+  void setRegisterPair(int r, int hi, int lo)
   {
-    if(lo == null)
-    {
-      int value = hi;
-      hi = (value >> 8) & 0xFF;
-      lo = value & 0xFF;
-    }
-    else
-    {
-      hi &= 0xff;
-      lo &= 0xff;
-    }
+    hi &= 0xff;
+    lo &= 0xff;
 
-    if(r == 0x0) {this.b = hi; this.c = lo;}
-    else if(r == 0x1) {this.d = hi; this.e = lo;}
-    else if(r == 0x2) {this.h = hi; this.l = lo;}
-    else if(r == 0x3) {this.a = hi; this.f = lo & 0xF;}
+    if(r == Registers.ADDR_BC) {this.b = hi; this.c = lo;}
+    else if(r == Registers.ADDR_DE) {this.d = hi; this.e = lo;}
+    else if(r == Registers.ADDR_HL) {this.h = hi; this.l = lo;}
+    else if(r == Registers.ADDR_AF) {this.a = hi; this.f = lo & 0xF;}
   }
 
 
@@ -110,7 +101,6 @@ class Registers
   void reset()
   {
     //AF=$01-GB/SGB, $FF-GBP, $11-GBC
-
     this.a = this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 0x11 : 0x01;
     this.f = 0xB0;
     this.b = 0x00;
