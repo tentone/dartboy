@@ -1149,7 +1149,7 @@ class Instructions
 
   static void LD_SP_HL(CPU cpu)
   {
-    cpu.setRegisterPairSP(Registers.ADDR_SP, cpu.registers.hl);
+    cpu.sp = cpu.registers.hl;
   }
 }
 

@@ -58,30 +58,10 @@ class CPU
   int clockSpeed;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  int _pc = 0;
-
-  set pc(int value)
-  {
-    this._pc = value & 0xFFFF;
-  }
-
-  int get pc
-  {
-    return this._pc & 0xFFFF;
-  }
+  int pc;
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int _sp = 0;
-
-  set sp(int value)
-  {
-    this._sp = value & 0xFFFF;
-  }
-
-  int get sp
-  {
-    return this._sp & 0xFFFF;
-  }
+  int sp;
 
   CPU(Cartridge cartridge)
   {
@@ -177,27 +157,21 @@ class CPU
   /// Returns the value of the register
   void setRegisterPairSP(int r, int value)
   {
-    int high = (value >> 8) & 0xFF;
-    int low = value & 0xFF;
-
     if(r == Registers.ADDR_BC)
     {
-      this.registers.b = high;
-      this.registers.c = low;
+      this.registers.bc = value;
     }
     else if(r == Registers.ADDR_DE)
     {
-      this.registers.d = high;
-      this.registers.e = low;
+      this.registers.de = value;
     }
     else if(r == Registers.ADDR_HL)
     {
-      this.registers.h = high;
-      this.registers.l = low;
+      this.registers.hl = value;
     }
     else if(r == Registers.ADDR_SP)
     {
-      this.sp = (high << 8) | low;
+      this.sp = value;
     }
   }
 

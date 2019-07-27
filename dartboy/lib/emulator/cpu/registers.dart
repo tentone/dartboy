@@ -140,13 +140,13 @@ class Registers
   /// 16 bit mixed af register
   int get af
   {
-    return ((this.a & 0xFF) << 8) | (this.f & 0xFF);
+    return (this.a << 8) | this.f;
   }
 
   set af(int value)
   {
-    this.a = ((value & 0xFF00) >> 8);
-    this.f = (value & 0xFF);
+    this.a = (value >> 8) & 0xFF;
+    this.f = value & 0xFF;
   }
 
   /// 16 bit mixed bc register
@@ -157,31 +157,31 @@ class Registers
 
   set bc(int value)
   {
-    this.b = ((value & 0xFF00) >> 8);
-    this.c = (value & 0xFF);
+    this.b = (value >> 8) & 0xFF;
+    this.c = value & 0xFF;
   }
 
   /// 16 bit mixed de register
   int get de
   {
-    return ((this.d & 0xFF) << 8) | (this.e & 0xFF);
+    return (this.d << 8) | this.e;
   }
 
   set de(int value)
   {
-    this.d = ((value & 0xFF00) >> 8);
-    this.e = (value & 0xFF);
+    this.d = (value >> 8) & 0xFF;
+    this.e = value & 0xFF;
   }
 
   /// 16 bit mixed hl register
   int get hl
   {
-    return ((this.h & 0xFF) << 8) | (this.l & 0xFF);
+    return (this.h << 8) | this.l;
   }
 
   set hl(int value)
   {
-    this.h = ((value & 0xFF00) >> 8);
-    this.l = (value & 0xFF);
+    this.h = (value >> 8) & 0xFF;
+    this.l = value & 0xFF;
   }
 }
