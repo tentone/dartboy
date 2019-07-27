@@ -191,7 +191,7 @@ class MainScreenState extends State<MainScreen>
                         return;
                       }
                       MainScreen.emulator.run();
-                    }, color: Colors.black, child: new Text("Run", style: const TextStyle(color: Colors.white))),
+                    }, color: Colors.black, child: new Text('Run', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       if(MainScreen.emulator.state != EmulatorState.RUNNING)
@@ -201,11 +201,11 @@ class MainScreenState extends State<MainScreen>
                       }
 
                       MainScreen.emulator.pause();
-                    }, color: Colors.black, child: new Text("Pause", style: const TextStyle(color: Colors.white))),
+                    }, color: Colors.black, child: new Text('Pause', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.reset();
-                    }, color: Colors.black, child: new Text("Reset", style: const TextStyle(color: Colors.white))),
+                    }, color: Colors.black, child: new Text('Reset', style: const TextStyle(color: Colors.white))),
                     (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.debugStep();
