@@ -8,17 +8,17 @@ import '../memory/cartridge.dart';
 class Registers
 {
   // The DMG has 4 flag registers, zero, subtract, half-carry and carry.
-  static const int F_ZERO = 0x80;
+  static const int ZERO = 0x80;
   // Half-carry is only ever used for the DAA instruction. Half-carry is usually carry over lower nibble, and carry is over bit 7.
-  static const int F_SUBTRACT = 0x40;
-  static const int F_HALF_CARRY = 0x20;
-  static const int F_CARRY = 0x10;
+  static const int SUBTRACT = 0x40;
+  static const int HALF_CARRY = 0x20;
+  static const int CARRY = 0x10;
 
-  static const int ADDR_BC = 0x0;
-  static const int ADDR_DE = 0x1;
-  static const int ADDR_HL = 0x2;
-  static const int ADDR_AF = 0x3;
-  static const int ADDR_SP = 0x3;
+  static const int BC = 0x0;
+  static const int DE = 0x1;
+  static const int HL = 0x2;
+  static const int AF = 0x3;
+  static const int SP = 0x3;
 
   /// CPU registers store temporally the result of the instructions.
   ///
@@ -37,6 +37,54 @@ class Registers
     this.reset();
   }
 
+  /// 16 bit mixed AF register
+  int get af
+  {
+    return (this.a << 8) | this.f;
+  }
+
+  set af(int value)
+  {
+    this.a = (value >> 8) & 0xFF;
+    this.f = value & 0xFF;
+  }
+
+  /// 16 bit mixed BC register
+  int get bc
+  {
+    return ((this.b & 0xFF) << 8) | (this.c & 0xFF);
+  }
+
+  set bc(int value)
+  {
+    this.b = (value >> 8) & 0xFF;
+    this.c = value & 0xFF;
+  }
+
+  /// 16 bit mixed DE register
+  int get de
+  {
+    return (this.d << 8) | this.e;
+  }
+
+  set de(int value)
+  {
+    this.d = (value >> 8) & 0xFF;
+    this.e = value & 0xFF;
+  }
+
+  /// 16 bit mixed HL register
+  int get hl
+  {
+    return (this.h << 8) | this.l;
+  }
+
+  set hl(int value)
+  {
+    this.h = (value >> 8) & 0xFF;
+    this.l = value & 0xFF;
+  }
+
   /// Fetches the byte value contained in a register, r is the register id as encoded by opcode.
   /// Returns the value of the register
   int getRegister(int r)
@@ -48,7 +96,7 @@ class Registers
     if(r == 0x3) {return this.e;}
     if(r == 0x4) {return this.h;}
     if(r == 0x5) {return this.l;}
-    if(r == 0x6) {return this.cpu.mmu.readByte((h << 8) | l);}
+    if(r == 0x6) {return this.cpu.mmu.readByte((this.h << 8) | this.l);}
 
     throw new Exception('Unknown register address getRegister().');
   }
@@ -72,10 +120,10 @@ class Registers
   /// Returns the value of the register
   int getRegisterPair(int r)
   {
-    if(r == Registers.ADDR_BC) {return this.bc;}
-    if(r == Registers.ADDR_DE) {return this.de;}
-    if(r == Registers.ADDR_HL) {return this.hl;}
-    if(r == Registers.ADDR_AF) {return this.af;}
+    if(r == Registers.BC) {return this.bc;}
+    if(r == Registers.DE) {return this.de;}
+    if(r == Registers.HL) {return this.hl;}
+    if(r == Registers.AF) {return this.af;}
 
     throw new Exception('Unknown register pair address getRegisterPair().');
   }
@@ -88,10 +136,10 @@ class Registers
     hi &= 0xff;
     lo &= 0xff;
 
-    if(r == Registers.ADDR_BC) {this.b = hi; this.c = lo;}
-    else if(r == Registers.ADDR_DE) {this.d = hi; this.e = lo;}
-    else if(r == Registers.ADDR_HL) {this.h = hi; this.l = lo;}
-    else if(r == Registers.ADDR_AF) {this.a = hi; this.f = lo & 0xF;}
+    if(r == Registers.BC) {this.b = hi; this.c = lo;}
+    else if(r == Registers.DE) {this.d = hi; this.e = lo;}
+    else if(r == Registers.HL) {this.h = hi; this.l = lo;}
+    else if(r == Registers.AF) {this.a = hi; this.f = lo & 0xF;}
   }
 
 
@@ -118,10 +166,10 @@ class Registers
     flag &= 0x7;
 
     // Condition code is in last 3 bits
-    if(flag == 0x4) {return (this.f & F_ZERO) == 0;}
-    if(flag == 0x5) {return (this.f & F_ZERO) != 0;}
-    if(flag == 0x6) {return (this.f & F_CARRY) == 0;}
-    if(flag == 0x7) {return (this.f & F_CARRY) != 0;}
+    if(flag == 0x4) {return (this.f & Registers.ZERO) == 0;}
+    if(flag == 0x5) {return (this.f & Registers.ZERO) != 0;}
+    if(flag == 0x6) {return (this.f & Registers.CARRY) == 0;}
+    if(flag == 0x7) {return (this.f & Registers.CARRY) != 0;}
 
     return false;
   }
@@ -135,53 +183,5 @@ class Registers
     this.f = subtract ? this.f | 0x40 : this.f & 0xBF;
     this.f = halfCarry ? this.f | 0x20 : this.f & 0xDF;
     this.f = carry ? this.f | 0x10 : this.f & 0xEF;
-  }
-
-  /// 16 bit mixed af register
-  int get af
-  {
-    return (this.a << 8) | this.f;
-  }
-
-  set af(int value)
-  {
-    this.a = (value >> 8) & 0xFF;
-    this.f = value & 0xFF;
-  }
-
-  /// 16 bit mixed bc register
-  int get bc
-  {
-    return ((this.b & 0xFF) << 8) | (this.c & 0xFF);
-  }
-
-  set bc(int value)
-  {
-    this.b = (value >> 8) & 0xFF;
-    this.c = value & 0xFF;
-  }
-
-  /// 16 bit mixed de register
-  int get de
-  {
-    return (this.d << 8) | this.e;
-  }
-
-  set de(int value)
-  {
-    this.d = (value >> 8) & 0xFF;
-    this.e = value & 0xFF;
-  }
-
-  /// 16 bit mixed hl register
-  int get hl
-  {
-    return (this.h << 8) | this.l;
-  }
-
-  set hl(int value)
-  {
-    this.h = (value >> 8) & 0xFF;
-    this.l = value & 0xFF;
   }
 }

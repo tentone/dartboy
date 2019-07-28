@@ -129,12 +129,12 @@ class Instructions
     
     if((carry & 0x100) != 0)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
 
     if((carry & 0x10) != 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     nsp &= 0xffff;
@@ -147,15 +147,15 @@ class Instructions
   {
     addDebugStack('SCF', cpu);
 
-    cpu.registers.f &= Registers.F_ZERO;
-    cpu.registers.f |= Registers.F_CARRY;
+    cpu.registers.f &= Registers.ZERO;
+    cpu.registers.f |= Registers.CARRY;
   }
 
   static void CCF(CPU cpu)
   {
     addDebugStack('CCF', cpu);
 
-    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) != 0 ? (cpu.registers.f & Registers.F_ZERO) : ((cpu.registers.f & Registers.F_ZERO) | Registers.F_CARRY);
+    cpu.registers.f = (cpu.registers.f & Registers.CARRY) != 0 ? (cpu.registers.f & Registers.ZERO) : ((cpu.registers.f & Registers.ZERO) | Registers.CARRY);
   }
 
   static void LD_A_n(CPU cpu)
@@ -185,11 +185,11 @@ class Instructions
 
     if((carry & 0x100) != 0)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
     if((carry & 0x10) != 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     nsp &= 0xffff;
@@ -202,7 +202,7 @@ class Instructions
     addDebugStack('CPL', cpu);
 
     cpu.registers.a = (~cpu.registers.a) & 0xFF;
-    cpu.registers.f = (cpu.registers.f & (Registers.F_CARRY | Registers.F_ZERO)) | Registers.F_HALF_CARRY | Registers.F_SUBTRACT;
+    cpu.registers.f = (cpu.registers.f & (Registers.CARRY | Registers.ZERO)) | Registers.HALF_CARRY | Registers.SUBTRACT;
   }
 
   static void LD_FFn_A(CPU cpu)
@@ -298,9 +298,9 @@ class Instructions
         {
           // BIT b, r
           // 0 1 b b b r r r
-          cpu.registers.f &= Registers.F_CARRY;
-          cpu.registers.f |= Registers.F_HALF_CARRY;
-          if((data & (0x1 << (op >> 3 & 0x7))) == 0) cpu.registers.f |= Registers.F_ZERO;
+          cpu.registers.f &= Registers.CARRY;
+          cpu.registers.f |= Registers.HALF_CARRY;
+          if((data & (0x1 << (op >> 3 & 0x7))) == 0) cpu.registers.f |= Registers.ZERO;
           return;
         }
       case 0x0:
@@ -312,12 +312,12 @@ class Instructions
                 cpu.registers.f = 0;
                 if((data & 0x80) != 0)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
                 data <<= 1;
 
                 // we're shifting circular left, add back bit 7
-                if((cpu.registers.f & Registers.F_CARRY) != 0)
+                if((cpu.registers.f & Registers.CARRY) != 0)
                 {
                   data |= 0x01;
                 }
@@ -326,7 +326,7 @@ class Instructions
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -337,13 +337,13 @@ class Instructions
                 cpu.registers.f = 0;
                 if((data & 0x1) != 0)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
 
                 data >>= 1;
 
                 // we're shifting circular right, add back bit 7
-                if((cpu.registers.f & Registers.F_CARRY) != 0)
+                if((cpu.registers.f & Registers.CARRY) != 0)
                 {
                   data |= 0x80;
                 }
@@ -352,7 +352,7 @@ class Instructions
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -360,13 +360,13 @@ class Instructions
               }
             case 0x10: // Rcpu.registers.l m
               {
-                bool carryflag = (cpu.registers.f & Registers.F_CARRY) != 0;
+                bool carryflag = (cpu.registers.f & Registers.CARRY) != 0;
                 cpu.registers.f = 0;
 
                 // we'll be shifting left, so if bit 7 is set we set carry
                 if((data & 0x80) == 0x80)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
                 data <<= 1;
                 data &= 0xff;
@@ -379,7 +379,7 @@ class Instructions
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -387,13 +387,13 @@ class Instructions
               }
             case 0x18: // RR m
               {
-                bool carryflag = (cpu.registers.f & Registers.F_CARRY) != 0;
+                bool carryflag = (cpu.registers.f & Registers.CARRY) != 0;
                 cpu.registers.f = 0;
 
                 // we'll be shifting right, so if bit 1 is set we set carry
                 if((data & 0x1) == 0x1)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
 
                 data >>= 1;
@@ -406,7 +406,7 @@ class Instructions
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -420,14 +420,14 @@ class Instructions
                 // we'll be shifting right, so if bit 1 is set we set carry
                 if((data & 0x1) != 0)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
 
                 data >>= 1;
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -440,7 +440,7 @@ class Instructions
                 // we'll be shifting right, so if bit 1 is set we set carry
                 if((data & 0x80) != 0)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
 
                 data <<= 1;
@@ -448,7 +448,7 @@ class Instructions
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -460,7 +460,7 @@ class Instructions
                 cpu.registers.f = 0;
                 if((data & 0x1) != 0)
                 {
-                  cpu.registers.f |= Registers.F_CARRY;
+                  cpu.registers.f |= Registers.CARRY;
                 }
 
                 data >>= 1;
@@ -472,7 +472,7 @@ class Instructions
 
                 if(data == 0)
                 {
-                  cpu.registers.f |= Registers.F_ZERO;
+                  cpu.registers.f |= Registers.ZERO;
                 }
 
                 cpu.registers.setRegister(reg, data);
@@ -481,7 +481,7 @@ class Instructions
             case 0x30: // SWAP m
               {
                 data = ((data & 0xF0) >> 4) | ((data & 0x0F) << 4);
-                cpu.registers.f = data == 0 ? Registers.F_ZERO : 0;
+                cpu.registers.f = data == 0 ? Registers.ZERO : 0;
                 cpu.registers.setRegister(reg, data);
                 return;
               }
@@ -508,13 +508,13 @@ class Instructions
   {
     addDebugStack('RLA', cpu);
 
-    bool carryflag = (cpu.registers.f & Registers.F_CARRY) != 0;
+    bool carryflag = (cpu.registers.f & Registers.CARRY) != 0;
     cpu.registers.f = 0; // &= Registers.F_ZERO;?
 
     // We'll be shifting left, so if bit 7 is set we set carry
     if((cpu.registers.a & 0x80) == 0x80)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
     cpu.registers.a <<= 1;
     cpu.registers.a &= 0xff;
@@ -530,13 +530,13 @@ class Instructions
   {
     addDebugStack('RRA', cpu);
 
-    bool carryflag = (cpu.registers.f & Registers.F_CARRY) != 0;
+    bool carryflag = (cpu.registers.f & Registers.CARRY) != 0;
     cpu.registers.f = 0;
 
     // we'll be shifting right, so if bit 1 is set we set carry
     if((cpu.registers.a & 0x1) == 0x1)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
     cpu.registers.a >>= 1;
 
@@ -551,12 +551,12 @@ class Instructions
     cpu.registers.f = 0;//Registers.F_ZERO;
     if((cpu.registers.a & 0x1) == 0x1)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
     cpu.registers.a >>= 1;
 
     // We're shifting circular right, add back bit 7
-    if((cpu.registers.f & Registers.F_CARRY) != 0)
+    if((cpu.registers.f & Registers.CARRY) != 0)
     {
       cpu.registers.a |= 0x80;
     }
@@ -566,25 +566,25 @@ class Instructions
   {
     addDebugStack('SBC_r', cpu);
 
-    int carry = (cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0;
+    int carry = (cpu.registers.f & Registers.CARRY) != 0 ? 1 : 0;
     int reg = cpu.registers.getRegister(op & 0x7) & 0xff;
 
-    cpu.registers.f = Registers.F_SUBTRACT;
+    cpu.registers.f = Registers.SUBTRACT;
     if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     cpu.registers.a -= reg + carry;
     if(cpu.registers.a < 0)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       cpu.registers.a &= 0xFF;
     }
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -593,27 +593,27 @@ class Instructions
     addDebugStack('ADC_n', cpu);
 
     int val = cpu.nextUnsignedBytePC();
-    int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
+    int carry = ((cpu.registers.f & Registers.CARRY) != 0 ? 1 : 0);
     int n = val + carry;
 
     cpu.registers.f = 0;
 
     if((((cpu.registers.a & 0xf) + (val & 0xf)) + carry & 0xF0) != 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     cpu.registers.a += n;
 
     if(cpu.registers.a > 0xFF)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       cpu.registers.a &= 0xFF;
     }
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -635,7 +635,7 @@ class Instructions
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -644,11 +644,11 @@ class Instructions
     addDebugStack('AND_n', cpu);
 
     cpu.registers.a &= cpu.nextUnsignedBytePC();
-    cpu.registers.f = Registers.F_HALF_CARRY;
+    cpu.registers.f = Registers.HALF_CARRY;
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -740,38 +740,38 @@ class Instructions
     
     int tmp = cpu.registers.a;
 
-    if((cpu.registers.f & Registers.F_SUBTRACT) == 0)
+    if((cpu.registers.f & Registers.SUBTRACT) == 0)
     {
-      if((cpu.registers.f & Registers.F_HALF_CARRY) != 0 || ((tmp & 0x0f) > 9))
+      if((cpu.registers.f & Registers.HALF_CARRY) != 0 || ((tmp & 0x0f) > 9))
       {
         tmp += 0x06;
       }
-      if((cpu.registers.f & Registers.F_CARRY) != 0 || ((tmp > 0x9f)))
+      if((cpu.registers.f & Registers.CARRY) != 0 || ((tmp > 0x9f)))
       {
         tmp += 0x60;
       }
     }
     else
     {
-      if((cpu.registers.f & Registers.F_HALF_CARRY) != 0)
+      if((cpu.registers.f & Registers.HALF_CARRY) != 0)
       {
         tmp = ((tmp - 6) & 0xff);
       }
-      if((cpu.registers.f & Registers.F_CARRY) != 0)
+      if((cpu.registers.f & Registers.CARRY) != 0)
       {
         tmp -= 0x60;
       }
     }
 
-    cpu.registers.f &= Registers.F_SUBTRACT | Registers.F_CARRY;
+    cpu.registers.f &= Registers.SUBTRACT | Registers.CARRY;
 
     if(tmp > 0xff)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       tmp &= 0xff;
     }
 
-    if(tmp == 0){cpu.registers.f |= Registers.F_ZERO;}
+    if(tmp == 0){cpu.registers.f |= Registers.ZERO;}
 
     cpu.registers.a = tmp;
   }
@@ -793,7 +793,7 @@ class Instructions
     cpu.registers.f = 0;
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -822,7 +822,7 @@ class Instructions
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -831,11 +831,11 @@ class Instructions
     addDebugStack('AND_r', cpu);
 
     cpu.registers.a = (cpu.registers.a & cpu.registers.getRegister(op & 0x7)) & 0xff;
-    cpu.registers.f = Registers.F_HALF_CARRY;
+    cpu.registers.f = Registers.HALF_CARRY;
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -843,27 +843,27 @@ class Instructions
   {
     addDebugStack('ADC_r', cpu);
 
-    int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
+    int carry = ((cpu.registers.f & Registers.CARRY) != 0 ? 1 : 0);
     int reg = (cpu.registers.getRegister(op & 0x7) & 0xff);
 
     int d = carry + reg;
     cpu.registers.f = 0;
     if((((cpu.registers.a & 0xf) + (reg & 0xf) + carry) & 0xF0) != 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     cpu.registers.a += d;
 
     if(cpu.registers.a > 0xFF)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       cpu.registers.a &= 0xFF;
     }
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -874,19 +874,19 @@ class Instructions
     cpu.registers.f = 0;
     if((((cpu.registers.a & 0xf) + (n & 0xf)) & 0xF0) != 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     cpu.registers.a += n;
     if(cpu.registers.a > 0xFF)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       cpu.registers.a &= 0xFF;
     }
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -910,22 +910,22 @@ class Instructions
   {
     addDebugStack('SUB', cpu);
 
-    cpu.registers.f = Registers.F_SUBTRACT;
+    cpu.registers.f = Registers.SUBTRACT;
     if((cpu.registers.a & 0xf) - (n & 0xf) < 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     cpu.registers.a -= n;
     if((cpu.registers.a & 0xFF00) != 0)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
 
     cpu.registers.a &= 0xFF;
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -952,27 +952,27 @@ class Instructions
     addDebugStack('SBC_n', cpu);
 
     int val = cpu.nextUnsignedBytePC();
-    int carry = ((cpu.registers.f & Registers.F_CARRY) != 0 ? 1 : 0);
+    int carry = ((cpu.registers.f & Registers.CARRY) != 0 ? 1 : 0);
     int n = val + carry;
 
-    cpu.registers.f = Registers.F_SUBTRACT;
+    cpu.registers.f = Registers.SUBTRACT;
 
     if((cpu.registers.a & 0xf) - (val & 0xf) - carry < 0)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     cpu.registers.a -= n;
 
     if(cpu.registers.a < 0)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       cpu.registers.a &= 0xff;
     }
 
     if(cpu.registers.a == 0)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
   }
 
@@ -992,18 +992,18 @@ class Instructions
     int ss = cpu.getRegisterPairSP((op >> 4) & 0x3);
     int hl = cpu.registers.hl;
 
-    cpu.registers.f &= Registers.F_ZERO;
+    cpu.registers.f &= Registers.ZERO;
 
     if(((hl & 0xFFF) + (ss & 0xFFF)) > 0xFFF)
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
 
     hl += ss;
 
     if(hl > 0xFFFF)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       hl &= 0xFFFF;
     }
 
@@ -1014,20 +1014,20 @@ class Instructions
   {
     addDebugStack('CP', cpu);
 
-    cpu.registers.f = Registers.F_SUBTRACT;
+    cpu.registers.f = Registers.SUBTRACT;
 
     if(cpu.registers.a < n)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
     }
     else if(cpu.registers.a == n)
     {
-      cpu.registers.f |= Registers.F_ZERO;
+      cpu.registers.f |= Registers.ZERO;
     }
 
     if((cpu.registers.a & 0xf) < ((cpu.registers.a - n) & 0xf))
     {
-      cpu.registers.f |= Registers.F_HALF_CARRY;
+      cpu.registers.f |= Registers.HALF_CARRY;
     }
   }
 
@@ -1061,7 +1061,7 @@ class Instructions
     int reg = (op >> 3) & 0x7;
     int a = cpu.registers.getRegister(reg) & 0xff;
 
-    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | InstructionTables.DEC[a];
+    cpu.registers.f = (cpu.registers.f & Registers.CARRY) | InstructionTables.DEC[a];
 
     a = (a - 1) & 0xff;
 
@@ -1075,7 +1075,7 @@ class Instructions
     int reg = (op >> 3) & 0x7;
     int a = cpu.registers.getRegister(reg) & 0xff;
 
-    cpu.registers.f = (cpu.registers.f & Registers.F_CARRY) | InstructionTables.INC[a];
+    cpu.registers.f = (cpu.registers.f & Registers.CARRY) | InstructionTables.INC[a];
 
     a = (a + 1) & 0xff;
 
@@ -1092,7 +1092,7 @@ class Instructions
 
     if(carry)
     {
-      cpu.registers.f |= Registers.F_CARRY;
+      cpu.registers.f |= Registers.CARRY;
       cpu.registers.a |= 1;
     }
     else

@@ -144,10 +144,10 @@ class CPU
   /// Returns the value of the register
   int getRegisterPairSP(int r)
   {
-    if(r == Registers.ADDR_BC) {return this.registers.bc;}
-    if(r == Registers.ADDR_DE) {return this.registers.de;}
-    if(r == Registers.ADDR_HL) {return this.registers.hl;}
-    if(r == Registers.ADDR_SP) {return this.sp;}
+    if(r == Registers.BC) {return this.registers.bc;}
+    if(r == Registers.DE) {return this.registers.de;}
+    if(r == Registers.HL) {return this.registers.hl;}
+    if(r == Registers.SP) {return this.sp;}
 
     throw new Exception('Unknown register pair address getRegisterPair().');
   }
@@ -157,19 +157,19 @@ class CPU
   /// Returns the value of the register
   void setRegisterPairSP(int r, int value)
   {
-    if(r == Registers.ADDR_BC)
+    if(r == Registers.BC)
     {
       this.registers.bc = value;
     }
-    else if(r == Registers.ADDR_DE)
+    else if(r == Registers.DE)
     {
       this.registers.de = value;
     }
-    else if(r == Registers.ADDR_HL)
+    else if(r == Registers.HL)
     {
       this.registers.hl = value;
     }
-    else if(r == Registers.ADDR_SP)
+    else if(r == Registers.SP)
     {
       this.sp = value;
     }
