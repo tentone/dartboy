@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../utils/byte_utils.dart';
 import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
@@ -157,21 +159,30 @@ class CPU
   /// Returns the value of the register
   void setRegisterPairSP(int r, int value)
   {
-    if(r == Registers.BC)
+    if(r == Registers.SP)
     {
-      this.registers.bc = value;
+      this.sp = value & 0xFFFF;
     }
-    else if(r == Registers.DE)
+    else
     {
-      this.registers.de = value;
-    }
-    else if(r == Registers.HL)
-    {
-      this.registers.hl = value;
-    }
-    else if(r == Registers.SP)
-    {
-      this.sp = value;
+      int hi = ((value >> 8) & 0xFF);
+      int lo = (value & 0xFF);
+
+      if(r == Registers.BC)
+      {
+        this.registers.b = hi;
+        this.registers.c = lo;
+      }
+      else if(r == Registers.DE)
+      {
+        this.registers.d = hi;
+        this.registers.e = lo;
+      }
+      else if(r == Registers.HL)
+      {
+        this.registers.h = hi;
+        this.registers.l = lo;
+      }
     }
   }
 
@@ -490,7 +501,7 @@ class CPU
       case 0x35: // (HL)
           Instructions.DEC_r(this, op);
           break;
-      case 0x3:
+      case 0x03:
       case 0x13:
       case 0x23:
       case 0x33:

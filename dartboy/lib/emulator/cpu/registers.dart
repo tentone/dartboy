@@ -14,15 +14,25 @@ class Registers
   static const int HALF_CARRY = 0x20;
   static const int CARRY = 0x10;
 
+  // Register pair addressing
   static const int BC = 0x0;
   static const int DE = 0x1;
   static const int HL = 0x2;
   static const int AF = 0x3;
   static const int SP = 0x3;
 
-  /// CPU registers store temporally the result of the instructions.
-  ///
-  /// F is the flag register.
+  // Register addressing
+  static const int A = 0x07;
+  static const int B = 0x00;
+  static const int C = 0x01;
+  static const int D = 0x02;
+  static const int E = 0x03;
+  static const int H = 0x04;
+  static const int L = 0x05;
+
+  // CPU registers store temporally the result of the instructions.
+  //
+  // F is the flag register.
   int a, f;
   int b, c;
   int d, e;
@@ -52,7 +62,7 @@ class Registers
   /// 16 bit mixed BC register
   int get bc
   {
-    return ((this.b & 0xFF) << 8) | (this.c & 0xFF);
+    return (this.b << 8) | this.c;
   }
 
   set bc(int value)
@@ -96,7 +106,7 @@ class Registers
     if(r == 0x3) {return this.e;}
     if(r == 0x4) {return this.h;}
     if(r == 0x5) {return this.l;}
-    if(r == 0x6) {return this.cpu.mmu.readByte((this.h << 8) | this.l);}
+    if(r == 0x6) {return this.cpu.mmu.readByte(this.hl);}
 
     throw new Exception('Unknown register address getRegister().');
   }
@@ -104,7 +114,7 @@ class Registers
   /// Alters the byte value contained in a register, r is the register id as encoded by opcode.
   void setRegister(int r, int value)
   {
-    value &= 0xff;
+    value &= 0xFF;
 
     if(r == 0x7) {this.a = value;}
     else if(r == 0x0) {this.b = value;}
@@ -113,7 +123,7 @@ class Registers
     else if(r == 0x3) {this.e = value;}
     else if(r == 0x4) {this.h = value;}
     else if(r == 0x5) {this.l = value;}
-    else if(r == 0x6) {this.cpu.mmu.writeByte((this.h << 8) | this.l, value);}
+    else if(r == 0x6) {this.cpu.mmu.writeByte(this.hl, value);}
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
@@ -133,8 +143,8 @@ class Registers
   /// Returns the value of the register
   void setRegisterPair(int r, int hi, int lo)
   {
-    hi &= 0xff;
-    lo &= 0xff;
+    hi &= 0xFF;
+    lo &= 0xFF;
 
     if(r == Registers.BC) {this.b = hi; this.c = lo;}
     else if(r == Registers.DE) {this.d = hi; this.e = lo;}

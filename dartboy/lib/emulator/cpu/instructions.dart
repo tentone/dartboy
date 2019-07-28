@@ -137,7 +137,7 @@ class Instructions
       cpu.registers.f |= Registers.HALF_CARRY;
     }
 
-    nsp &= 0xffff;
+    nsp &= 0xFFFF;
 
     cpu.sp = nsp;
     cpu.tick(4);
@@ -162,7 +162,7 @@ class Instructions
   {
     addDebugStack('LD_A_n', cpu);
 
-    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.hl & 0xffff);
+    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.hl & 0xFFFF);
     cpu.registers.hl = (cpu.registers.hl - 1) & 0xFFFF;
   }
 
@@ -192,7 +192,7 @@ class Instructions
       cpu.registers.f |= Registers.HALF_CARRY;
     }
 
-    nsp &= 0xffff;
+    nsp &= 0xFFFF;
 
     cpu.registers.hl =  nsp;
   }
@@ -209,7 +209,7 @@ class Instructions
   {
     addDebugStack('LD_FFn_A', cpu);
 
-    cpu.mmu.writeByte(0xff00 | cpu.nextUnsignedBytePC(), cpu.registers.a);
+    cpu.mmu.writeByte(0xFF00 | cpu.nextUnsignedBytePC(), cpu.registers.a);
   }
 
   static void LDH_FFC_A(CPU cpu)
@@ -231,8 +231,8 @@ class Instructions
   {
     addDebugStack('LD_A_HLI', cpu);
 
-    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.hl & 0xffff);
-    cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
+    cpu.registers.a = cpu.getUnsignedByte(cpu.registers.hl & 0xFFFF);
+    cpu.registers.hl =  (cpu.registers.hl + 1) & 0xFFFF;
   }
 
   static void LD_HLI_A(CPU cpu)
@@ -240,7 +240,7 @@ class Instructions
     addDebugStack('LD_HLI_A', cpu);
 
     cpu.mmu.writeByte(cpu.registers.hl & 0xFFFF, cpu.registers.a);
-    cpu.registers.hl =  (cpu.registers.hl + 1) & 0xffff;
+    cpu.registers.hl =  (cpu.registers.hl + 1) & 0xFFFF;
   }
 
   static void LD_HLD_A(CPU cpu)
@@ -276,7 +276,7 @@ class Instructions
 
     int op = cpu.getUnsignedByte(cpu.pc++);
     int reg = op & 0x7;
-    int data = cpu.registers.getRegister(reg) & 0xff;
+    int data = cpu.registers.getRegister(reg) & 0xFF;
 
     switch(op & 0xC0)
     {
@@ -322,7 +322,7 @@ class Instructions
                   data |= 0x01;
                 }
 
-                data &= 0xff;
+                data &= 0xFF;
 
                 if(data == 0)
                 {
@@ -348,7 +348,7 @@ class Instructions
                   data |= 0x80;
                 }
 
-                data &= 0xff;
+                data &= 0xFF;
 
                 if(data == 0)
                 {
@@ -369,7 +369,7 @@ class Instructions
                   cpu.registers.f |= Registers.CARRY;
                 }
                 data <<= 1;
-                data &= 0xff;
+                data &= 0xFF;
 
                 // move old cpu.registers.c into bit 0
                 if(carryflag)
@@ -444,7 +444,7 @@ class Instructions
                 }
 
                 data <<= 1;
-                data &= 0xff;
+                data &= 0xFF;
 
                 if(data == 0)
                 {
@@ -499,9 +499,9 @@ class Instructions
   {
     addDebugStack('DEC_rr', cpu);
 
-    int p = (op >> 4) & 0x3;
-    int o = cpu.getRegisterPairSP(p);
-    cpu.setRegisterPairSP(p, o - 1);
+    int pair = (op >> 4) & 0x3;
+    int o = cpu.getRegisterPairSP(pair);
+    cpu.setRegisterPairSP(pair, o - 1);
   }
 
   static void RLA(CPU cpu)
@@ -509,7 +509,7 @@ class Instructions
     addDebugStack('RLA', cpu);
 
     bool carryflag = (cpu.registers.f & Registers.CARRY) != 0;
-    cpu.registers.f = 0; // &= Registers.F_ZERO;?
+    cpu.registers.f = 0;
 
     // We'll be shifting left, so if bit 7 is set we set carry
     if((cpu.registers.a & 0x80) == 0x80)
@@ -517,7 +517,7 @@ class Instructions
       cpu.registers.f |= Registers.CARRY;
     }
     cpu.registers.a <<= 1;
-    cpu.registers.a &= 0xff;
+    cpu.registers.a &= 0xFF;
 
     // Move old cpu.registers.c into bit 0
     if(carryflag)
@@ -567,7 +567,7 @@ class Instructions
     addDebugStack('SBC_r', cpu);
 
     int carry = (cpu.registers.f & Registers.CARRY) != 0 ? 1 : 0;
-    int reg = cpu.registers.getRegister(op & 0x7) & 0xff;
+    int reg = cpu.registers.getRegister(op & 0x7) & 0xFF;
 
     cpu.registers.f = Registers.SUBTRACT;
     if((cpu.registers.a & 0x0f) - (reg & 0x0f) - carry < 0)
@@ -736,8 +736,6 @@ class Instructions
   {
     addDebugStack('DAA', cpu);
 
-    //TODO <CHECK DAA IMPLEMENTATION>
-    
     int tmp = cpu.registers.a;
 
     if((cpu.registers.f & Registers.SUBTRACT) == 0)
@@ -755,7 +753,7 @@ class Instructions
     {
       if((cpu.registers.f & Registers.HALF_CARRY) != 0)
       {
-        tmp = ((tmp - 6) & 0xff);
+        tmp = ((tmp - 6) & 0xFF);
       }
       if((cpu.registers.f & Registers.CARRY) != 0)
       {
@@ -765,10 +763,10 @@ class Instructions
 
     cpu.registers.f &= Registers.SUBTRACT | Registers.CARRY;
 
-    if(tmp > 0xff)
+    if(tmp > 0xFF)
     {
       cpu.registers.f |= Registers.CARRY;
-      tmp &= 0xff;
+      tmp &= 0xFF;
     }
 
     if(tmp == 0){cpu.registers.f |= Registers.ZERO;}
@@ -801,7 +799,7 @@ class Instructions
   {
     addDebugStack('OR_r', cpu);
 
-    OR(cpu, cpu.registers.getRegister(op & 0x7) & 0xff);
+    OR(cpu, cpu.registers.getRegister(op & 0x7) & 0xFF);
   }
 
   static void OR_n(CPU cpu)
@@ -817,7 +815,7 @@ class Instructions
   {
     addDebugStack('XOR_r', cpu);
 
-    cpu.registers.a = (cpu.registers.a ^ cpu.registers.getRegister(op & 0x7)) & 0xff;
+    cpu.registers.a = (cpu.registers.a ^ cpu.registers.getRegister(op & 0x7)) & 0xFF;
     cpu.registers.f = 0;
 
     if(cpu.registers.a == 0)
@@ -830,7 +828,7 @@ class Instructions
   {
     addDebugStack('AND_r', cpu);
 
-    cpu.registers.a = (cpu.registers.a & cpu.registers.getRegister(op & 0x7)) & 0xff;
+    cpu.registers.a = (cpu.registers.a & cpu.registers.getRegister(op & 0x7)) & 0xFF;
     cpu.registers.f = Registers.HALF_CARRY;
 
     if(cpu.registers.a == 0)
@@ -844,7 +842,7 @@ class Instructions
     addDebugStack('ADC_r', cpu);
 
     int carry = ((cpu.registers.f & Registers.CARRY) != 0 ? 1 : 0);
-    int reg = (cpu.registers.getRegister(op & 0x7) & 0xff);
+    int reg = (cpu.registers.getRegister(op & 0x7) & 0xFF);
 
     int d = carry + reg;
     cpu.registers.f = 0;
@@ -894,7 +892,7 @@ class Instructions
   {
     addDebugStack('ADD_r', cpu);
 
-    int n = cpu.registers.getRegister(op & 0x7) & 0xff;
+    int n = cpu.registers.getRegister(op & 0x7) & 0xFF;
     ADD(cpu, n);
   }
 
@@ -933,7 +931,7 @@ class Instructions
   {
     addDebugStack('SUB_r', cpu);
 
-    int n = cpu.registers.getRegister(op & 0x7) & 0xff;
+    int n = cpu.registers.getRegister(op & 0x7) & 0xFF;
 
     SUB(cpu, n);
   }
@@ -967,7 +965,7 @@ class Instructions
     if(cpu.registers.a < 0)
     {
       cpu.registers.f |= Registers.CARRY;
-      cpu.registers.a &= 0xff;
+      cpu.registers.a &= 0xFF;
     }
 
     if(cpu.registers.a == 0)
@@ -987,9 +985,10 @@ class Instructions
   {
     addDebugStack('ADD_HL_rr', cpu);
 
-    // Z is not affected cpu.registers.h is set if carry out of bit 11; reset otherwise
-    // N is reset cpu.registers.c is set if carry from bit 15; reset otherwise
-    int ss = cpu.getRegisterPairSP((op >> 4) & 0x3);
+    // Z is not affected is set if carry out of bit 11; reset otherwise
+    // N is reset is set if carry from bit 15; reset otherwise
+    int pair = (op >> 4) & 0x3;
+    int ss = cpu.getRegisterPairSP(pair);
     int hl = cpu.registers.hl;
 
     cpu.registers.f &= Registers.ZERO;
@@ -1050,7 +1049,7 @@ class Instructions
     addDebugStack('INC_rr', cpu);
 
     int pair = (op >> 4) & 0x3;
-    int o = cpu.getRegisterPairSP(pair) & 0xffff;
+    int o = cpu.getRegisterPairSP(pair) & 0xFFFF;
     cpu.setRegisterPairSP(pair, o + 1);
   }
 
@@ -1059,11 +1058,11 @@ class Instructions
     addDebugStack('DEC_r', cpu);
 
     int reg = (op >> 3) & 0x7;
-    int a = cpu.registers.getRegister(reg) & 0xff;
+    int a = cpu.registers.getRegister(reg) & 0xFF;
 
     cpu.registers.f = (cpu.registers.f & Registers.CARRY) | InstructionTables.DEC[a];
 
-    a = (a - 1) & 0xff;
+    a = (a - 1) & 0xFF;
 
     cpu.registers.setRegister(reg, a);
   }
@@ -1073,11 +1072,11 @@ class Instructions
     addDebugStack('INC_r', cpu);
 
     int reg = (op >> 3) & 0x7;
-    int a = cpu.registers.getRegister(reg) & 0xff;
+    int a = cpu.registers.getRegister(reg) & 0xFF;
 
     cpu.registers.f = (cpu.registers.f & Registers.CARRY) | InstructionTables.INC[a];
 
-    a = (a + 1) & 0xff;
+    a = (a + 1) & 0xFF;
 
     cpu.registers.setRegister(reg, a);
   }
@@ -1100,7 +1099,7 @@ class Instructions
       cpu.registers.f = 0;
     }
 
-    cpu.registers.a &= 0xff;
+    cpu.registers.a &= 0xFF;
   }
 
   static void JP_nn(CPU cpu)
@@ -1177,7 +1176,7 @@ class InstructionTables
   /// for A in range(0x100):
   ///     F = 0
   ///     if((((A & 0xf) + 1) & 0xF0) != 0): F |= F_H
-  ///     if(A + 1 > 0xff): F |= F_Z
+  ///     if(A + 1 > 0xFF): F |= F_Z
   ///     INC[A] = F
   static const List<int> INC = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32,
