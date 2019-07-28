@@ -11,27 +11,26 @@
 
 ### Screenshots
 
-![graph](<https://tentone.github.io/dartboy/readme/pokemon.png>)
-
-![graph](<https://tentone.github.io/dartboy/readme/tetris.png>)
+![graph](https://raw.githubusercontent.com/tentone/dartboy/master/readme/pokemon.png)![graph](https://raw.githubusercontent.com/tentone/dartboy/master/readme/tetris.png)
 
 
 
 ### Run the Emulator
 
 - Load the project using Android studio or Visual Studio code with the flutter plugin installed, the project can run directly on mobile or desktop without changes. (For the web version you will need to change the GUI imports for the web specific imports.)
-- The game can be controlled using the keyboard on desktop (<kbd>&larr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&rarr;</kbd> <kbd>Z</kbd> <kbd>X</kbd> <kbd>Enter</kbd> <kbd>Backspace</kbd>), on mobile use the onscreen buttons.
+- The game can be controlled using the keyboard on desktop (<kbd>&larr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&rarr;</kbd> <kbd>Z</kbd> <kbd>X</kbd> <kbd>Enter</kbd> <kbd>C</kbd>), on mobile use the onscreen buttons.
 
 
 
 ### To do
 
-- [ ] Store battery backed game memory in .sav file.
-- [ ] MBC2 support
-- [ ] Audio Support
-- [ ] Fix register signed data results.
+- The emulator was built as a learning project and as a challenge, there are still a lot that can be done to improve.
+  - [ ] Store battery backed game memory in .sav file.
+  - [ ] MBC2 support
+  - [ ] Audio Support
+  - [ ] Fix register signed data results.
 
-
+  
 
 ### Setup Web
 
