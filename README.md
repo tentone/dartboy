@@ -2,8 +2,9 @@
 
 - Dart based GameBoy (and GameBoy Color) emulator that runs on desktop, mobile and web using the Flutter framework (tested on Windows and Android).
 - Project was developed using Flutter 1.5.5 and Dart 2.3.0.
-- Supports MBC1, MBC2, MBC3, MBC5 and basic cartridges, has basic support for GameBoy Color games. Does not support Super GameBoy specific features.
+- Supports MBC1, MBC3, MBC5 and basic cartridges, has basic support for GameBoy Color games. Does not support Super GameBoy specific features.
 - Full support for the Sharp LR35902 CPU instruction set.
+- Sound support still not implemented.
 
 
 
@@ -13,6 +14,22 @@
 ![graph](<https://tentone.github.io/dartboy/readme/pokemon.png>)
 
 ![graph](<https://tentone.github.io/dartboy/readme/tetris.png>)
+
+
+
+### Run the Emulator
+
+- Load the project using Android studio or Visual Studio code with the flutter plugin installed, the project can run directly on mobile or desktop without changes. (For the web version you will need to change the GUI imports for the web specific imports.)
+- The game can be controlled using the keyboard on desktop (<kbd>&larr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&rarr;</kbd> <kbd>Z</kbd> <kbd>X</kbd> <kbd>Enter</kbd> <kbd>Backspace</kbd>), on mobile use the onscreen buttons.
+
+
+
+### To do
+
+- [ ] Store battery backed game memory in .sav file.
+- [ ] MBC2 support
+- [ ] Audio Support
+- [ ] Fix register signed data results.
 
 
 
