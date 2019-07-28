@@ -108,7 +108,6 @@ class MainScreenState extends State<MainScreen>
       });
     }
 
-
     return new Scaffold
     (
       backgroundColor: Colors.black,

@@ -10,7 +10,9 @@
 
 ### Screenshots
 
-TODO
+![pokemon](C:\Users\tentone\Documents\Git\dartboy\readme\pokemon.png)
+
+![tetrist](C:\Users\tentone\Documents\Git\dartboy\readme\tetris.png)
 
 
 

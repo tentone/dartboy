@@ -60,10 +60,14 @@ class CPU
   int clockSpeed;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  int pc;
+  int _pc;
+  int get pc {return this._pc & 0xFFFF;}
+  set pc(int value){this._pc = value & 0xFFFF;}
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int sp;
+  int _sp;
+  int get sp {return this._sp & 0xFFFF;}
+  set sp(int value){this._sp = value & 0xFFFF;}
 
   CPU(Cartridge cartridge)
   {
@@ -116,14 +120,14 @@ class CPU
   int getUnsignedByte(int address)
   {
     this.tick(4);
-    return this.mmu.readByte(address) & 0xff;
+    return this.mmu.readByte(address) & 0xFF;
   }
 
   /// Read a byte from memory and update the clock count.
   int getSignedByte(int address)
   {
     this.tick(4);
-    return ByteUtils.toSignedByte(this.mmu.readByte(address) & 0xff);
+    return ByteUtils.toSignedByte(this.mmu.readByte(address) & 0xFF);
   }
 
   /// Write a byte into memory (takes 4 clocks)
@@ -137,8 +141,8 @@ class CPU
   void pushWordSP(int value)
   {
     this.sp -= 2;
-    this.mmu.writeByte(this.sp, value & 0x00FF);
-    this.mmu.writeByte(this.sp + 1, (value & 0xFF00) >> 8);
+    this.mmu.writeByte(this.sp, value & 0xFF);
+    this.mmu.writeByte(this.sp + 1, (value >> 8) & 0xFF);
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode.
@@ -161,12 +165,12 @@ class CPU
   {
     if(r == Registers.SP)
     {
-      this.sp = value & 0xFFFF;
+      this.sp = value;
     }
     else
     {
-      int hi = ((value >> 8) & 0xFF);
-      int lo = (value & 0xFF);
+      int hi = (value >> 8) & 0xFF;
+      int lo = value & 0xFF;
 
       if(r == Registers.BC)
       {
@@ -638,7 +642,7 @@ class CPU
       case 0xe7:
       case 0xef:
       case 0xf7:
-      case 0xff:
+      case 0xFF:
         Instructions.RST_p(this, op);
         break;
       case 0xf3:
