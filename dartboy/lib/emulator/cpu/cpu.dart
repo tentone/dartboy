@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import '../../utils/byte_utils.dart';
 import '../memory/cartridge.dart';
 import '../memory/memory_registers.dart';
 import '../memory/mmu/mmu.dart';
@@ -60,14 +59,10 @@ class CPU
   int clockSpeed;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  int _pc;
-  int get pc {return this._pc & 0xFFFF;}
-  set pc(int value){this._pc = value & 0xFFFF;}
+  int pc;
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int _sp;
-  int get sp {return this._sp & 0xFFFF;}
-  set sp(int value){this._sp = value & 0xFFFF;}
+  int sp;
 
   CPU(Cartridge cartridge)
   {
@@ -127,7 +122,7 @@ class CPU
   int getSignedByte(int address)
   {
     this.tick(4);
-    return ByteUtils.toSignedByte(this.mmu.readByte(address) & 0xFF);
+    return (this.mmu.readByte(address) & 0xFF).toSigned(8);
   }
 
   /// Write a byte into memory (takes 4 clocks)

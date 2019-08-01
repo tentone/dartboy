@@ -37,6 +37,15 @@ class DartBoy extends StatelessWidget
   {
     overrideTargetPlatformForDesktop();
 
+    Function printVariants = (int a)
+    {
+      print(a);
+      print(a.toSigned(8));
+      print(a.toUnsigned(8));
+    };
+
+    printVariants(0xFF);
+
     return new MaterialApp
     (
       title: 'GBC',
