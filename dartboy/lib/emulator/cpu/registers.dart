@@ -74,7 +74,7 @@ class Registers
   /// 16 bit mixed AF register
   int get af
   {
-    return (this.a << 8) | this.f;
+    return (this.a.toUnsigned(8) << 8) | this.f.toUnsigned(8);
   }
 
   set af(int value)
@@ -86,7 +86,7 @@ class Registers
   /// 16 bit mixed BC register
   int get bc
   {
-    return (this.b << 8) | this.c;
+    return (this.b.toUnsigned(8) << 8) | this.c.toUnsigned(8);
   }
 
   set bc(int value)
@@ -98,7 +98,7 @@ class Registers
   /// 16 bit mixed DE register
   int get de
   {
-    return (this.d << 8) | this.e;
+    return (this.d.toUnsigned(8) << 8) | this.e.toUnsigned(8);
   }
 
   set de(int value)
@@ -110,7 +110,7 @@ class Registers
   /// 16 bit mixed HL register
   int get hl
   {
-    return (this.h << 8) | this.l;
+    return (this.h.toUnsigned(8) << 8) | this.l.toUnsigned(8);
   }
 
   set hl(int value)

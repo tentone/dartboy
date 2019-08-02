@@ -59,10 +59,14 @@ class CPU
   int clockSpeed;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  int pc;
+  int _pc;
+  set pc(int value) {this._pc = value & 0xFFFF;}
+  int get pc{return this._pc & 0xFFFF;}
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int sp;
+  int _sp;
+  set sp(int value) {this._sp = value & 0xFFFF;}
+  int get sp{return this._sp & 0xFFFF;}
 
   CPU(Cartridge cartridge)
   {
