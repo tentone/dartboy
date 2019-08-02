@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import '../../cpu/cpu.dart';
 import '../memory.dart';
@@ -15,7 +16,7 @@ class MBC3 extends MBC
   bool rtcEnabled;
 
   /// The real time clock registers.
-  List<int> rtc;
+  Uint8List rtc;
 
   MBC3(CPU cpu) : super(cpu);
 
@@ -27,10 +28,10 @@ class MBC3 extends MBC
     this.rtcEnabled = false;
     this.ramBank = 0;
 
-    this.rtc = new List<int>(4);
+    this.rtc = new Uint8List(4);
     this.rtc.fillRange(0, this.rtc.length, 0);
 
-    this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 4);
+    this.cartRam = new Uint8List(MBC.RAM_PAGESIZE * 4);
     this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 

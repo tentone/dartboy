@@ -1,8 +1,9 @@
+import 'dart:typed_data';
+
 import '../../cpu/cpu.dart';
 import '../memory.dart';
 import '../memory_addresses.dart';
 import 'mbc.dart';
-
 
 /// Memory banking chip 1 (MBC1).
 ///
@@ -40,7 +41,7 @@ class MBC1 extends MBC
     this.modeSelect = MBC1.MODE_16ROM_8RAM;
     this.romBank = 1;
 
-    this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 4);
+    this.cartRam = new Uint8List(MBC.RAM_PAGESIZE * 4);
     this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 

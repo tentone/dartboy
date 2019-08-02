@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,13 @@ class DartBoy extends StatelessWidget
       print(a.toUnsigned(8));
     };
 
-    printVariants(0xFF);
+
+    Uint8List a = new Uint8List(1);
+    a[0] = 255;
+    print(a);
+    print(a[0].toSigned(8));
+    a[0] += 2;
+    print(a);
 
     return new MaterialApp
     (

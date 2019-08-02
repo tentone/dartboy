@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../../cpu/cpu.dart';
 import '../memory_addresses.dart';
@@ -19,7 +20,7 @@ class MBC extends MMU
   bool ramEnabled;
 
   /// Raw cart ram, has to be initialized and reset by the implementations.
-  List<int> cartRam;
+  Uint8List cartRam;
 
   MBC(CPU cpu) : super(cpu);
 

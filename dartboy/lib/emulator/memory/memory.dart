@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import '../configuration.dart';
 import '../cpu/cpu.dart';
@@ -25,19 +26,19 @@ class Memory
   static const int ROM_PAGESIZE = 0x4000;
 
   /// Register values contains mostly control flags, mapped from 0xFF00-0xFF7F + HRAM (0xFF80-0xFFFE) + Interrupt Enable Register (0xFFFF)
-  List<int> registers;
+  Uint8List registers;
 
   /// OAM (Object Attribute Memory) or (Sprite Attribute Table), mapped from 0xFE00-0xFE9F.
-  List<int> oam;
+  Uint8List oam;
 
   /// Video RAM, mapped from 0x8000-0x9FFF.
   /// On the GBC, this bank is switchable 0-1 by writing to 0xFF4F.
-  List<int> vram;
+  Uint8List vram;
 
   /// Work RAM, mapped from 0xC000-0xCFFF and 0xD000-0xDFFF.
   ///
   /// On the GBC, this bank is switchable 1-7 by writing to 0xFF07.
-  List<int> wram;
+  Uint8List wram;
 
   /// The current page of Video RAM, always multiples of VRAM_PAGESIZE.
   ///
@@ -77,16 +78,16 @@ class Memory
     this.wramPageStart = Memory.WRAM_PAGESIZE;
     this.romPageStart = Memory.ROM_PAGESIZE;
 
-    this.registers = new List<int>(0x100);
+    this.registers = new Uint8List(0x100);
     this.registers.fillRange(0, this.registers.length, 0);
 
-    this.oam = new List<int>(0xA0);
+    this.oam = new Uint8List(0xA0);
     this.oam.fillRange(0, this.oam.length, 0);
 
-    this.wram = new List<int>(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
+    this.wram = new Uint8List(Memory.WRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 8 : 2));
     this.wram.fillRange(0, this.wram.length, 0);
 
-    this.vram = new List<int>(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
+    this.vram = new Uint8List(Memory.VRAM_PAGESIZE * (this.cpu.cartridge.gameboyType == GameboyType.COLOR ? 2 : 1));
     this.vram.fillRange(0, this.vram.length, 0);
 
     this.writeIO(0x04, 0xAB);

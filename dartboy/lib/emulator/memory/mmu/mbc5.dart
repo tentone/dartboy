@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../cpu/cpu.dart';
 import '../memory.dart';
 import '../memory_addresses.dart';
@@ -22,7 +24,7 @@ class MBC5 extends MBC
     this.modeSelect = 0;
     this.romBank = 0;
 
-    this.cartRam = new List<int>(MBC.RAM_PAGESIZE * 16);
+    this.cartRam = new Uint8List(MBC.RAM_PAGESIZE * 16);
     this.cartRam.fillRange(0, this.cartRam.length, 0);
   }
 
