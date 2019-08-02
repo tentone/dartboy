@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'cpu.dart';
 import '../memory/cartridge.dart';
 
@@ -22,17 +24,38 @@ class Registers
   static const int SP = 0x3;
 
   // Register addressing
-  static const int A = 0x07;
   static const int B = 0x00;
   static const int C = 0x01;
   static const int D = 0x02;
   static const int E = 0x03;
   static const int H = 0x04;
   static const int L = 0x05;
+  static const int F = 0x06;
+  static const int A = 0x07;
 
   // CPU registers store temporally the result of the instructions.
   //
   // F is the flag register.
+  Uint8List registers;
+
+  /*int get a{return this.registers[A];}
+  int get b{return this.registers[B];}
+  int get c{return this.registers[C];}
+  int get d{return this.registers[D];}
+  int get e{return this.registers[E];}
+  int get f{return this.registers[F];}
+  int get h{return this.registers[H];}
+  int get l{return this.registers[L];}
+
+  set a(int value){this.registers[A] = value;}
+  set b(int value){this.registers[B] = value;}
+  set c(int value){this.registers[C] = value;}
+  set d(int value){this.registers[D] = value;}
+  set e(int value){this.registers[E] = value;}
+  set f(int value){this.registers[F] = value;}
+  set h(int value){this.registers[H] = value;}
+  set l(int value){this.registers[L] = value;}*/
+
   int a, f;
   int b, c;
   int d, e;
@@ -44,6 +67,7 @@ class Registers
   Registers(CPU cpu)
   {
     this.cpu = cpu;
+    this.registers = new Uint8List(8);
     this.reset();
   }
 
