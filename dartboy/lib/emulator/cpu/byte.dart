@@ -1,5 +1,5 @@
 
-/// Represents a gameboy register.
+/// Class to represent a byte value that can be operated directly.
 class Byte
 {
 
