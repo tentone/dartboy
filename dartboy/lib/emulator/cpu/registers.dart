@@ -36,9 +36,10 @@ class Registers
   // CPU registers store temporally the result of the instructions.
   //
   // F is the flag register.
-  Uint8List registers;
+  Int8List registers;
 
-  /*int get a{return this.registers[A];}
+  /*
+  int get a{return this.registers[A];}
   int get b{return this.registers[B];}
   int get c{return this.registers[C];}
   int get d{return this.registers[D];}
@@ -54,7 +55,8 @@ class Registers
   set e(int value){this.registers[E] = value;}
   set f(int value){this.registers[F] = value;}
   set h(int value){this.registers[H] = value;}
-  set l(int value){this.registers[L] = value;}*/
+  set l(int value){this.registers[L] = value;}
+  */
 
   int a, f;
   int b, c;
@@ -67,7 +69,7 @@ class Registers
   Registers(CPU cpu)
   {
     this.cpu = cpu;
-    this.registers = new Uint8List(8);
+    this.registers = new Int8List(8);
     this.reset();
   }
 

@@ -12,6 +12,9 @@ import 'instructions.dart';
 /// Sharp LR35902
 class CPU
 {
+  static const int PC = 0;
+  static const int SP = 1;
+
   /// Frequency frequency (hz)
   static const int FREQUENCY = 4194304;
 
@@ -58,18 +61,23 @@ class CPU
   /// Current clock speed of the system (can be double on GBC hardware).
   int clockSpeed;
 
+  /// Stores the PC and SP pointers
+  Uint16List pointers;
+
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  int _pc;
-  set pc(int value) {this._pc = value & 0xFFFF;}
-  int get pc{return this._pc & 0xFFFF;}
+  //int pc;
+  set pc(int value) {this.pointers[PC] = value & 0xFFFF;}
+  int get pc{return this.pointers[PC];}
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  int _sp;
-  set sp(int value) {this._sp = value & 0xFFFF;}
-  int get sp{return this._sp & 0xFFFF;}
+  //int sp;
+  set sp(int value) {this.pointers[SP] = value & 0xFFFF;}
+  int get sp{return this.pointers[SP];}
 
   CPU(Cartridge cartridge)
   {
+    this.pointers = new Uint16List(2);
+
     this.cartridge = cartridge;
     this.mmu = this.cartridge.createController(this);
     this.ppu = new PPU(this);

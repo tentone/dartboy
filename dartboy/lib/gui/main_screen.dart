@@ -226,7 +226,9 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        MainScreen.emulator.loadROM(new File('./roms/individual/03-op sp,hl.gb'));
+                        textInputDialog(hint: './roms/games/tetris.gb', onOpen: (String fname){
+                          MainScreen.emulator.loadROM(new File(fname));
+                        });
                       }
 
                       if(MainScreen.emulator.state == EmulatorState.READY)
@@ -241,6 +243,61 @@ class MainScreenState extends State<MainScreen>
           )
           ]
         )
+      )
+    );
+  }
+
+  /// Show a text input dialog to introduce string values.
+  textInputDialog({String hint, Function onOpen}) async
+  {
+    TextEditingController controller = new TextEditingController();
+    controller.text = hint != null ? hint : '';
+
+    await showDialog<String>
+    (
+      context: context,
+      child: new AlertDialog
+      (
+        contentPadding: const EdgeInsets.all(16.0),
+        content: new Row
+        (
+          children: <Widget>
+          [
+            new Expanded
+            (
+              child: new TextField
+              (
+                autofocus: true,
+                controller: controller,
+                decoration: new InputDecoration(labelText: 'File Name', hintText: hint != null ? hint : ''),
+              ),
+            )
+          ]
+        ),
+        actions: <Widget>
+        [
+          new FlatButton
+          (
+            child: const Text('Cancel'),
+            onPressed: ()
+            {
+
+              Navigator.pop(context);
+            }
+          ),
+          new FlatButton
+          (
+            child: const Text('Open'),
+            onPressed: ()
+            {
+              if(onOpen != null)
+              {
+                onOpen(controller.text);
+              }
+              Navigator.pop(context);
+            }
+          )
+        ]
       )
     );
   }
