@@ -12,6 +12,7 @@ dependencies:
   wave_generator: 0.1.0
   audioplayers: ^0.8.0
   file_picker: ^1.3.7
+  image: ^2.1.4
 #  flutter_web: any
 #  flutter_web_ui: any
 
