@@ -78,17 +78,20 @@ class MainScreenState extends State<MainScreen>
         int keyCode = int.parse(value);
 
         // Debug functions
-        if(key is RawKeyDownEvent)
+        if(MainScreen.emulator.state == EmulatorState.RUNNING)
         {
-          if(keyCode == KEY_I)
+          if(key is RawKeyDownEvent)
           {
-            print('Toogle background layer.');
-            Configuration.drawBackgroundLayer = !Configuration.drawBackgroundLayer;
-          }
-          else if(keyCode == KEY_O)
-          {
-            print('Toogle sprite layer.');
-            Configuration.drawSpriteLayer = !Configuration.drawSpriteLayer;
+            if(keyCode == KEY_I)
+            {
+              print('Toogle background layer.');
+              Configuration.drawBackgroundLayer = !Configuration.drawBackgroundLayer;
+            }
+            else if(keyCode == KEY_O)
+            {
+              print('Toogle sprite layer.');
+              Configuration.drawSpriteLayer = !Configuration.drawSpriteLayer;
+            }
           }
         }
 

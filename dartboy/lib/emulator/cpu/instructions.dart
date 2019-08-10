@@ -1148,7 +1148,7 @@ class Instructions
 
   static void LD_SP_HL(CPU cpu)
   {
-    cpu.sp = cpu.registers.hl;
+    cpu.sp = cpu.registers.hl & 0xFFFF;
   }
 }
 

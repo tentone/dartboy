@@ -38,7 +38,7 @@ class Registers
   // F is the flag register.
   Int8List registers;
 
-  int get a{return this.registers[A];}
+  /*int get a{return this.registers[A];}
   int get b{return this.registers[B];}
   int get c{return this.registers[C];}
   int get d{return this.registers[D];}
@@ -54,7 +54,9 @@ class Registers
   set e(int value){this.registers[E] = value;}
   set f(int value){this.registers[F] = value;}
   set h(int value){this.registers[H] = value;}
-  set l(int value){this.registers[L] = value;}
+  set l(int value){this.registers[L] = value;}*/
+
+  int a,b, c, d, e, f, h, l;
 
   /// Pointer to the CPU object
   CPU cpu;
@@ -69,14 +71,14 @@ class Registers
   /// 16 bit mixed AF register
   int get af
   {
-    int value = (this.a.toUnsigned(8) << 8) | this.f.toUnsigned(8);
+    int value = ((this.a.toUnsigned(8)) << 8) | (this.f.toUnsigned(8));
     return value.toSigned(16);
   }
 
   set af(int value)
   {
     value = value.toUnsigned(16);
-
+    
     this.a = ((value >> 8) & 0xFF).toSigned(8);
     this.f = (value & 0xFF).toSigned(8);
   }
@@ -84,7 +86,7 @@ class Registers
   /// 16 bit mixed BC register
   int get bc
   {
-    int value = (this.b.toUnsigned(8) << 8) | this.c.toUnsigned(8);
+    int value = ((this.b.toUnsigned(8)) << 8) | (this.c.toUnsigned(8));
     return value.toSigned(16);
   }
 
@@ -99,7 +101,7 @@ class Registers
   /// 16 bit mixed DE register
   int get de
   {
-    int value = (this.d.toUnsigned(8) << 8) | this.e.toUnsigned(8);
+    int value = ((this.d.toUnsigned(8)) << 8) | (this.e.toUnsigned(8));
     return value.toSigned(16);
   }
 
@@ -114,7 +116,7 @@ class Registers
   /// 16 bit mixed HL register
   int get hl
   {
-    int value = (this.h.toUnsigned(8) << 8) | this.l.toUnsigned(8);
+    int value = ((this.h.toUnsigned(8)) << 8) | (this.l.toUnsigned(8));
     return value.toSigned(16);
   }
 
@@ -130,13 +132,13 @@ class Registers
   /// Returns the value of the register
   int getRegister(int r)
   {
-    if(r == 0x7) {return this.a;}
-    if(r == 0x0) {return this.b;}
-    if(r == 0x1) {return this.c;}
-    if(r == 0x2) {return this.d;}
-    if(r == 0x3) {return this.e;}
-    if(r == 0x4) {return this.h;}
-    if(r == 0x5) {return this.l;}
+    if(r == A) {return this.a;}
+    if(r == B) {return this.b;}
+    if(r == C) {return this.c;}
+    if(r == D) {return this.d;}
+    if(r == E) {return this.e;}
+    if(r == H) {return this.h;}
+    if(r == L) {return this.l;}
     if(r == 0x6) {return this.cpu.mmu.readByte(this.hl);}
 
     throw new Exception('Unknown register address getRegister().');
@@ -147,13 +149,13 @@ class Registers
   {
     value &= 0xFF;
 
-    if(r == 0x7) {this.a = value;}
-    else if(r == 0x0) {this.b = value;}
-    else if(r == 0x1) {this.c = value;}
-    else if(r == 0x2) {this.d = value;}
-    else if(r == 0x3) {this.e = value;}
-    else if(r == 0x4) {this.h = value;}
-    else if(r == 0x5) {this.l = value;}
+    if(r == A) {this.a = value;}
+    else if(r == B) {this.b = value;}
+    else if(r == C) {this.c = value;}
+    else if(r == D) {this.d = value;}
+    else if(r == E) {this.e = value;}
+    else if(r == H) {this.h = value;}
+    else if(r == L) {this.l = value;}
     else if(r == 0x6) {this.cpu.mmu.writeByte(this.hl, value);}
   }
 
