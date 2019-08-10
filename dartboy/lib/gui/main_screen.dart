@@ -226,7 +226,7 @@ class MainScreenState extends State<MainScreen>
                       }
                       else
                       {
-                        textInputDialog(hint: './roms/games/tetris.gb', onOpen: (String fname){
+                        textInputDialog(hint: './roms/individual/03-op sp,hl.gb', onOpen: (String fname){
                           MainScreen.emulator.loadROM(new File(fname));
                         });
                       }

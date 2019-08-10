@@ -66,12 +66,12 @@ class CPU
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
   //int pc;
-  set pc(int value) {this.pointers[PC] = value & 0xFFFF;}
+  set pc(int value) {this.pointers[PC] = value;}
   int get pc{return this.pointers[PC];}
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
   //int sp;
-  set sp(int value) {this.pointers[SP] = value & 0xFFFF;}
+  set sp(int value) {this.pointers[SP] = value;}
   int get sp{return this.pointers[SP];}
 
   CPU(Cartridge cartridge)
