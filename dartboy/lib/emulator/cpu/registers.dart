@@ -63,7 +63,6 @@ class Registers
   {
     this.cpu = cpu;
     this.registers = new List<int>(8);
-    this.reset();
   }
 
   // Pair 16 bit mixed registers
@@ -79,7 +78,7 @@ class Registers
 
   int readPair(int a, int b)
   {
-    int value = ((this.registers[a].toUnsigned(8)) << 8) | (this.registers[b].toUnsigned(8));
+    int value = (this.registers[a].toUnsigned(8) << 8) | (this.registers[b].toUnsigned(8));
     return value.toSigned(16);
   }
 

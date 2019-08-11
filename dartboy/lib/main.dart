@@ -37,13 +37,23 @@ class DartBoy extends StatelessWidget
   Widget build(BuildContext context)
   {
     // TODO <Test Code>
-    Registers registers = MainScreen.emulator.cpu.registers;
-    registers.reset();
-    registers.a = 2;
-    print(registers.a);
+    Registers registers = new Registers(null);
 
-    registers.af = 3;
-    print(registers.af);
+    List<int> list = [ -120, 127, 300, -300];
+    for(int i = 0; i < list.length; i++)
+    {
+      registers.a = list[i];
+      print(registers.a);
+
+      registers.f = list[i];
+      print(registers.f);
+
+      registers.af = list[i];
+      print(registers.af);
+
+      registers.hl = list[i];
+      print(registers.hl);
+    }
 
     overrideTargetPlatformForDesktop();
 
