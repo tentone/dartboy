@@ -36,9 +36,9 @@ class Registers
   // CPU registers store temporally the result of the instructions.
   //
   // F is the flag register.
-  Int8List registers;
+  List<int> registers;
 
-  /*int get a{return this.registers[A];}
+  int get a{return this.registers[A];}
   int get b{return this.registers[B];}
   int get c{return this.registers[C];}
   int get d{return this.registers[D];}
@@ -54,9 +54,7 @@ class Registers
   set e(int value){this.registers[E] = value;}
   set f(int value){this.registers[F] = value;}
   set h(int value){this.registers[H] = value;}
-  set l(int value){this.registers[L] = value;}*/
-
-  int a,b, c, d, e, f, h, l;
+  set l(int value){this.registers[L] = value;}
 
   /// Pointer to the CPU object
   CPU cpu;
@@ -64,69 +62,35 @@ class Registers
   Registers(CPU cpu)
   {
     this.cpu = cpu;
-    this.registers = new Int8List(8);
+    this.registers = new List<int>(8);
     this.reset();
   }
 
-  /// 16 bit mixed AF register
-  int get af
+  // Pair 16 bit mixed registers
+  int get af {return readPair(A, F);}
+  int get bc {return readPair(B, C);}
+  int get de {return readPair(D, E);}
+  int get hl {return readPair(H, L);}
+
+  set af(int value) {writePair(A, F, value);}
+  set bc(int value) {writePair(B, C, value);}
+  set de(int value) {writePair(D, E, value);}
+  set hl(int value) {writePair(H, L, value);}
+
+  int readPair(int a, int b)
   {
-    int value = ((this.a.toUnsigned(8)) << 8) | (this.f.toUnsigned(8));
+    int value = ((this.registers[a].toUnsigned(8)) << 8) | (this.registers[b].toUnsigned(8));
     return value.toSigned(16);
   }
 
-  set af(int value)
-  {
-    value = value.toUnsigned(16);
-    
-    this.a = ((value >> 8) & 0xFF).toSigned(8);
-    this.f = (value & 0xFF).toSigned(8);
-  }
-
-  /// 16 bit mixed BC register
-  int get bc
-  {
-    int value = ((this.b.toUnsigned(8)) << 8) | (this.c.toUnsigned(8));
-    return value.toSigned(16);
-  }
-
-  set bc(int value)
+  void writePair(int a, int b, int value)
   {
     value = value.toUnsigned(16);
 
-    this.b = ((value >> 8) & 0xFF).toSigned(8);
-    this.c = (value & 0xFF).toSigned(8);
+    this.registers[a] = ((value & 0xFF00) >> 8).toSigned(8);
+    this.registers[b] = (value & 0xFF).toSigned(8);
   }
 
-  /// 16 bit mixed DE register
-  int get de
-  {
-    int value = ((this.d.toUnsigned(8)) << 8) | (this.e.toUnsigned(8));
-    return value.toSigned(16);
-  }
-
-  set de(int value)
-  {
-    value = value.toUnsigned(16);
-
-    this.d = ((value >> 8) & 0xFF).toSigned(8);
-    this.e = (value & 0xFF).toSigned(8);
-  }
-
-  /// 16 bit mixed HL register
-  int get hl
-  {
-    int value = ((this.h.toUnsigned(8)) << 8) | (this.l.toUnsigned(8));
-    return value.toSigned(16);
-  }
-
-  set hl(int value)
-  {
-    value = value.toUnsigned(16);
-
-    this.h = ((value >> 8) & 0xFF).toSigned(8);
-    this.l = (value & 0xFF).toSigned(8);
-  }
 
   /// Fetches the byte value contained in a register, r is the register id as encoded by opcode.
   /// Returns the value of the register

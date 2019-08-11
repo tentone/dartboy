@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'emulator/cpu/registers.dart';
 import 'gui/main_screen.dart';
 
 void main()
@@ -35,6 +36,15 @@ class DartBoy extends StatelessWidget
   @override
   Widget build(BuildContext context)
   {
+    // TODO <Test Code>
+    Registers registers = MainScreen.emulator.cpu.registers;
+    registers.reset();
+    registers.a = 2;
+    print(registers.a);
+
+    registers.af = 3;
+    print(registers.af);
+
     overrideTargetPlatformForDesktop();
 
     return new MaterialApp
