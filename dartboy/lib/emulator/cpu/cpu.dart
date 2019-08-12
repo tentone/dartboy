@@ -62,21 +62,19 @@ class CPU
   int clockSpeed;
 
   /// Stores the PC and SP pointers
-  Uint16List pointers;
+  List<int> pointers;
 
   /// 16 bit Program Counter, the memory address of the next instruction to be fetched
-  //int pc;
   set pc(int value) {this.pointers[PC] = value;}
   int get pc{return this.pointers[PC];}
 
   /// 16 bit Stack Pointer, the memory address of the top of the stack
-  //int sp;
   set sp(int value) {this.pointers[SP] = value;}
   int get sp{return this.pointers[SP];}
 
   CPU(Cartridge cartridge)
   {
-    this.pointers = new Uint16List(2);
+    this.pointers = new List<int>(2);
 
     this.cartridge = cartridge;
     this.mmu = this.cartridge.createController(this);
@@ -150,51 +148,6 @@ class CPU
     this.sp -= 2;
     this.mmu.writeByte(this.sp, value & 0xFF);
     this.mmu.writeByte(this.sp + 1, (value >> 8) & 0xFF);
-  }
-
-  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode.
-  /// It can return a register pair or the CPU SP value.
-  /// Returns the value of the register
-  int getRegisterPairSP(int r)
-  {
-    if(r == Registers.BC) {return this.registers.bc;}
-    if(r == Registers.DE) {return this.registers.de;}
-    if(r == Registers.HL) {return this.registers.hl;}
-    if(r == Registers.SP) {return this.sp;}
-
-    throw new Exception('Unknown register pair address getRegisterPair().');
-  }
-
-  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
-  /// It can set a register pair or the CPU SP value.
-  /// Returns the value of the register
-  void setRegisterPairSP(int r, int value)
-  {
-    if(r == Registers.SP)
-    {
-      this.sp = value;
-    }
-    else
-    {
-      int hi = (value >> 8) & 0xFF;
-      int lo = value & 0xFF;
-
-      if(r == Registers.BC)
-      {
-        this.registers.b = hi;
-        this.registers.c = lo;
-      }
-      else if(r == Registers.DE)
-      {
-        this.registers.d = hi;
-        this.registers.e = lo;
-      }
-      else if(r == Registers.HL)
-      {
-        this.registers.h = hi;
-        this.registers.l = lo;
-      }
-    }
   }
 
   ///Increase the clock cycles and trigger interrupts as needed.
@@ -356,6 +309,37 @@ class CPU
     {
       this.fireInterrupts();
     }
+  }
+
+  /// Puts the emulator in and out of double speed mode.
+  ///
+  /// @param doubleSpeed the new double speed state
+  void setDoubleSpeed(bool doubleSpeed)
+  {
+    if(this.doubleSpeed != doubleSpeed)
+    {
+      this.doubleSpeed = doubleSpeed;
+      this.clockSpeed = this.doubleSpeed ? (FREQUENCY * 2) : FREQUENCY;
+    }
+  }
+
+  /// Returns a string with debug information on the current status of the CPU.
+  ///
+  /// Returns the current values of all registers, and a history of the instructions executed by the CPU.
+  String getDebugString()
+  {
+    String data = 'Registers:\n';
+    /* data += 'AF: 0x' + this.registers.af.toRadixString(16) + '\n';
+    data += 'BC: 0x' + this.registers.bc.toRadixString(16) + '\n';
+    data += 'DE: 0x' + this.registers.de.toRadixString(16) + '\n';
+    data += 'HL: 0x' + this.registers.hl.toRadixString(16) + '\n';*/
+
+    data += 'CPU:\n';
+    data += 'PC: 0x' + this.pc.toRadixString(16) + '\n';
+    data += 'SP: 0x' + this.sp.toRadixString(16) + '\n';
+    data += 'Clocks: ' + this.clocks.toString() + '\n';
+
+    return data;
   }
 
   /// Decode the instruction, execute it, update the CPU timer variables, check for interrupts.
@@ -708,36 +692,5 @@ class CPU
             throw new Exception('Unsupported operation, (OP: 0x' + op.toRadixString(16) + ')');
         }
     }
-  }
-
-  /// Puts the emulator in and out of double speed mode.
-  ///
-  /// @param doubleSpeed the new double speed state
-  void setDoubleSpeed(bool doubleSpeed)
-  {
-    if(this.doubleSpeed != doubleSpeed)
-    {
-      this.doubleSpeed = doubleSpeed;
-      this.clockSpeed = this.doubleSpeed ? (FREQUENCY * 2) : FREQUENCY;
-    }
-  }
-
-  /// Returns a string with debug information on the current status of the CPU.
-  ///
-  /// Returns the current values of all registers, and a history of the instructions executed by the CPU.
-  String getDebugString()
-  {
-    String data = 'Registers:\n';
-    data += 'AF: 0x' + this.registers.af.toRadixString(16) + '\n';
-    data += 'BC: 0x' + this.registers.bc.toRadixString(16) + '\n';
-    data += 'DE: 0x' + this.registers.de.toRadixString(16) + '\n';
-    data += 'HL: 0x' + this.registers.hl.toRadixString(16) + '\n';
-
-    data += 'CPU:\n';
-    data += 'PC: 0x' + this.pc.toRadixString(16) + '\n';
-    data += 'SP: 0x' + this.sp.toRadixString(16) + '\n';
-    data += 'Clocks: ' + this.clocks.toString() + '\n';
-
-    return data;
   }
 }

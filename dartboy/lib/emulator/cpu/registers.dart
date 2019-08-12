@@ -65,32 +65,6 @@ class Registers
     this.registers = new List<int>(8);
   }
 
-  // Pair 16 bit mixed registers
-  int get af {return readPair(A, F);}
-  int get bc {return readPair(B, C);}
-  int get de {return readPair(D, E);}
-  int get hl {return readPair(H, L);}
-
-  set af(int value) {writePair(A, F, value);}
-  set bc(int value) {writePair(B, C, value);}
-  set de(int value) {writePair(D, E, value);}
-  set hl(int value) {writePair(H, L, value);}
-
-  int readPair(int a, int b)
-  {
-    int value = (this.registers[a].toUnsigned(8) << 8) | (this.registers[b].toUnsigned(8));
-    return value.toSigned(16);
-  }
-
-  void writePair(int a, int b, int value)
-  {
-    value = value.toUnsigned(16);
-
-    this.registers[a] = ((value & 0xFF00) >> 8).toSigned(8);
-    this.registers[b] = (value & 0xFF).toSigned(8);
-  }
-
-
   /// Fetches the byte value contained in a register, r is the register id as encoded by opcode.
   /// Returns the value of the register
   int getRegister(int r)
@@ -102,7 +76,7 @@ class Registers
     if(r == E) {return this.e;}
     if(r == H) {return this.h;}
     if(r == L) {return this.l;}
-    if(r == 0x6) {return this.cpu.mmu.readByte(this.hl);}
+    if(r == 0x6) {return this.cpu.mmu.readByte(this.getRegisterPair(HL));}
 
     throw new Exception('Unknown register address getRegister().');
   }
@@ -119,19 +93,32 @@ class Registers
     else if(r == E) {this.e = value;}
     else if(r == H) {this.h = value;}
     else if(r == L) {this.l = value;}
-    else if(r == 0x6) {this.cpu.mmu.writeByte(this.hl, value);}
+    else if(r == 0x6) {this.cpu.mmu.writeByte(this.getRegisterPair(HL), value);}
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
   /// Returns the value of the register
   int getRegisterPair(int r)
   {
-    if(r == Registers.BC) {return this.bc;}
-    if(r == Registers.DE) {return this.de;}
-    if(r == Registers.HL) {return this.hl;}
-    if(r == Registers.AF) {return this.af;}
+    if(r == BC) {return (this.b << 8) | this.c;}
+    if(r == DE) {return (this.d << 8) | this.e;}
+    if(r == HL) {return (this.h << 8) | this.l;}
+    if(r == AF) {return (this.a << 8) | this.f;}
 
     throw new Exception('Unknown register pair address getRegisterPair().');
+  }
+
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode.
+  /// It can return a register pair or the CPU SP value.
+  /// Returns the value of the register
+  int getRegisterPairSP(int r)
+  {
+    if(r == BC) {return (this.b << 8) | this.c;}
+    if(r == DE) {return (this.d << 8) | this.e;}
+    if(r == HL) {return (this.h << 8) | this.l;}
+    if(r == Registers.SP) {return this.cpu.sp;}
+
+    throw new Exception('Unknown register pair address getRegisterPairSP().');
   }
 
   /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
@@ -142,12 +129,40 @@ class Registers
     hi &= 0xFF;
     lo &= 0xFF;
 
-    if(r == Registers.BC) {this.b = hi; this.c = lo;}
-    else if(r == Registers.DE) {this.d = hi; this.e = lo;}
-    else if(r == Registers.HL) {this.h = hi; this.l = lo;}
-    else if(r == Registers.AF) {this.a = hi; this.f = lo & 0xF;}
+    if(r == BC) {this.b = hi; this.c = lo;}
+    else if(r == DE) {this.d = hi; this.e = lo;}
+    else if(r == HL) {this.h = hi; this.l = lo;}
+    else if(r == AF) {this.a = hi; this.f = lo & 0xF;}
   }
 
+  /// Fetches the world value of a registers pair, r is the register id as encoded by opcode (PUSH_rr).
+  /// It can set a register pair or the CPU SP value.
+  /// Returns the value of the register
+  void setRegisterPairSP(int r, int value)
+  {
+    int hi = (value >> 8) & 0xFF;
+    int lo = value & 0xFF;
+
+    if(r == Registers.BC)
+    {
+      this.b = hi;
+      this.c = lo;
+    }
+    else if(r == Registers.DE)
+    {
+      this.d = hi;
+      this.e = lo;
+    }
+    else if(r == Registers.HL)
+    {
+      this.h = hi;
+      this.l = lo;
+    }
+    else if(r == Registers.SP)
+    {
+      this.cpu.sp = (hi << 8) | lo;
+    }
+  }
 
   /// Reset the registers to default values
   ///
@@ -172,10 +187,10 @@ class Registers
     flag &= 0x7;
 
     // Condition code is in last 3 bits
-    if(flag == 0x4) {return (this.f & Registers.ZERO) == 0;}
-    if(flag == 0x5) {return (this.f & Registers.ZERO) != 0;}
-    if(flag == 0x6) {return (this.f & Registers.CARRY) == 0;}
-    if(flag == 0x7) {return (this.f & Registers.CARRY) != 0;}
+    if(flag == 0x4) {return (this.f & ZERO) == 0;}
+    if(flag == 0x5) {return (this.f & ZERO) != 0;}
+    if(flag == 0x6) {return (this.f & CARRY) == 0;}
+    if(flag == 0x7) {return (this.f & CARRY) != 0;}
 
     return false;
   }
@@ -185,9 +200,9 @@ class Registers
   /// There are four values on the upper bits of the register that are set depending on the instruction being executed.
   void setFlags(bool zero, bool subtract, bool halfCarry, bool carry)
   {
-    this.f = zero ? this.f | 0x80 : this.f & 0x7F;
-    this.f = subtract ? this.f | 0x40 : this.f & 0xBF;
-    this.f = halfCarry ? this.f | 0x20 : this.f & 0xDF;
-    this.f = carry ? this.f | 0x10 : this.f & 0xEF;
+    this.f = zero ? (this.f | ZERO) : (this.f & 0x7F);
+    this.f = subtract ? (this.f | SUBTRACT) : (this.f & 0xBF);
+    this.f = halfCarry ? (this.f | HALF_CARRY) : (this.f & 0xDF);
+    this.f = carry ? (this.f | CARRY) : (this.f & 0xEF);
   }
 }
