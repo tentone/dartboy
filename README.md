@@ -1,4 +1,4 @@
-# DartBoy
+# Dart Boy
 
 - Dart based GameBoy (and GameBoy Color) emulator that runs on desktop, mobile and web using the Flutter framework (tested on Windows and Android).
 - Project was developed using Flutter 1.5.5 and Dart 2.3.0.
@@ -17,7 +17,9 @@
 
 ### Run the Emulator
 
-- Load the project using Android studio or Visual Studio code with the flutter plugin installed, the project can run directly on mobile or desktop without changes. (For the web version you will need to change the GUI imports for the web specific imports.)
+- Get the [Dart SDK](https://dart.dev/get-dart) and [Flutter SDK](https://flutter.dev/docs/get-started/install) from the internet. 
+- Load the project using [Android Studio](https://developer.android.com/studio) or [Visual Studio Code](https://code.visualstudio.com/) with the flutter plugin installed, the project can run directly on mobile or desktop without changes.
+  - For the web version you will need to change the GUI imports for the web specific imports.
 - The game can be controlled using the keyboard on desktop (<kbd>&larr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&rarr;</kbd> <kbd>Z</kbd> <kbd>X</kbd> <kbd>Enter</kbd> <kbd>C</kbd>), on mobile use the onscreen buttons.
 
 
@@ -32,7 +34,7 @@
 
   
 
-### Setup Web
+### Web
 
 - To enable the web version of flutter, you need to install the flutter web tools first by running the following code on your terminal. 
 - You need to ensure that `flutter\.pub-cache\bin`  is available from the environment path.
@@ -51,7 +53,7 @@ flutter pub global run webdev serve
 
 
 
-### Setup Desktop
+### Desktop
 
 - In Windows install visual studio with C++ support and make sure that the command `msbuild` works properly and that `vcvars64.bat` is in the path. (If visual studio is installed but `msbuild` is not found, add it to your path).
 - Flutter desktop support is still experimental and not enabled by default, its only available on the master channel.
