@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:typed_data' show Float32List;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';

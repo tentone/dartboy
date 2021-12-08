@@ -44,3 +44,5 @@ dartboy/windows/roms/pokemon\.gb
 *.sav
 
 dartboy/windows/roms/games/
+
+.idea/

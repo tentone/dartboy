@@ -11,6 +11,7 @@ class Registers
 {
   // The DMG has 4 flag registers, zero, subtract, half-carry and carry.
   static const int ZERO = 0x80;
+
   // Half-carry is only ever used for the DAA instruction. Half-carry is usually carry over lower nibble, and carry is over bit 7.
   static const int SUBTRACT = 0x40;
   static const int HALF_CARRY = 0x20;
