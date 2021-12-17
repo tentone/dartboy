@@ -222,7 +222,7 @@ class MainScreenState extends State<MainScreen>
 
                       if(Platform.isAndroid || Platform.isIOS)
                       {
-                        FilePicker.getFile(fileExtension: 'gb').then((File file)
+                        FilePicker.getFile(type: FileType.custom).then((File file)
                         {
                           MainScreen.emulator.loadROM(file);
                         });
@@ -301,7 +301,7 @@ class MainScreenState extends State<MainScreen>
             }
           )
         ]
-      )
+      ), builder: (BuildContext context) {  }
     );
   }
 }
