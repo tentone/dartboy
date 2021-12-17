@@ -46,3 +46,5 @@ dartboy/windows/roms/pokemon\.gb
 dartboy/windows/roms/games/
 
 .idea/
+
+dartboy/lib/generated_plugin_registrant.dart

@@ -220,19 +220,15 @@ class MainScreenState extends State<MainScreen>
                         return;
                       }
 
-                      if(Platform.isAndroid || Platform.isIOS)
+                      FilePicker.platform.pickFiles(type: FileType.custom).then((FilePickerResult result)
                       {
-                        FilePicker.getFile(type: FileType.custom).then((File file)
-                        {
+                        if (result != null) {
+                          File file = File(result.files.single.path);
                           MainScreen.emulator.loadROM(file);
-                        });
-                      }
-                      else
-                      {
-                        textInputDialog(hint: './roms/individual/03-op sp,hl.gb', onOpen: (String fname){
-                          MainScreen.emulator.loadROM(new File(fname));
-                        });
-                      }
+                        } else {
+                          Modal.alert(context, 'Error', 'No file was selected.');
+                        }
+                      });
 
                       if(MainScreen.emulator.state == EmulatorState.READY)
                       {
@@ -259,7 +255,7 @@ class MainScreenState extends State<MainScreen>
     await showDialog<String>
     (
       context: context,
-      child: new AlertDialog
+      builder: (BuildContext cx) { return new AlertDialog
       (
         contentPadding: const EdgeInsets.all(16.0),
         content: new Row
@@ -301,7 +297,7 @@ class MainScreenState extends State<MainScreen>
             }
           )
         ]
-      ), builder: (BuildContext context) {  }
+      );}
     );
   }
 }
