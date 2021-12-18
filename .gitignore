@@ -1,3 +1,8 @@
+.idea/
+.dart_tool/
+lib/generated_plugin_registrant.dart
+build/
+
 # Prerequisites
 *.d
 
@@ -34,17 +39,6 @@
 wgbc/\.vs/
 
 *.wav
-
-dartboy/roms/pokemon\.gbc
-
-dartboy/windows/roms/pokemon\.gb
-
 *.rtc
-
 *.sav
-
-dartboy/windows/roms/games/
-
-.idea/
-
-dartboy/lib/generated_plugin_registrant.dart
+*.tmp

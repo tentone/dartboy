@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import './cpu/cpu.dart';
 import './memory/cartridge.dart';
@@ -48,15 +49,13 @@ class Emulator
   }
 
   /// Load a ROM from a file and create the HW components for the emulator.
-  void loadROM(File file)
+  void loadROM(Uint8List data)
   {
     if(this.state != EmulatorState.WAITING)
     {
       print('Emulator should be reset to load ROM.');
       return;
     }
-
-    List<int> data = file.readAsBytesSync();
 
     Cartridge cartridge = new Cartridge();
     cartridge.load(data);

@@ -208,10 +208,10 @@ class MainScreenState extends State<MainScreen>
                     {
                       MainScreen.emulator.reset();
                     }, color: Colors.black, child: new Text('Reset', style: const TextStyle(color: Colors.white))),
-                    (!Platform.isAndroid && !Platform.isIOS) ? new RaisedButton(onPressed: ()
+                    new RaisedButton(onPressed: ()
                     {
                       MainScreen.emulator.debugStep();
-                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))) : new Container(width: 0.0),
+                    }, color: Colors.black, child: new Text('Step', style: const TextStyle(color: Colors.white))),
                     new RaisedButton(onPressed: ()
                     {
                       if(MainScreen.emulator.state != EmulatorState.WAITING)
@@ -220,11 +220,12 @@ class MainScreenState extends State<MainScreen>
                         return;
                       }
 
-                      FilePicker.platform.pickFiles(type: FileType.custom).then((FilePickerResult result)
+                      FilePicker.platform.pickFiles(dialogTitle: 'Choose ROM').then((FilePickerResult result)
                       {
+                        print(result);
+
                         if (result != null) {
-                          File file = File(result.files.single.path);
-                          MainScreen.emulator.loadROM(file);
+                          MainScreen.emulator.loadROM(result.files.single.bytes);
                         } else {
                           Modal.alert(context, 'Error', 'No file was selected.');
                         }

@@ -11,9 +11,7 @@
   - [ ] Audio Support
   - [ ] Fix register signed data results.
 
-
-
-![graph](https://raw.githubusercontent.com/tentone/dartboy/master/readme/pokemon.png)![graph](https://raw.githubusercontent.com/tentone/dartboy/master/readme/tetris.png)
+<img src="https://raw.githubusercontent.com/tentone/dartboy/master/readme/pokemon.png" width="250"><img src="https://raw.githubusercontent.com/tentone/dartboy/master/readme/tetris.png" width="250"><img src="https://raw.githubusercontent.com/tentone/dartboy/master/readme/web.png" width="250">
 
 
 
