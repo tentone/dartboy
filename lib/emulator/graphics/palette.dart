@@ -17,7 +17,7 @@ abstract class Palette
 class GBPalette implements Palette
 {
   CPU cpu;
-  int register;
+  int register = 0;
   List<int> colors;
 
   GBPalette(CPU cpu, List<int> colors, int register)

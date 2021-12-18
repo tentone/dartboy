@@ -38,28 +38,28 @@ class CPU
   bool interruptsEnabled;
 
   /// The current CPU clock cycle since the beginning of the emulation.
-  int clocks;
+  int clocks = 0;
 
   /// The number of cycles elapsed since the last speed emulation sleep.
-  int cyclesSinceLastSleep;
+  int cyclesSinceLastSleep = 0;
 
   /// The number of cycles executed in the last second.
-  int cyclesExecutedThisSecond;
+  int cyclesExecutedThisSecond = 0;
 
   /// Indicates if the emulator is running at double speed.
   bool doubleSpeed;
 
   /// The current cycle of the DIV register.
-  int divCycle;
+  int divCycle = 0;
 
   /// The current cycle of the TIMA register.
-  int timerCycle;
+  int timerCycle = 0;
 
   /// Buttons of the gameboy the index stored in the Gamepad class corresponds to the position here
   List<bool> buttons;
 
   /// Current clock speed of the system (can be double on GBC hardware).
-  int clockSpeed;
+  int clockSpeed = 0;
 
   /// Stores the PC and SP pointers
   List<int> pointers;

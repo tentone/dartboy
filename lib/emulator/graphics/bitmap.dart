@@ -4,8 +4,11 @@ import 'dart:typed_data';
 class Bitmap
 {
   final int pixelSize;
+  
   final int width;
+
   final int height;
+
   final Uint8List data;
 
   Bitmap(this.width, this.height, this.data, {this.pixelSize = 4});

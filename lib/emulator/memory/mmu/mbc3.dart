@@ -10,7 +10,7 @@ import 'mbc1.dart';
 class MBC3 extends MBC
 {
   /// The currently selected RAM bank.
-  int ramBank;
+  int ramBank = 0;
 
   /// Whether the real time clock is enabled for IO.
   bool rtcEnabled;

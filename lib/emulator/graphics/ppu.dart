@@ -61,16 +61,16 @@ class PPU
   List<int> spritesDrawnPerLine;
 
   /// A counter for the number of cycles elapsed since the last LCD event.
-  int lcdCycles;
+  int lcdCycles = 0;
 
   /// Accumulator for how many VBlanks have been performed since the last reset.
-  int currentVBlankCount;
+  int currentVBlankCount = 0;
 
   /// The timestamp of the last second, in nanoseconds.
-  int lastSecondTime;
+  int lastSecondTime = 0;
 
   /// The last measured Emulator.cycle.
-  int lastCoreCycle;
+  int lastCoreCycle = 0;
 
   PPU(CPU cpu)
   {

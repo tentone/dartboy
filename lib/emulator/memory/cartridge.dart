@@ -15,7 +15,7 @@ class Cartridge
   List<int> data;
 
   /// Size of the memory in bytes
-  int size;
+  int size = 0;
 
   /// Cartridge name read from the
   String name;
@@ -23,30 +23,30 @@ class Cartridge
   /// Cartridge type, there are 16 different types.
   ///
   /// Read from memory address 0x147 (Check page 11 of the GB CPU manual for details)
-  int type;
+  int type = 0;
 
   /// In cartridge ROM configuration. Read from the address 0x148.
   ///
   /// (Check page 12 of the GB CPU manual for details)
-  int romType;
+  int romType = 0;
 
   /// Indicates how many rom banks there are available.
   ///
   /// Each ROM bank has 32KB in size
-  int romBanks;
+  int romBanks = 0;
 
   /// In cartridge RAM configuration. Read from the address 0x149.
   ///
   /// (Check page 12 of the GB CPU manual for details)
-  int ramType;
+  int ramType = 0;
 
   /// Indicates how many RAM banks are available in the cartridge.
   ///
   /// Each bank has 8KBytes in size.
-  int ramBanks;
+  int ramBanks = 0;
 
   /// Cartridge checksum, used to check if the data of the game is good, and also used to select the better color palette in classic gb games.
-  int checksum;
+  int checksum = 0;
 
   /// In CGB cartridges the upper bit is used to enable CGB functions. This is required, otherwise the CGB switches itself into Non-CGB-Mode.
   ///

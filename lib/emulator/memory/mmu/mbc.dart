@@ -14,7 +14,7 @@ class MBC extends MMU
   static const int RAM_PAGESIZE = 0x2000;
 
   /// The current offset (page) into cart ram.
-  int ramPageStart;
+  int ramPageStart = 0;
 
   /// Whether or not accessing RAM is currently enabled.
   bool ramEnabled;

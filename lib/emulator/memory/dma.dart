@@ -10,16 +10,16 @@ class DMA
   Memory memory;
 
   /// The source address.
-  int source;
+  int source = 0;
 
   /// The destination address.
-  int destination;
+  int destination = 0;
 
   /// The length of the transfer, is reduced on each tick.
-  int length;
+  int length = 0;
 
   /// The current offset into the source/destination buffers.
-  int position;
+  int position = 0;
 
   /// Creates a new DMA instance.
   ///

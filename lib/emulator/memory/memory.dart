@@ -43,15 +43,15 @@ class Memory
   /// The current page of Video RAM, always multiples of VRAM_PAGESIZE.
   ///
   /// On non-GBC, this is always 0.
-  int vramPageStart;
+  int vramPageStart = 0;
 
   /// The current page of Work RAM, always multiples of WRAM_PAGESIZE.
   ///
   /// On non-GBC, this is always WRAM_PAGESIZE.
-  int wramPageStart;
+  int wramPageStart = 0;
 
   /// The current page of ROM, always multiples of ROM_PAGESIZE.
-  int romPageStart;
+  int romPageStart = 0;
 
   /// CPU that is using the MMU, useful to trigger changes in other parts affected by memory changes.
   CPU cpu;
